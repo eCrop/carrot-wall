@@ -2,7 +2,9 @@
 FROM node:22-alpine AS web
 WORKDIR /web
 COPY apps/web/package*.json ./
-RUN npm ci
+# ponytail: npm install, not ci — the lockfile omits wasm32-wasi optional peers
+# that npm only resolves on linux. Back to `npm ci` if the lock ever covers them.
+RUN npm install --no-audit --no-fund
 COPY apps/web/ ./
 RUN npm run build -- --configuration production
 
