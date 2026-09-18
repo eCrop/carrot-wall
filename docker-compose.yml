@@ -1,0 +1,23 @@
+services:
+  api:
+    build:
+      context: apps/api
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8010:8080"
+    environment:
+      ADMIN_PIN: ${ADMIN_PIN:-0000}
+    volumes:
+      - api-data:/data
+
+  web:
+    build:
+      context: apps/web
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3010:4200"
+    depends_on:
+      - api
+
+volumes:
+  api-data:
