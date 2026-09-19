@@ -6,6 +6,7 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -52,6 +53,26 @@ public class PostsResource {
 
         Post post = Post.create(name, message, type);
         return Response.status(Response.Status.CREATED).entity(PostDto.from(post)).build();
+    }
+
+    /**
+     * Any visitor can +1 a post once per browser (spec F5) — the guard is client-side
+     * ({@code localStorage}), not here, so this endpoint has nothing to check beyond "does this
+     * post exist and is it visible": a hidden post is a soft delete, and nothing invisible is
+     * upvotable. Goes through {@link Post#upvote()} rather than a bulk {@code update(...)}
+     * string so {@code updated_at} moves and the increment reaches polling clients.
+     */
+    @POST
+    @Path("/{id}/upvote")
+    @Consumes(MediaType.WILDCARD)
+    @Transactional
+    public Response upvote(@PathParam("id") Long id) {
+        Post post = Post.findById(id);
+        if (post == null || post.hidden) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        post.upvote();
+        return Response.ok(PostDto.from(post)).build();
     }
 
     private static Response badRequest(String message) {
