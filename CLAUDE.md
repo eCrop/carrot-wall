@@ -61,7 +61,10 @@ Only env var: `ADMIN_PIN`. Node 20+ required (Node 25 works, warns).
 - Hidden posts are a soft delete: excluded from every public response, never deleted from the DB.
 - Admin routes and admin API endpoints return 401 without the PIN session cookie.
 - `docs/intents/` holds `spec.md` cut into eight buildable slices, in dependency order — start
-  there, not at the spec, when picking up work. New feature specs go in `docs/specs/`. Tests: JUnit beside the resource, Angular unit tests
+  there, not at the spec, when picking up work. New feature specs go in `docs/specs/`, named
+  `<NN>-<feature-name>.md` matching the intent's number and slug (`docs/intents/02-submit-a-post.md`
+  → `docs/specs/02-submit-a-post.md`); a plan for that slice is the same name with `-plan`
+  appended (`02-submit-a-post-plan.md`). Tests: JUnit beside the resource, Angular unit tests
   beside the component, Playwright e2e in `apps/web/e2e/` (convention not created yet).
 - Design tokens (ivory `#FAF9F5`, ink `#141413`, coral `#D97757`, hairline borders, no drop
   shadows, serif headings + Inter) are in spec §4 — follow `DESIGN.md` if it appears at the root.
