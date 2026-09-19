@@ -144,6 +144,54 @@ class WallResourceTest {
     }
 
     @Test
+    void includeHiddenIsIgnoredWithoutAValidAdminSession() {
+        String marker = marker();
+        Post post = persistPost(marker, false);
+        hide(post.id);
+
+        given().queryParam("includeHidden", true)
+                .when()
+                .get("/api/wall")
+                .then()
+                .body("posts.message", not(hasItem(marker)));
+    }
+
+    @Test
+    void includeHiddenSurfacesAHiddenPostWithAValidAdminSession() {
+        String marker = marker();
+        Post post = persistPost(marker, false);
+        hide(post.id);
+        String token = AdminResourceTest.login();
+
+        given().cookie("admin_session", token)
+                .queryParam("includeHidden", true)
+                .when()
+                .get("/api/wall")
+                .then()
+                .body("posts.message", hasItem(marker));
+    }
+
+    @Test
+    void sinceWithIncludeHiddenKeepsANewlyHiddenPostAsAnUpsertNotARemoval() {
+        String marker = marker();
+        Post post = persistPost(marker, false);
+        backdate(post.id, LocalDateTime.now().minusHours(1)); // see comment above
+        long justBefore = System.currentTimeMillis();
+        String token = AdminResourceTest.login();
+
+        hide(post.id);
+
+        given().cookie("admin_session", token)
+                .queryParam("since", justBefore)
+                .queryParam("includeHidden", true)
+                .when()
+                .get("/api/wall")
+                .then()
+                .body("posts.message", hasItem(marker))
+                .body("removedIds", not(hasItem(post.id.intValue())));
+    }
+
+    @Test
     void beforeCursorReturnsTheNextPageWithNoOverlapWithPageOne() {
         String olderMarker = marker();
         Post older = persistPost(olderMarker, false);

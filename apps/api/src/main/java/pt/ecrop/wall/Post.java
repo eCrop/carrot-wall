@@ -106,19 +106,28 @@ public class Post extends PanacheEntityBase {
     private static final Sort NEWEST_FIRST =
             Sort.by("createdAt", Sort.Direction.Descending).and("id", Sort.Direction.Descending);
 
-    /** Page 1: every visible pinned post, then the newest {@code pageSize} visible unpinned ones. */
-    public static List<Post> firstPage(int pageSize) {
-        List<Post> pinnedPosts = list("hidden = false and pinned = true", NEWEST_FIRST);
+    /**
+     * Page 1: every pinned post, then the newest {@code pageSize} unpinned ones. Hidden posts
+     * are excluded unless {@code includeHidden} is true — the admin wall passing {@code true}
+     * is the one place hidden content is allowed to leave the server (spec §F8); callers must
+     * have already verified the request carries a valid admin session before setting it.
+     */
+    public static List<Post> firstPage(int pageSize, boolean includeHidden) {
+        String visibility = includeHidden ? "" : "hidden = false and ";
+        List<Post> pinnedPosts = list(visibility + "pinned = true", NEWEST_FIRST);
         List<Post> unpinnedPosts =
-                find("hidden = false and pinned = false", NEWEST_FIRST).page(0, pageSize).list();
+                find(visibility + "pinned = false", NEWEST_FIRST).page(0, pageSize).list();
         pinnedPosts.addAll(unpinnedPosts);
         return pinnedPosts;
     }
 
-    /** "Load more": the next {@code pageSize} visible unpinned posts older than the cursor. */
-    public static List<Post> before(LocalDateTime cursorCreatedAt, Long cursorId, int pageSize) {
+    /** "Load more": the next {@code pageSize} unpinned posts older than the cursor. */
+    public static List<Post> before(
+            LocalDateTime cursorCreatedAt, Long cursorId, int pageSize, boolean includeHidden) {
+        String visibility = includeHidden ? "" : "hidden = false and ";
         return find(
-                        "hidden = false and pinned = false"
+                        visibility
+                                + "pinned = false"
                                 + " and (createdAt < ?1 or (createdAt = ?1 and id < ?2))",
                         NEWEST_FIRST,
                         cursorCreatedAt,
@@ -127,9 +136,14 @@ public class Post extends PanacheEntityBase {
                 .list();
     }
 
-    /** Visible posts created or modified at or after {@code since} — the poll delta. */
-    public static List<Post> changedSince(LocalDateTime since) {
-        return list("hidden = false and updatedAt >= ?1", Sort.by("updatedAt"), since);
+    /**
+     * Posts created or modified at or after {@code since} — the poll delta. With
+     * {@code includeHidden}, a post that just became hidden stays in this list as an ordinary
+     * upsert (it's still on the admin wall) instead of moving to {@link #hiddenSince}.
+     */
+    public static List<Post> changedSince(LocalDateTime since, boolean includeHidden) {
+        String visibility = includeHidden ? "" : "hidden = false and ";
+        return list(visibility + "updatedAt >= ?1", Sort.by("updatedAt"), since);
     }
 
     /** Ids of posts hidden at or after {@code since} — content never leaves the DB for these. */

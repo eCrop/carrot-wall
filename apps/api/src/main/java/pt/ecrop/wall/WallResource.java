@@ -1,5 +1,7 @@
 package pt.ecrop.wall;
 
+import jakarta.inject.Inject;
+import jakarta.ws.rs.CookieParam;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -30,31 +32,53 @@ public class WallResource {
     @ConfigProperty(name = "wall.page-size")
     int pageSize;
 
+    @Inject
+    AdminSessionStore sessionStore;
+
     @GET
     public WallResponse wall(
             @QueryParam("before") Long beforeMillis,
             @QueryParam("beforeId") Long beforeId,
-            @QueryParam("since") Long sinceMillis) {
+            @QueryParam("since") Long sinceMillis,
+            @QueryParam("includeHidden") boolean includeHidden,
+            @CookieParam(AdminResource.SESSION_COOKIE) String adminSession) {
+
+        // Unauthenticated by design — attendees poll this every 5s — so a missing/invalid
+        // session never 401s the request, it just silently downgrades includeHidden to false.
+        // Trusting the query param alone would let anyone read hidden content by appending
+        // ?includeHidden=true; do not "simplify" this away.
+        boolean effectiveIncludeHidden = includeHidden && sessionStore.isValid(adminSession);
 
         PromptDto prompt = PromptDto.from(Prompt.active());
         long serverTime = System.currentTimeMillis();
 
         if (sinceMillis != null) {
             LocalDateTime since = toLocalDateTime(sinceMillis);
-            List<PostDto> posts = Post.changedSince(since).stream().map(PostDto::from).toList();
-            List<Long> removedIds = Post.hiddenSince(since);
+            List<PostDto> posts =
+                    Post.changedSince(since, effectiveIncludeHidden).stream()
+                            .map(PostDto::from)
+                            .toList();
+            List<Long> removedIds = effectiveIncludeHidden ? List.of() : Post.hiddenSince(since);
             return new WallResponse(prompt, posts, removedIds, serverTime);
         }
 
         if (beforeMillis != null && beforeId != null) {
             List<PostDto> posts =
-                    Post.before(toLocalDateTime(beforeMillis), beforeId, pageSize).stream()
+                    Post.before(
+                                    toLocalDateTime(beforeMillis),
+                                    beforeId,
+                                    pageSize,
+                                    effectiveIncludeHidden)
+                            .stream()
                             .map(PostDto::from)
                             .toList();
             return new WallResponse(prompt, posts, List.of(), serverTime);
         }
 
-        List<PostDto> posts = Post.firstPage(pageSize).stream().map(PostDto::from).toList();
+        List<PostDto> posts =
+                Post.firstPage(pageSize, effectiveIncludeHidden).stream()
+                        .map(PostDto::from)
+                        .toList();
         return new WallResponse(prompt, posts, List.of(), serverTime);
     }
 
