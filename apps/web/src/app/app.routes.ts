@@ -1,3 +1,5 @@
 import { Routes } from '@angular/router';
 
-export const routes: Routes = [];
+import { WallComponent } from './wall/wall';
+
+export const routes: Routes = [{ path: '', component: WallComponent }];
