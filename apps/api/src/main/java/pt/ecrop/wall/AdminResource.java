@@ -1,10 +1,13 @@
 package pt.ecrop.wall;
 
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.NewCookie;
@@ -56,5 +59,27 @@ public class AdminResource {
     @AdminOnly
     public Response session() {
         return Response.ok().build();
+    }
+
+    @PUT
+    @Path("/posts/{id}/answer")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @AdminOnly
+    @Transactional
+    public Response setAnswer(@PathParam("id") Long id, AdminAnswerRequest request) {
+        Post post = (Post) Post.findById(id);
+        if (post == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        String answerText = request.answerText() == null ? "" : request.answerText().trim();
+        if (answerText.length() > 1000) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new ApiError("O texto da resposta pode ter no máximo 1000 caracteres."))
+                    .build();
+        }
+
+        post.answer(answerText);
+        return Response.noContent().build();
     }
 }

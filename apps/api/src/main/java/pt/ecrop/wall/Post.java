@@ -84,8 +84,18 @@ public class Post extends PanacheEntityBase {
         upvotes++;
     }
 
+    /** Blank or null clears the answer entirely — both fields go back to {@code null} rather
+     * than storing an empty string with a fresh timestamp. Trims itself rather than trusting
+     * the caller to: this is the one place "an answer is always stored trimmed" can be true
+     * regardless of what calls it. */
     public void answer(String text) {
-        answerText = text;
+        String trimmed = text == null ? null : text.trim();
+        if (trimmed == null || trimmed.isBlank()) {
+            answerText = null;
+            answerUpdatedAt = null;
+            return;
+        }
+        answerText = trimmed;
         answerUpdatedAt = LocalDateTime.now();
     }
 
