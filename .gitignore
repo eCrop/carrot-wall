@@ -4,3 +4,5 @@ dist/
 target/
 apps/api/data/
 .env
+.angular/
+.playwright-mcp/
