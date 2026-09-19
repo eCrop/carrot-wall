@@ -30,6 +30,13 @@ export class WallService {
   private readonly hasMoreSignal = signal(true);
   private readonly loadedSignal = signal(false);
   private lastServerTime = 0;
+  /** When a poll is already in flight, a new `poll()` call is queued to run only once it
+   * settles — rather than firing its own concurrent request — so a poll triggered right after
+   * an admin save (see AnswerEditorComponent) can't have its fresh response overwritten by an
+   * older, still-in-flight one finishing later. `null` when nothing is in flight, which is also
+   * what lets an isolated `poll()` call fire its request synchronously, same as before this
+   * field existed. */
+  private pollInFlight: Promise<void> | null = null;
 
   readonly prompt = this.promptSignal.asReadonly();
   readonly hasMore = this.hasMoreSignal.asReadonly();
@@ -76,7 +83,26 @@ export class WallService {
     this.upsert(response.posts);
   }
 
-  async poll(): Promise<void> {
+  poll(): Promise<void> {
+    // A rejected doPoll() must not poison the queue for whatever's chained after it — every
+    // caller catches its own errors via the promise this method returns instead.
+    const previous = this.pollInFlight;
+    const run = () => this.doPoll();
+    const result: Promise<void> = (previous ? previous.catch(() => {}).then(run) : run()).finally(
+      () => {
+        // Only clear if nothing queued behind this call already took the slot — with three or
+        // more overlapping polls, an earlier one's `finally` must not null out a later one's
+        // still-in-flight request.
+        if (this.pollInFlight === result) {
+          this.pollInFlight = null;
+        }
+      },
+    );
+    this.pollInFlight = result;
+    return result;
+  }
+
+  private async doPoll(): Promise<void> {
     const response = await this.fetch(new HttpParams().set('since', this.lastServerTime));
     this.upsert(response.posts);
     this.remove(response.removedIds);

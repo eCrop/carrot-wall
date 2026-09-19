@@ -170,6 +170,118 @@ describe('WallService', () => {
     expect(service.hasMore()).toBe(false);
   });
 
+  it('a rejected poll does not block the next one', async () => {
+    const firstPage: WallResponse = {
+      prompt: null,
+      posts: [post({ id: 1 })],
+      removedIds: [],
+      serverTime: 1000,
+    };
+    let promise: Promise<void> = service.loadFirstPage();
+    httpMock.expectOne('/api/wall').flush(firstPage);
+    await promise;
+
+    const firstPoll = service.poll();
+    httpMock
+      .expectOne((r) => r.params.get('since') === '1000')
+      .error(new ProgressEvent('network error'));
+    await firstPoll.catch(() => {});
+
+    const delta: WallResponse = {
+      prompt: null,
+      posts: [post({ id: 1, upvotes: 9 })],
+      removedIds: [],
+      serverTime: 2000,
+    };
+    const secondPoll = service.poll();
+    httpMock.expectOne((r) => r.params.get('since') === '1000').flush(delta);
+    await secondPoll;
+
+    expect(service.posts()[0].upvotes).toBe(9);
+  });
+
+  it('a poll started before an earlier one resolves runs only after it, using its up-to-date since=', async () => {
+    const firstPage: WallResponse = {
+      prompt: null,
+      posts: [post({ id: 1 })],
+      removedIds: [],
+      serverTime: 1000,
+    };
+    let promise: Promise<void> = service.loadFirstPage();
+    httpMock.expectOne('/api/wall').flush(firstPage);
+    await promise;
+
+    // Two overlapping poll() calls, e.g. the 5s interval and an admin save's immediate poll.
+    const firstPoll = service.poll();
+    const secondPoll = service.poll();
+
+    // Only one request should be in flight until the first completes.
+    const firstReq = httpMock.expectOne((r) => r.params.get('since') === '1000');
+    httpMock.expectNone((r) => r.url === '/api/wall' && r.params.get('since') !== '1000');
+    firstReq.flush({
+      prompt: null,
+      posts: [post({ id: 1, upvotes: 5 })],
+      removedIds: [],
+      serverTime: 2000,
+    });
+    await firstPoll;
+    // The queued call's request fires one microtask after the first settles — let it flush.
+    await Promise.resolve();
+
+    // The second call's request only fires now, using the since= the first one just set.
+    const secondReq = httpMock.expectOne((r) => r.params.get('since') === '2000');
+    secondReq.flush({
+      prompt: null,
+      posts: [post({ id: 1, upvotes: 9 })],
+      removedIds: [],
+      serverTime: 3000,
+    });
+    await secondPoll;
+
+    expect(service.posts()[0].upvotes).toBe(9);
+  });
+
+  it('a third poll queued behind two others still waits for its own turn', async () => {
+    const firstPage: WallResponse = {
+      prompt: null,
+      posts: [post({ id: 1 })],
+      removedIds: [],
+      serverTime: 1000,
+    };
+    let promise: Promise<void> = service.loadFirstPage();
+    httpMock.expectOne('/api/wall').flush(firstPage);
+    await promise;
+
+    // Three overlapping calls: if settling the first ever nulls out pollInFlight while the
+    // second is still running, the third would fire concurrently with the second instead of
+    // waiting its turn — the exact race this queue exists to close.
+    const firstPoll = service.poll();
+    const secondPoll = service.poll();
+    const thirdPoll = service.poll();
+
+    const firstReq = httpMock.expectOne((r) => r.params.get('since') === '1000');
+    firstReq.flush({ prompt: null, posts: [], removedIds: [], serverTime: 2000 });
+    await firstPoll;
+    await Promise.resolve();
+
+    const secondReq = httpMock.expectOne((r) => r.params.get('since') === '2000');
+    httpMock.expectNone((r) => r.url === '/api/wall' && r.params.get('since') !== '2000');
+    secondReq.flush({ prompt: null, posts: [], removedIds: [], serverTime: 3000 });
+    await secondPoll;
+    await Promise.resolve();
+
+    const thirdReq = httpMock.expectOne((r) => r.params.get('since') === '3000');
+    thirdReq.flush({
+      prompt: null,
+      posts: [post({ id: 1, upvotes: 4 })],
+      removedIds: [],
+      serverTime: 4000,
+    });
+    await thirdPoll;
+
+    expect(service.posts()[0].upvotes).toBe(4);
+  });
+
   it('never sends includeHidden by default — the public route stays unauthenticated-shaped', async () => {
     const promise = service.loadFirstPage();
     httpMock

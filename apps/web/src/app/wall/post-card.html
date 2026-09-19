@@ -14,9 +14,13 @@
 
   @if (post().answerText) {
     <div class="post-card__answer">
-      <span class="post-card__answer-label">✓ Resposta</span>
+      <span class="post-card__answer-label">✓ Resposta · {{ answerTime() }}</span>
       <p class="post-card__answer-text">{{ post().answerText }}</p>
     </div>
+  }
+
+  @if (admin()) {
+    <app-answer-editor [post]="post()" />
   }
 
   <footer class="post-card__footer">

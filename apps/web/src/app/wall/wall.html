@@ -12,7 +12,11 @@
 } @else if (posts().length > 0) {
   <div class="wall-grid">
     @for (post of posts(); track post.id) {
-      <app-post-card [post]="post" [highlighted]="post.id === highlightedPostId()" />
+      <app-post-card
+        [post]="post"
+        [highlighted]="post.id === highlightedPostId()"
+        [admin]="admin()"
+      />
     }
   </div>
 

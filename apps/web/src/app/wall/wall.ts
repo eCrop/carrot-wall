@@ -4,6 +4,7 @@ import {
   DestroyRef,
   effect,
   inject,
+  input,
   OnInit,
   signal,
 } from '@angular/core';
@@ -29,6 +30,10 @@ export class WallComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+
+  /** Passed straight through to every card — see PostCardComponent. `AdminComponent` is the
+   * only caller that sets this true. */
+  readonly admin = input(false);
 
   readonly posts = this.wallService.posts;
   readonly prompt = this.wallService.prompt;

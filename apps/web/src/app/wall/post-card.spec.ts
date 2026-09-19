@@ -1,4 +1,7 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { vi } from 'vitest';
 
 import { Post } from './wall.models';
 import { PostCardComponent } from './post-card';
@@ -18,14 +21,24 @@ function post(overrides: Partial<Post> = {}): Post {
   };
 }
 
-async function render(input: Post) {
+async function render(input: Post, admin = false) {
   const fixture = TestBed.createComponent(PostCardComponent);
   fixture.componentRef.setInput('post', input);
+  fixture.componentRef.setInput('admin', admin);
   await fixture.whenStable();
   return fixture.nativeElement as HTMLElement;
 }
 
 describe('PostCardComponent', () => {
+  beforeEach(() => {
+    // AnswerEditorComponent (rendered when admin=true) injects HttpClient — provided here so
+    // DI resolves even though these tests never trigger a request through it; interaction
+    // with the editor itself is answer-editor.spec.ts's job, not this file's.
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+  });
+
   it('renders the message, author, type and upvote count', async () => {
     const el = await render(post({ name: 'Rita', message: 'Olá mundo', upvotes: 7 }));
     expect(el.textContent).toContain('Olá mundo');
@@ -60,5 +73,74 @@ describe('PostCardComponent', () => {
 
     expect(el.querySelector('script')).toBeNull();
     expect(el.textContent).toContain(payload);
+  });
+
+  it('renders an answer containing a script tag as literal text, never as HTML (spec §7.12)', async () => {
+    const payload = '<script>alert(1)</script>';
+    const el = await render(post({ answerText: payload }));
+
+    expect(el.querySelector('script')).toBeNull();
+    expect(el.textContent).toContain(payload);
+  });
+
+  it('shows the admin answer editor only when admin is true', async () => {
+    const publicCard = await render(post());
+    expect(publicCard.querySelector('app-answer-editor')).toBeNull();
+
+    const adminCard = await render(post(), true);
+    expect(adminCard.querySelector('app-answer-editor')).not.toBeNull();
+    expect(adminCard.textContent).toContain('Responder');
+  });
+
+  describe('answer timestamp', () => {
+    // Fixed "now" so the same-day/earlier-day boundary is deterministic rather than depending
+    // on when the test suite happens to run. Mocks Date.now() only (not vi.useFakeTimers, which
+    // also stubs setTimeout — and TestBed's whenStable() relies on real timers to resolve).
+    const NOW = new Date('2026-09-19T14:32:00');
+
+    beforeEach(() => {
+      vi.spyOn(Date, 'now').mockReturnValue(NOW.getTime());
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('shows a relative time for an answer under 1h old', async () => {
+      const answeredAt = NOW.getTime() - 45 * 60_000;
+      const el = await render(post({ answerText: 'Sim.', answerUpdatedAt: answeredAt }));
+
+      const label = el.querySelector('.post-card__answer-label')!.textContent!;
+      expect(label).toContain('há 45 minutos');
+    });
+
+    it('shows HH:mm for an answer over 1h old on the same day', async () => {
+      const answeredAt = new Date('2026-09-19T10:05:00').getTime();
+      const el = await render(post({ answerText: 'Sim.', answerUpdatedAt: answeredAt }));
+
+      const expectedTime = new Intl.DateTimeFormat('pt-PT', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }).format(new Date(answeredAt));
+      const label = el.querySelector('.post-card__answer-label')!.textContent!;
+      expect(label).toContain(expectedTime);
+    });
+
+    it('shows the date and time for an answer from an earlier day', async () => {
+      const answeredAt = new Date('2026-09-17T14:32:00').getTime();
+      const el = await render(post({ answerText: 'Sim.', answerUpdatedAt: answeredAt }));
+
+      const expectedDate = new Intl.DateTimeFormat('pt-PT', {
+        day: 'numeric',
+        month: 'short',
+      }).format(new Date(answeredAt));
+      const expectedTime = new Intl.DateTimeFormat('pt-PT', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }).format(new Date(answeredAt));
+      const label = el.querySelector('.post-card__answer-label')!.textContent!;
+      expect(label).toContain(expectedDate);
+      expect(label).toContain(expectedTime);
+    });
   });
 });

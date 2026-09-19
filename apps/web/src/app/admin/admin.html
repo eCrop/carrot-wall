@@ -1,6 +1,6 @@
 @if (!checking()) {
   @if (loggedIn()) {
-    <app-wall />
+    <app-wall [admin]="true" />
   } @else {
     <main class="admin-gate">
       <h1>Acesso da instrutora</h1>
