@@ -273,4 +273,171 @@ class AdminResourceTest {
                 .findFirst()
                 .orElseThrow();
     }
+
+    @Test
+    void listingPresetsWithNoSessionCookieIsRejected() {
+        given().when().get("/api/admin/prompts/presets").then().statusCode(401);
+    }
+
+    @Test
+    void listingPresetsReturnsTheFiveSeededOnes() {
+        String token = login();
+
+        given().cookie("admin_session", token)
+                .when()
+                .get("/api/admin/prompts/presets")
+                .then()
+                .statusCode(200)
+                .body("size()", equalTo(5))
+                .body("[0].text", equalTo("A única coisa que quero desta semana é…"));
+    }
+
+    @Test
+    void activatingAPresetChangesWhatThePublicWallReturns() {
+        String token = login();
+        long presetId =
+                given().cookie("admin_session", token)
+                        .when()
+                        .get("/api/admin/prompts/presets")
+                        .then()
+                        .extract()
+                        .jsonPath()
+                        .getLong("find { it.text == 'Perguntas para o fim do dia' }.id");
+
+        given().cookie("admin_session", token)
+                .contentType(ContentType.JSON)
+                .body("{\"presetId\":" + presetId + "}")
+                .when()
+                .post("/api/admin/prompt")
+                .then()
+                .statusCode(204);
+
+        given().when()
+                .get("/api/wall")
+                .then()
+                .body("prompt.text", equalTo("Perguntas para o fim do dia"));
+    }
+
+    @Test
+    void activatingFreeTextChangesWhatThePublicWallReturns() {
+        String marker = marker();
+        String token = login();
+
+        given().cookie("admin_session", token)
+                .contentType(ContentType.JSON)
+                .body("{\"text\":\"" + marker + "\"}")
+                .when()
+                .post("/api/admin/prompt")
+                .then()
+                .statusCode(204);
+
+        given().when().get("/api/wall").then().body("prompt.text", equalTo(marker));
+    }
+
+    @Test
+    void activatingTheSameTextTwiceLeavesThePromptIdUnchanged() {
+        String marker = marker();
+        String token = login();
+
+        given().cookie("admin_session", token)
+                .contentType(ContentType.JSON)
+                .body("{\"text\":\"" + marker + "\"}")
+                .when()
+                .post("/api/admin/prompt")
+                .then()
+                .statusCode(204);
+        int firstId =
+                given().when().get("/api/wall").then().extract().jsonPath().getInt("prompt.id");
+
+        given().cookie("admin_session", token)
+                .contentType(ContentType.JSON)
+                .body("{\"text\":\"" + marker + "\"}")
+                .when()
+                .post("/api/admin/prompt")
+                .then()
+                .statusCode(204);
+        int secondId =
+                given().when().get("/api/wall").then().extract().jsonPath().getInt("prompt.id");
+
+        assertEquals(firstId, secondId);
+    }
+
+    @Test
+    void activatingBlankTextIsRejectedAndLeavesThePromptUnchanged() {
+        String token = login();
+        String activeBefore =
+                given().when().get("/api/wall").then().extract().jsonPath().getString("prompt.text");
+
+        given().cookie("admin_session", token)
+                .contentType(ContentType.JSON)
+                .body("{\"text\":\"   \"}")
+                .when()
+                .post("/api/admin/prompt")
+                .then()
+                .statusCode(400);
+
+        given().when().get("/api/wall").then().body("prompt.text", equalTo(activeBefore));
+    }
+
+    @Test
+    void activatingTextOver200CharsIsRejectedAndLeavesThePromptUnchanged() {
+        String token = login();
+        String activeBefore =
+                given().when().get("/api/wall").then().extract().jsonPath().getString("prompt.text");
+        String tooLong = "x".repeat(201);
+
+        given().cookie("admin_session", token)
+                .contentType(ContentType.JSON)
+                .body("{\"text\":\"" + tooLong + "\"}")
+                .when()
+                .post("/api/admin/prompt")
+                .then()
+                .statusCode(400);
+
+        given().when().get("/api/wall").then().body("prompt.text", equalTo(activeBefore));
+    }
+
+    @Test
+    void activatingAnUnknownPresetIdReturnsNotFound() {
+        String token = login();
+
+        given().cookie("admin_session", token)
+                .contentType(ContentType.JSON)
+                .body("{\"presetId\":999999999}")
+                .when()
+                .post("/api/admin/prompt")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test
+    void activatingAPromptWithNoSessionCookieIsRejected() {
+        String activeBefore =
+                given().when().get("/api/wall").then().extract().jsonPath().getString("prompt.text");
+
+        given().contentType(ContentType.JSON)
+                .body("{\"text\":\"" + marker() + "\"}")
+                .when()
+                .post("/api/admin/prompt")
+                .then()
+                .statusCode(401);
+
+        given().when().get("/api/wall").then().body("prompt.text", equalTo(activeBefore));
+    }
+
+    @Test
+    void aScriptTagInAPromptRendersAsLiteralTextOnThePublicWall() {
+        String scriptText = marker() + "-<script>alert(1)</script>";
+        String token = login();
+
+        given().cookie("admin_session", token)
+                .contentType(ContentType.JSON)
+                .body("{\"text\":\"" + scriptText + "\"}")
+                .when()
+                .post("/api/admin/prompt")
+                .then()
+                .statusCode(204);
+
+        given().when().get("/api/wall").then().body("prompt.text", equalTo(scriptText));
+    }
 }

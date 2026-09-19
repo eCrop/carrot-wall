@@ -30,4 +30,26 @@ public class Prompt extends PanacheEntityBase {
     public static Prompt active() {
         return find("order by activatedAt desc").firstResult();
     }
+
+    /**
+     * Activates {@code text}: bumps {@code activatedAt} on the existing row with that exact
+     * text if one exists (matching V3's already-seeded first prompt, for instance), otherwise
+     * inserts a new row. Never edits a row's {@code text} — an activation is always either an
+     * insert or a timestamp change, per spec §7. Sets {@code activatedAt} directly rather than
+     * via a {@code @PreUpdate} like {@link Post#touch()}: unlike {@code Post}, a {@code Prompt}
+     * has no other mutable column for such a hook to guard.
+     */
+    public static Prompt activate(String text) {
+        Prompt existing = find("text", text).firstResult();
+        if (existing != null) {
+            existing.activatedAt = LocalDateTime.now();
+            return existing;
+        }
+
+        Prompt prompt = new Prompt();
+        prompt.text = text;
+        prompt.activatedAt = LocalDateTime.now();
+        prompt.persist();
+        return prompt;
+    }
 }
