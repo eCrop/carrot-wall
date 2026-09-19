@@ -2,6 +2,9 @@
   @if (prompt(); as p) {
     <p class="wall-prompt__text">{{ p.text }}</p>
   }
+  @if (admin()) {
+    <app-prompt-selector [activeText]="prompt()?.text ?? null" />
+  }
 </header>
 
 @if (loaded() && posts().length === 0) {

@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
+import { PromptSelectorComponent } from '../admin/prompt-selector';
 import { PostCardComponent } from './post-card';
 import { WallService } from './wall.service';
 
@@ -21,7 +22,7 @@ const HIGHLIGHT_DURATION_MS = 2000;
 @Component({
   selector: 'app-wall',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PostCardComponent],
+  imports: [PostCardComponent, PromptSelectorComponent],
   templateUrl: './wall.html',
   styleUrl: './wall.scss',
 })
