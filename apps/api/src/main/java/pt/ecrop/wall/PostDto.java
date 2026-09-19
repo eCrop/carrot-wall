@@ -3,8 +3,10 @@ package pt.ecrop.wall;
 import java.time.ZoneId;
 
 /**
- * What a post looks like on the wire. Deliberately has no `hidden` field — a hidden post
- * either isn't in the list at all, or its id is in {@link WallResponse#removedIds()}.
+ * What a post looks like on the wire. {@code hidden} is only ever {@code true} for a response an
+ * admin asked for with {@code includeHidden=true} — {@link WallResource} and {@link Post}'s query
+ * methods already guarantee a hidden post's row never reaches {@link #from(Post)} otherwise, so
+ * this record doesn't re-check who's asking.
  */
 public record PostDto(
         Long id,
@@ -12,6 +14,7 @@ public record PostDto(
         String message,
         String type,
         boolean pinned,
+        boolean hidden,
         int upvotes,
         long createdAt,
         String answerText,
@@ -24,6 +27,7 @@ public record PostDto(
                 post.message,
                 post.type,
                 post.pinned,
+                post.hidden,
                 post.upvotes,
                 toEpochMillis(post.createdAt),
                 post.answerText,

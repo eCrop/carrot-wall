@@ -86,6 +86,49 @@ public class AdminResource {
         return Response.noContent().build();
     }
 
+    @POST
+    @Path("/posts/{id}/pin")
+    @AdminOnly
+    @Transactional
+    public Response pin(@PathParam("id") Long id) {
+        return toggle(id, Post::pin);
+    }
+
+    @POST
+    @Path("/posts/{id}/unpin")
+    @AdminOnly
+    @Transactional
+    public Response unpin(@PathParam("id") Long id) {
+        return toggle(id, Post::unpin);
+    }
+
+    @POST
+    @Path("/posts/{id}/hide")
+    @AdminOnly
+    @Transactional
+    public Response hide(@PathParam("id") Long id) {
+        return toggle(id, Post::hide);
+    }
+
+    @POST
+    @Path("/posts/{id}/unhide")
+    @AdminOnly
+    @Transactional
+    public Response unhide(@PathParam("id") Long id) {
+        return toggle(id, Post::unhide);
+    }
+
+    /** 404 for an unknown id, else applies the given mutation and returns 204 — the shared shape
+     * behind all four moderation toggles above. */
+    private Response toggle(Long id, java.util.function.Consumer<Post> mutation) {
+        Post post = (Post) Post.findById(id);
+        if (post == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        mutation.accept(post);
+        return Response.noContent().build();
+    }
+
     @GET
     @Path("/prompts/presets")
     @AdminOnly
