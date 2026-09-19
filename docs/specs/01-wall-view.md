@@ -1,6 +1,6 @@
 # Spec: wall view (`/`)
 
-**Author:** Pedro Fonseca · **Date:** 2026-09-19 · **Status:** draft
+**Author:** Pedro Fonseca · **Date:** 2026-09-19 · **Status:** implemented
 **From intent:** `docs/intents/01-wall-view.md` · **Covers:** spec F1
 
 ## Problem
