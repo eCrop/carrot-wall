@@ -3,7 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 
 import { Post, WallResponse } from './wall.models';
-import { WallService } from './wall.service';
+import { WALL_INCLUDE_HIDDEN, WallService } from './wall.service';
 
 function post(overrides: Partial<Post> = {}): Post {
   return {
@@ -168,5 +168,47 @@ describe('WallService', () => {
     await promise;
 
     expect(service.hasMore()).toBe(false);
+  });
+
+  it('never sends includeHidden by default — the public route stays unauthenticated-shaped', async () => {
+    const promise = service.loadFirstPage();
+    httpMock
+      .expectOne((r) => r.url === '/api/wall' && !r.params.has('includeHidden'))
+      .flush({
+        prompt: null,
+        posts: [],
+        removedIds: [],
+        serverTime: 1,
+      });
+    await promise;
+  });
+});
+
+describe('WallService with WALL_INCLUDE_HIDDEN = true', () => {
+  let service: WallService;
+  let httpMock: HttpTestingController;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: WALL_INCLUDE_HIDDEN, useValue: true },
+      ],
+    });
+    service = TestBed.inject(WallService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
+  });
+
+  it('sends includeHidden=true on every fetch when the token is provided true', async () => {
+    const promise = service.loadFirstPage();
+    httpMock
+      .expectOne((r) => r.params.get('includeHidden') === 'true')
+      .flush({ prompt: null, posts: [], removedIds: [], serverTime: 1 });
+    await promise;
   });
 });

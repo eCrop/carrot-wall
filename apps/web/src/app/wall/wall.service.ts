@@ -1,8 +1,18 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { InjectionToken, Injectable, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { Post, Prompt, WallResponse } from './wall.models';
+
+/**
+ * Whether this instance of `WallService` should ask the API for hidden posts too. Defaults to
+ * `false` so the public `/` route (the app-wide singleton) never sends it; `AdminComponent`
+ * re-provides both this token and a fresh `WallService` in its own `providers`, so `<app-wall>`
+ * can be reused verbatim on `/admin` without touching the public singleton.
+ */
+export const WALL_INCLUDE_HIDDEN = new InjectionToken<boolean>('WALL_INCLUDE_HIDDEN', {
+  factory: () => false,
+});
 
 /**
  * Holds the wall's state as an id-keyed map — not an array — so a poll delta can upsert or
@@ -13,6 +23,7 @@ import { Post, Prompt, WallResponse } from './wall.models';
 @Injectable({ providedIn: 'root' })
 export class WallService {
   private readonly http = inject(HttpClient);
+  private readonly includeHidden = inject(WALL_INCLUDE_HIDDEN);
 
   private readonly postsById = signal(new Map<number, Post>());
   private readonly promptSignal = signal<Prompt | null>(null);
@@ -73,8 +84,9 @@ export class WallService {
     this.lastServerTime = response.serverTime;
   }
 
-  private fetch(params?: HttpParams): Promise<WallResponse> {
-    return firstValueFrom(this.http.get<WallResponse>('/api/wall', { params }));
+  private fetch(params: HttpParams = new HttpParams()): Promise<WallResponse> {
+    const withVisibility = this.includeHidden ? params.set('includeHidden', true) : params;
+    return firstValueFrom(this.http.get<WallResponse>('/api/wall', { params: withVisibility }));
   }
 
   private toMap(posts: Post[]): Map<number, Post> {
