@@ -39,6 +39,19 @@
   box-shadow: 0 0 0 2px var(--wall-accent);
 }
 
+.post-card--hidden {
+  opacity: 0.5;
+}
+
+.post-card__hidden-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--wall-muted);
+  border: 1px solid var(--wall-hairline);
+  border-radius: 999px;
+  padding: 0.125rem 0.625rem;
+}
+
 .post-card__header {
   display: flex;
   align-items: center;

@@ -12,6 +12,7 @@ function post(overrides: Partial<Post> = {}): Post {
     message: 'hello',
     type: 'livre',
     pinned: false,
+    hidden: false,
     upvotes: 0,
     createdAt: 1000,
     answerText: null,

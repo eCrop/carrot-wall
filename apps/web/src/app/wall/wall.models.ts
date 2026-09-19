@@ -7,6 +7,7 @@ export interface Post {
   message: string;
   type: string;
   pinned: boolean;
+  hidden: boolean;
   upvotes: number;
   createdAt: number;
   answerText: string | null;
