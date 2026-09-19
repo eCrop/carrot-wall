@@ -52,3 +52,16 @@
   font-weight: 500;
   cursor: pointer;
 }
+
+.wall-new-post {
+  display: block;
+  width: fit-content;
+  margin: 0 auto 1.5rem;
+  padding: 0.625rem 1.5rem;
+  background: var(--wall-accent);
+  color: var(--wall-bg);
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 500;
+  text-decoration: none;
+}

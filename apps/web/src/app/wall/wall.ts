@@ -9,7 +9,7 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { PromptSelectorComponent } from '../admin/prompt-selector';
 import { PinnedCarouselComponent } from './pinned-carousel';
@@ -24,7 +24,7 @@ const HIGHLIGHT_DURATION_MS = 2000;
 @Component({
   selector: 'app-wall',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PostCardComponent, PromptSelectorComponent, PinnedCarouselComponent],
+  imports: [PostCardComponent, PromptSelectorComponent, PinnedCarouselComponent, RouterLink],
   templateUrl: './wall.html',
   styleUrl: './wall.scss',
 })

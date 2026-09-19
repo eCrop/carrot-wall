@@ -16,6 +16,14 @@
   color: var(--wall-ink, #141413);
 }
 
+.back {
+  display: inline-block;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: var(--wall-muted, #6b6a63);
+  text-decoration: none;
+}
+
 h1 {
   font-family: var(--wall-font-serif, 'Source Serif 4', Georgia, serif);
   margin-bottom: 4px;
