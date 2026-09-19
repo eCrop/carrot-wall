@@ -26,7 +26,9 @@ worth having. It satisfies spec §7.2, §7.3 and §7.13.
 
 Everyone in the room reads this view; nobody writes through it yet. New on the API side: a
 read endpoint that returns visible posts and the active prompt. New on the web side: the `/`
-route and its card component. The schema is already in place — no migration.
+route and its card component. The schema needs one migration after all: the 5s poll asks the
+API "what changed since t", and only `answer_updated_at` existed to answer that — a pin or an
+upvote would have been invisible to it. `posts.updated_at`, bumped on every write, closes that.
 
 ## Constraints
 
