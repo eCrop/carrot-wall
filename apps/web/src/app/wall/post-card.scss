@@ -8,6 +8,11 @@
   // Fires once, on element creation only: `@for (... track post.id)` in wall.html means an
   // already-loaded card is reused, never recreated, so a poll delta never replays this.
   animation: post-card-in 200ms ease;
+  // The coral highlight ring (WallComponent toggles --highlighted for ~2s after a fresh
+  // submit): a transition, not a keyframe animation, so it fades smoothly in on class-add
+  // and back out on class-remove without needing to know which direction is happening.
+  box-shadow: 0 0 0 0 transparent;
+  transition: box-shadow 200ms ease;
 }
 
 @keyframes post-card-in {
@@ -22,11 +27,16 @@
 @media (prefers-reduced-motion: reduce) {
   .post-card {
     animation: none;
+    transition: none;
   }
 }
 
 .post-card--pinned {
   border-color: var(--wall-accent);
+}
+
+.post-card--highlighted {
+  box-shadow: 0 0 0 2px var(--wall-accent);
 }
 
 .post-card__header {

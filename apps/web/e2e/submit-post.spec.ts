@@ -1,10 +1,5 @@
 import { expect, test } from '@playwright/test';
 
-/**
- * The full submit-and-see-it-on-the-wall flow needs `/` (WallComponent), which doesn't exist
- * on this branch yet — see docs/specs/02-submit-a-post-plan.md, Phase C. This spec covers what
- * is real today: the form itself, standalone.
- */
 test.describe('/post', () => {
   test('loads with the message field focused around the fold', async ({ page }) => {
     await page.goto('/post');
@@ -39,5 +34,26 @@ test.describe('/post', () => {
       .getByLabel('Mensagem')
       .evaluate((el) => getComputedStyle(el).fontSize);
     expect(parseFloat(fontSize)).toBeGreaterThanOrEqual(16);
+  });
+
+  test('submitting lands on the wall with the new post ringed in coral, then unringed', async ({
+    page,
+  }) => {
+    const message = `E2E post ${Date.now()}`;
+
+    await page.goto('/post');
+    await page.getByLabel('Mensagem').fill(message);
+    await page.getByRole('button', { name: 'Enviar' }).click();
+
+    // The URL's ?highlight= is cleared the instant the post is found in the loaded list —
+    // asserting on it is a race against that same lookup, so we assert on the visible ring
+    // instead, which the app holds open for a full 2s regardless of how fast the param clears.
+    await expect(page).toHaveURL(/^http:\/\/localhost:4200\/(\?highlight=\d+)?$/);
+    const card = page.locator('app-post-card', { hasText: message });
+    await expect(card.locator('.post-card--highlighted')).toBeVisible();
+
+    await expect(page).toHaveURL('http://localhost:4200/', { timeout: 3000 });
+    await expect(card.locator('.post-card--highlighted')).toHaveCount(0, { timeout: 3000 });
+    await expect(card).toContainText(message);
   });
 });

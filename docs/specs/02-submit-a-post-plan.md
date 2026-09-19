@@ -123,25 +123,41 @@ horizontal scroll and computed input `font-size` ≥16px.
 
 ---
 
-## Phase C — wall integration (gated)
+## Phase C — wall integration (done)
 
-**Gate:** slice 01 steps 5–8 committed on its branch — `WallComponent`, route `''`, `WallService`,
-`PostCardComponent`. Re-check before starting; slice 01's plan delivers all four but says nothing
-about `highlight`, so that hook is slice 02's to add. Rebase again first.
+**Gate cleared:** slice 01 landed `WallComponent`, route `''`, `WallService`, `PostCardComponent`
+(commits `1257636`..`dacc23c`) before this phase started. Rebased slice-02-submit onto that tip —
+one expected one-line conflict in `app.routes.ts` (both branches added a route to the same array
+literal), resolved by keeping both routes.
 
-**C1.** `WallComponent` reads the `highlight` query param, marks that post id as highlighted for
-~2s, then clears the param (`Router.navigate` with `replaceUrl`) so a refresh doesn't re-trigger it.
+**C1.** `WallComponent` now injects `ActivatedRoute`/`Router` and reads `?highlight=<id>` in
+`ngOnInit`. An `effect()` watches `WallService`'s existing `posts` signal (no service change
+needed) and only starts the 2s clock once the highlighted post has actually loaded — avoiding
+the page-1-fetch-vs-navigation race the setup plan called out. The query param clears
+(`router.navigate([], { queryParams: {}, replaceUrl: true })`) the instant the post is found,
+independent of the 2s ring — a refresh mid-ring won't re-trigger it, and the transient
+`?highlight=` URL state is too fast to reliably assert on (see C4's fix).
 
-**C2.** `PostCardComponent` gets a coral ring class driven by that flag — a CSS transition in the
-spec's 150–250ms band, no animation library (slice 01 already ruled out `@angular/animations`).
+**C2.** `PostCardComponent` got a `highlighted = input(false)` and a `.post-card--highlighted`
+class binding, following the exact `[class.post-card--pinned]` pattern already there. The ring
+is a `box-shadow` **transition** (200ms, matching `post-card-in`'s existing timing), not a
+`@keyframes` animation — the class toggles on/off and the transition handles both directions,
+so it didn't need to know which direction was happening. Respects the existing
+`prefers-reduced-motion` block.
 
-**C3.** Confirm the real navigation from `/post` now resolves.
+**C3.** Confirmed: the real navigation from `/post` resolves against the now-real `/` route.
 
-**C4.** The full Playwright e2e: fill, submit, land on `/`, see the post text, see the ring, see
-it gone after ~2s.
+**C4.** The full Playwright e2e was added, and one real bug surfaced twice along the way:
+- The submit button was originally disabled for an empty message, making the "empty message
+  shows a PT error" behavior (acceptance criterion 3) unreachable via the UI — caught in Phase B.
+- The e2e's first version asserted on the transient `/?highlight=<id>` URL, which is a race
+  against the same lookup that clears it — the assertion was flaky by construction, not the
+  app. Fixed by asserting on the visible ring (held open for a real 2s) instead of the URL,
+  which only needs to match a URL pattern that accepts either state. Verified stable across
+  3 repeats (`npx playwright test --repeat-each=3`), all passing.
 
-**C5.** Update `docs/specs/02-submit-a-post.md` — its criterion 9 says `npm test` includes the
-Playwright spec; Playwright runs under `npm run e2e` instead.
+**C5.** Updated `docs/specs/02-submit-a-post.md` criterion 9: Playwright runs under
+`npm run e2e`, not inside `npm test`.
 
 ---
 
@@ -180,11 +196,12 @@ no stack trace.
 
 ## Risks
 
-1. **Phase C is gated on another branch.** Acceptance criteria 1–2 and the full e2e cannot pass
-   until slice 01's web side lands. Tracked as a phase, not silently skipped.
-2. **Two rebases onto a moving branch.** Both slices edit `app.config.ts` and `app.routes.ts`;
-   slice 01 also rewrites `app.html` and deletes `app.spec.ts`. Conflicts should be one-liners —
-   rebasing at each phase boundary is what keeps them that way.
+1. ~~Phase C is gated on another branch.~~ Resolved: slice 01's web side landed and the rebase
+   in Phase C had exactly the one expected conflict (`app.routes.ts`), a one-liner.
+2. **Rebasing onto a moving branch.** Both slices edited `app.config.ts` and `app.routes.ts`;
+   slice 01 also rewrote `app.html` and deleted `app.spec.ts`. In the event, `app.config.ts`
+   merged cleanly (slice 01 landed `provideHttpClient()` itself, matching what Phase B had
+   already added) and `app.routes.ts` needed the one manual merge described in Phase C.
 3. **`frustração` carries a diacritic** through JSON, the URL-free request body, and a
    `VARCHAR(20)` column (10 chars, fits). Quarkus defaults to UTF-8; worth one explicit assertion
    in `PostsResourceTest` rather than trusting it.

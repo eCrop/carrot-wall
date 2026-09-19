@@ -82,7 +82,8 @@ the moment it takes longer than a sticky note, they stop using it.
 8. A message containing `<script>alert(1)</script>` is stored and later rendered on `/` as
    literal text, never executed (spec §7.12 — shared with the wall-view slice's own test, but
    the write path is this slice's to prove).
-9. `./mvnw test` and `npm test` (including the new Playwright spec) pass from a fresh clone.
+9. `./mvnw test`, `npm test`, and `npm run e2e` (the new Playwright spec — Playwright runs
+   separately from `ng test`/vitest, not inside `npm test`) each pass from a fresh clone.
 
 ## Constraints
 

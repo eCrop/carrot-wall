@@ -1,4 +1,8 @@
-<article class="post-card" [class.post-card--pinned]="post().pinned">
+<article
+  class="post-card"
+  [class.post-card--pinned]="post().pinned"
+  [class.post-card--highlighted]="highlighted()"
+>
   <header class="post-card__header">
     <span class="post-card__type">{{ typeLabel() }}</span>
     @if (post().pinned) {

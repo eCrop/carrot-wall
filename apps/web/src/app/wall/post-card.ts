@@ -21,6 +21,7 @@ const RELATIVE_TIME = new Intl.RelativeTimeFormat('pt-PT', { numeric: 'auto' });
 })
 export class PostCardComponent {
   readonly post = input.required<Post>();
+  readonly highlighted = input(false);
 
   readonly authorName = computed(() => this.post().name ?? 'Anónimo');
   readonly typeLabel = computed(() => TYPE_LABELS[this.post().type] ?? this.post().type);
