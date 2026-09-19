@@ -1,6 +1,6 @@
 # Plan: wall view (`/`)
 
-**Spec:** `docs/specs/01-wall-view.md` · **Intent:** `docs/intents/01-wall-view.md` · **Status:** awaiting approval
+**Spec:** `docs/specs/01-wall-view.md` · **Intent:** `docs/intents/01-wall-view.md` · **Status:** implemented
 
 ## Decisions this plan locks in
 
