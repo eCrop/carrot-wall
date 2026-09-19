@@ -39,6 +39,19 @@
   box-shadow: 0 0 0 2px var(--wall-accent);
 }
 
+.post-card--hidden {
+  opacity: 0.5;
+}
+
+.post-card__hidden-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--wall-muted);
+  border: 1px solid var(--wall-hairline);
+  border-radius: 999px;
+  padding: 0.125rem 0.625rem;
+}
+
 .post-card__header {
   display: flex;
   align-items: center;
@@ -87,4 +100,68 @@
   align-items: center;
   font-size: 0.8125rem;
   color: var(--wall-muted);
+}
+
+.post-card__upvotes {
+  font: inherit;
+  color: inherit;
+  background: var(--wall-bg);
+  border: 1px solid var(--wall-hairline);
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem;
+  margin-left: auto;
+  cursor: pointer;
+}
+
+.post-card__upvotes:disabled {
+  cursor: default;
+}
+
+.post-card__upvotes--voted {
+  color: var(--wall-accent);
+  border-color: var(--wall-accent);
+}
+
+// Large-type variant for /tv (spec: message text ≥32px, readable from six metres). Explicit
+// overrides rather than a scale token — this component has no existing scale hook, and a
+// handful of declarations here is a smaller diff than converting every rule to a scalable unit.
+.post-card--tv {
+  padding: 2rem;
+
+  .post-card__type,
+  .post-card__hidden-label {
+    font-size: 1.125rem;
+    padding: 0.25rem 1rem;
+  }
+
+  .post-card__pin {
+    font-size: 1.5rem;
+  }
+
+  .post-card__message {
+    font-size: 2rem;
+    line-height: 1.25;
+    margin-bottom: 1.25rem;
+  }
+
+  .post-card__answer {
+    padding: 1rem 1.25rem;
+  }
+
+  .post-card__answer-label {
+    font-size: 1.125rem;
+  }
+
+  .post-card__answer-text {
+    font-size: 1.5rem;
+  }
+
+  .post-card__footer {
+    font-size: 1.25rem;
+    gap: 1.25rem;
+  }
+
+  .post-card__upvotes {
+    cursor: default;
+  }
 }

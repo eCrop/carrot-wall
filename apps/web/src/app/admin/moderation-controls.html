@@ -1,0 +1,23 @@
+<div class="moderation-controls">
+  <button
+    type="button"
+    class="moderation-controls__button"
+    [disabled]="pinning()"
+    (click)="togglePin()"
+  >
+    {{ post().pinned ? 'Desfixar' : 'Fixar' }}
+  </button>
+
+  <button
+    type="button"
+    class="moderation-controls__button"
+    [disabled]="hiding()"
+    (click)="toggleHidden()"
+  >
+    {{ post().hidden ? 'Reexibir' : 'Ocultar' }}
+  </button>
+
+  @if (error()) {
+    <p class="moderation-controls__error" role="alert">{{ error() }}</p>
+  }
+</div>

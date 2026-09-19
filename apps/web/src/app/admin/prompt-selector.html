@@ -1,0 +1,44 @@
+<div class="prompt-selector">
+  @if (!expanded()) {
+    <button type="button" class="prompt-selector__toggle" (click)="toggle()">Mudar pergunta</button>
+  } @else {
+    <div class="prompt-selector__panel">
+      <div class="prompt-selector__presets">
+        @for (preset of presets(); track preset.id) {
+          <button
+            type="button"
+            class="prompt-selector__preset"
+            [class.prompt-selector__preset--active]="preset.text === activeText()"
+            [disabled]="submitting()"
+            (click)="selectPreset(preset)"
+          >
+            {{ preset.text }}
+          </button>
+        }
+      </div>
+
+      <form class="prompt-selector__form" (ngSubmit)="submitText()">
+        <input
+          type="text"
+          [maxlength]="maxPromptLength"
+          [ngModel]="text()"
+          (ngModelChange)="text.set($event)"
+          name="promptText"
+          placeholder="Escreve uma pergunta…"
+        />
+        <p class="prompt-selector__counter">{{ remaining() }} caracteres</p>
+
+        @if (error()) {
+          <p class="prompt-selector__error" role="alert">{{ error() }}</p>
+        }
+
+        <div class="prompt-selector__actions">
+          <button type="button" class="prompt-selector__cancel" (click)="cancel()">Cancelar</button>
+          <button type="submit" class="prompt-selector__save" [disabled]="!canSubmitText()">
+            Ativar
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+</div>

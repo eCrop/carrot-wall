@@ -4,11 +4,27 @@ import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { vi } from 'vitest';
 
-import { WallResponse } from './wall.models';
+import { Post, WallResponse } from './wall.models';
 import { WallComponent } from './wall';
 
 function activatedRouteWithQueryParams(params: Record<string, string>): Partial<ActivatedRoute> {
   return { snapshot: { queryParamMap: convertToParamMap(params) } as ActivatedRoute['snapshot'] };
+}
+
+function post(overrides: Partial<Post> = {}): Post {
+  return {
+    id: 1,
+    name: 'Rita',
+    message: 'Olá',
+    type: 'livre',
+    pinned: false,
+    hidden: false,
+    upvotes: 0,
+    createdAt: Date.now(),
+    answerText: null,
+    answerUpdatedAt: null,
+    ...overrides,
+  };
 }
 
 describe('WallComponent', () => {
@@ -59,6 +75,7 @@ describe('WallComponent', () => {
           message: 'Olá',
           type: 'livre',
           pinned: false,
+          hidden: false,
           upvotes: 0,
           createdAt: Date.now(),
           answerText: null,
@@ -96,6 +113,7 @@ describe('WallComponent', () => {
             message: 'Novo post',
             type: 'livre',
             pinned: false,
+            hidden: false,
             upvotes: 0,
             createdAt: Date.now(),
             answerText: null,
@@ -123,6 +141,61 @@ describe('WallComponent', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it('on the public wall, pinned posts render in the carousel and not in the grid', async () => {
+    configure();
+    const fixture = TestBed.createComponent(WallComponent);
+    fixture.detectChanges();
+
+    const response: WallResponse = {
+      prompt: null,
+      posts: [
+        post({ id: 1, message: 'Fixado', pinned: true }),
+        post({ id: 2, message: 'Normal', pinned: false }),
+      ],
+      removedIds: [],
+      serverTime: 1,
+    };
+    httpMock.expectOne('/api/wall').flush(response);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const el = fixture.nativeElement as HTMLElement;
+    const carousel = el.querySelector('app-pinned-carousel') as HTMLElement;
+    expect(carousel).not.toBeNull();
+    expect(carousel.textContent).toContain('Fixado');
+
+    const grid = el.querySelector('.wall-grid') as HTMLElement;
+    expect(grid.textContent).toContain('Normal');
+    expect(grid.textContent).not.toContain('Fixado');
+  });
+
+  it('on the admin wall, every post renders in one grid and there is no carousel', async () => {
+    configure();
+    const fixture = TestBed.createComponent(WallComponent);
+    fixture.componentRef.setInput('admin', true);
+    fixture.detectChanges();
+
+    const response: WallResponse = {
+      prompt: null,
+      posts: [
+        post({ id: 1, message: 'Fixado', pinned: true }),
+        post({ id: 2, message: 'Normal', pinned: false }),
+      ],
+      removedIds: [],
+      serverTime: 1,
+    };
+    httpMock.expectOne('/api/wall').flush(response);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('app-pinned-carousel')).toBeNull();
+
+    const grid = el.querySelector('.wall-grid') as HTMLElement;
+    expect(grid.textContent).toContain('Fixado');
+    expect(grid.textContent).toContain('Normal');
   });
 
   it('never highlights anything when there is no ?highlight= param', async () => {

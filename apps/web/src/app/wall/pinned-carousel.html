@@ -1,0 +1,31 @@
+@if (posts().length > 0) {
+  <div
+    class="pinned-carousel"
+    (mouseenter)="pause()"
+    (mouseleave)="resume()"
+    (focusin)="pause()"
+    (focusout)="resume()"
+  >
+    <div class="pinned-carousel__strip">
+      @for (post of currentPosts(); track post.id) {
+        <app-post-card [post]="post" [tv]="tv()" />
+      }
+    </div>
+
+    @if (interactive() && pages().length > 1) {
+      <div class="pinned-carousel__dots" role="tablist" aria-label="Publicações fixadas">
+        @for (page of pages(); track $index) {
+          <button
+            type="button"
+            class="pinned-carousel__dot"
+            [class.pinned-carousel__dot--active]="$index === currentPage()"
+            role="tab"
+            [attr.aria-selected]="$index === currentPage()"
+            [attr.aria-label]="'Página ' + ($index + 1)"
+            (click)="goTo($index)"
+          ></button>
+        }
+      </div>
+    }
+  </div>
+}

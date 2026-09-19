@@ -2,16 +2,23 @@
   @if (prompt(); as p) {
     <p class="wall-prompt__text">{{ p.text }}</p>
   }
+  @if (admin()) {
+    <app-prompt-selector [activeText]="prompt()?.text ?? null" />
+  }
 </header>
+
+@if (!admin()) {
+  <app-pinned-carousel [posts]="pinnedPosts()" />
+}
 
 @if (loaded() && posts().length === 0) {
   <div class="wall-empty">
     <p>Ainda não há mensagens no mural.</p>
     <p>Sê a primeira pessoa a escrever — aponta a câmara ao código QR para começar.</p>
   </div>
-} @else if (posts().length > 0) {
+} @else if (gridPosts().length > 0) {
   <div class="wall-grid">
-    @for (post of posts(); track post.id) {
+    @for (post of gridPosts(); track post.id) {
       <app-post-card
         [post]="post"
         [highlighted]="post.id === highlightedPostId()"

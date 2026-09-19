@@ -260,6 +260,145 @@ class AdminResourceTest {
         assertTrue(sibling.id != null, "sibling post must still exist");
     }
 
+    @Test
+    void pinSetsPinnedTrueAndLeavesHiddenUpvotesAndAnswerUntouched() {
+        String marker = marker();
+        Post post = persistPost(marker);
+        String token = login();
+
+        given().cookie("admin_session", token)
+                .when()
+                .post("/api/admin/posts/" + post.id + "/pin")
+                .then()
+                .statusCode(204);
+
+        var after = findByMessage(marker);
+        assertEquals(true, after.get("pinned"));
+        assertEquals(false, after.get("hidden"));
+        assertEquals(0, ((Number) after.get("upvotes")).intValue());
+        assertEquals(null, after.get("answerText"));
+    }
+
+    @Test
+    void unpinSetsPinnedFalse() {
+        String marker = marker();
+        Post post = persistPost(marker);
+        String token = login();
+        pin(post.id);
+
+        given().cookie("admin_session", token)
+                .when()
+                .post("/api/admin/posts/" + post.id + "/unpin")
+                .then()
+                .statusCode(204);
+
+        assertEquals(false, findByMessage(marker).get("pinned"));
+    }
+
+    @Test
+    void hideSetsHiddenTrueAndRemovesThePostFromThePublicWallButNotAnAdminOne() {
+        String marker = marker();
+        Post post = persistPost(marker);
+        String token = login();
+
+        given().cookie("admin_session", token)
+                .when()
+                .post("/api/admin/posts/" + post.id + "/hide")
+                .then()
+                .statusCode(204);
+
+        given().when()
+                .get("/api/wall")
+                .then()
+                .body("posts.message", org.hamcrest.Matchers.not(org.hamcrest.Matchers.hasItem(marker)));
+
+        given().cookie("admin_session", token)
+                .queryParam("includeHidden", true)
+                .when()
+                .get("/api/wall")
+                .then()
+                .body("posts.find { it.message == '" + marker + "' }.hidden", equalTo(true));
+    }
+
+    @Test
+    void unhideSetsHiddenFalseAndRestoresThePostToThePublicWall() {
+        String marker = marker();
+        Post post = persistPost(marker);
+        String token = login();
+        hide(post.id);
+
+        given().cookie("admin_session", token)
+                .when()
+                .post("/api/admin/posts/" + post.id + "/unhide")
+                .then()
+                .statusCode(204);
+
+        given().when()
+                .get("/api/wall")
+                .then()
+                .body("posts.message", org.hamcrest.Matchers.hasItem(marker));
+    }
+
+    @Test
+    void pinUnpinHideAndUnhideEachTouchOnlyTheirOwnPostLeavingASiblingUntouched() {
+        String targetMarker = marker();
+        String siblingMarker = marker();
+        Post target = persistPost(targetMarker);
+        persistPost(siblingMarker);
+        String token = login();
+
+        for (String action : List.of("pin", "hide", "unpin", "unhide")) {
+            var siblingBefore = findByMessage(siblingMarker);
+            given().cookie("admin_session", token)
+                    .when()
+                    .post("/api/admin/posts/" + target.id + "/" + action)
+                    .then()
+                    .statusCode(204);
+            var siblingAfter = findByMessage(siblingMarker);
+            assertEquals(siblingBefore.get("pinned"), siblingAfter.get("pinned"));
+            assertEquals(siblingBefore.get("hidden"), siblingAfter.get("hidden"));
+            assertEquals(
+                    ((Number) siblingBefore.get("upvotes")).intValue(),
+                    ((Number) siblingAfter.get("upvotes")).intValue());
+        }
+    }
+
+    @Test
+    void everyModerationToggleReturns401WithNoSessionCookie() {
+        String marker = marker();
+        Post post = persistPost(marker);
+
+        for (String action : List.of("pin", "unpin", "hide", "unhide")) {
+            given().when()
+                    .post("/api/admin/posts/" + post.id + "/" + action)
+                    .then()
+                    .statusCode(401);
+        }
+    }
+
+    @Test
+    void everyModerationToggleReturns404ForAnUnknownPostId() {
+        String token = login();
+
+        for (String action : List.of("pin", "unpin", "hide", "unhide")) {
+            given().cookie("admin_session", token)
+                    .when()
+                    .post("/api/admin/posts/999999999/" + action)
+                    .then()
+                    .statusCode(404);
+        }
+    }
+
+    @Transactional
+    void pin(Long id) {
+        ((Post) Post.findById(id)).pin();
+    }
+
+    @Transactional
+    void hide(Long id) {
+        ((Post) Post.findById(id)).hide();
+    }
+
     private static java.util.Map<?, ?> findByMessage(String marker) {
         return given().when()
                 .get("/api/wall")
@@ -272,5 +411,172 @@ class AdminResourceTest {
                 .filter(p -> marker.equals(p.get("message")))
                 .findFirst()
                 .orElseThrow();
+    }
+
+    @Test
+    void listingPresetsWithNoSessionCookieIsRejected() {
+        given().when().get("/api/admin/prompts/presets").then().statusCode(401);
+    }
+
+    @Test
+    void listingPresetsReturnsTheFiveSeededOnes() {
+        String token = login();
+
+        given().cookie("admin_session", token)
+                .when()
+                .get("/api/admin/prompts/presets")
+                .then()
+                .statusCode(200)
+                .body("size()", equalTo(5))
+                .body("[0].text", equalTo("A única coisa que quero desta semana é…"));
+    }
+
+    @Test
+    void activatingAPresetChangesWhatThePublicWallReturns() {
+        String token = login();
+        long presetId =
+                given().cookie("admin_session", token)
+                        .when()
+                        .get("/api/admin/prompts/presets")
+                        .then()
+                        .extract()
+                        .jsonPath()
+                        .getLong("find { it.text == 'Perguntas para o fim do dia' }.id");
+
+        given().cookie("admin_session", token)
+                .contentType(ContentType.JSON)
+                .body("{\"presetId\":" + presetId + "}")
+                .when()
+                .post("/api/admin/prompt")
+                .then()
+                .statusCode(204);
+
+        given().when()
+                .get("/api/wall")
+                .then()
+                .body("prompt.text", equalTo("Perguntas para o fim do dia"));
+    }
+
+    @Test
+    void activatingFreeTextChangesWhatThePublicWallReturns() {
+        String marker = marker();
+        String token = login();
+
+        given().cookie("admin_session", token)
+                .contentType(ContentType.JSON)
+                .body("{\"text\":\"" + marker + "\"}")
+                .when()
+                .post("/api/admin/prompt")
+                .then()
+                .statusCode(204);
+
+        given().when().get("/api/wall").then().body("prompt.text", equalTo(marker));
+    }
+
+    @Test
+    void activatingTheSameTextTwiceLeavesThePromptIdUnchanged() {
+        String marker = marker();
+        String token = login();
+
+        given().cookie("admin_session", token)
+                .contentType(ContentType.JSON)
+                .body("{\"text\":\"" + marker + "\"}")
+                .when()
+                .post("/api/admin/prompt")
+                .then()
+                .statusCode(204);
+        int firstId =
+                given().when().get("/api/wall").then().extract().jsonPath().getInt("prompt.id");
+
+        given().cookie("admin_session", token)
+                .contentType(ContentType.JSON)
+                .body("{\"text\":\"" + marker + "\"}")
+                .when()
+                .post("/api/admin/prompt")
+                .then()
+                .statusCode(204);
+        int secondId =
+                given().when().get("/api/wall").then().extract().jsonPath().getInt("prompt.id");
+
+        assertEquals(firstId, secondId);
+    }
+
+    @Test
+    void activatingBlankTextIsRejectedAndLeavesThePromptUnchanged() {
+        String token = login();
+        String activeBefore =
+                given().when().get("/api/wall").then().extract().jsonPath().getString("prompt.text");
+
+        given().cookie("admin_session", token)
+                .contentType(ContentType.JSON)
+                .body("{\"text\":\"   \"}")
+                .when()
+                .post("/api/admin/prompt")
+                .then()
+                .statusCode(400);
+
+        given().when().get("/api/wall").then().body("prompt.text", equalTo(activeBefore));
+    }
+
+    @Test
+    void activatingTextOver200CharsIsRejectedAndLeavesThePromptUnchanged() {
+        String token = login();
+        String activeBefore =
+                given().when().get("/api/wall").then().extract().jsonPath().getString("prompt.text");
+        String tooLong = "x".repeat(201);
+
+        given().cookie("admin_session", token)
+                .contentType(ContentType.JSON)
+                .body("{\"text\":\"" + tooLong + "\"}")
+                .when()
+                .post("/api/admin/prompt")
+                .then()
+                .statusCode(400);
+
+        given().when().get("/api/wall").then().body("prompt.text", equalTo(activeBefore));
+    }
+
+    @Test
+    void activatingAnUnknownPresetIdReturnsNotFound() {
+        String token = login();
+
+        given().cookie("admin_session", token)
+                .contentType(ContentType.JSON)
+                .body("{\"presetId\":999999999}")
+                .when()
+                .post("/api/admin/prompt")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test
+    void activatingAPromptWithNoSessionCookieIsRejected() {
+        String activeBefore =
+                given().when().get("/api/wall").then().extract().jsonPath().getString("prompt.text");
+
+        given().contentType(ContentType.JSON)
+                .body("{\"text\":\"" + marker() + "\"}")
+                .when()
+                .post("/api/admin/prompt")
+                .then()
+                .statusCode(401);
+
+        given().when().get("/api/wall").then().body("prompt.text", equalTo(activeBefore));
+    }
+
+    @Test
+    void aScriptTagInAPromptRendersAsLiteralTextOnThePublicWall() {
+        String scriptText = marker() + "-<script>alert(1)</script>";
+        String token = login();
+
+        given().cookie("admin_session", token)
+                .contentType(ContentType.JSON)
+                .body("{\"text\":\"" + scriptText + "\"}")
+                .when()
+                .post("/api/admin/prompt")
+                .then()
+                .statusCode(204);
+
+        given().when().get("/api/wall").then().body("prompt.text", equalTo(scriptText));
     }
 }

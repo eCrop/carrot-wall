@@ -1,5 +1,6 @@
 package pt.ecrop.wall;
 
+import io.quarkus.panache.common.Sort;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.Consumes;
@@ -13,6 +14,8 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+import java.util.List;
 
 /**
  * The gate: {@code POST /login} trades the PIN for a session cookie, {@code GET /session} tells
@@ -80,6 +83,85 @@ public class AdminResource {
         }
 
         post.answer(answerText);
+        return Response.noContent().build();
+    }
+
+    @POST
+    @Path("/posts/{id}/pin")
+    @AdminOnly
+    @Transactional
+    public Response pin(@PathParam("id") Long id) {
+        return toggle(id, Post::pin);
+    }
+
+    @POST
+    @Path("/posts/{id}/unpin")
+    @AdminOnly
+    @Transactional
+    public Response unpin(@PathParam("id") Long id) {
+        return toggle(id, Post::unpin);
+    }
+
+    @POST
+    @Path("/posts/{id}/hide")
+    @AdminOnly
+    @Transactional
+    public Response hide(@PathParam("id") Long id) {
+        return toggle(id, Post::hide);
+    }
+
+    @POST
+    @Path("/posts/{id}/unhide")
+    @AdminOnly
+    @Transactional
+    public Response unhide(@PathParam("id") Long id) {
+        return toggle(id, Post::unhide);
+    }
+
+    /** 404 for an unknown id, else applies the given mutation and returns 204 — the shared shape
+     * behind all four moderation toggles above. */
+    private Response toggle(Long id, java.util.function.Consumer<Post> mutation) {
+        Post post = (Post) Post.findById(id);
+        if (post == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        mutation.accept(post);
+        return Response.noContent().build();
+    }
+
+    @GET
+    @Path("/prompts/presets")
+    @AdminOnly
+    public List<PromptPresetDto> listPresets() {
+        return PromptPreset.<PromptPreset>listAll(Sort.by("id")).stream()
+                .map(PromptPresetDto::from)
+                .toList();
+    }
+
+    @POST
+    @Path("/prompt")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @AdminOnly
+    @Transactional
+    public Response activatePrompt(ActivatePromptRequest request) {
+        String text;
+        if (request.presetId() != null) {
+            PromptPreset preset = (PromptPreset) PromptPreset.findById(request.presetId());
+            if (preset == null) {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+            text = preset.text;
+        } else {
+            text = request.text() == null ? "" : request.text().trim();
+        }
+
+        if (text.isBlank() || text.length() > 200) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new ApiError("A pergunta tem de ter entre 1 e 200 caracteres."))
+                    .build();
+        }
+
+        Prompt.activate(text);
         return Response.noContent().build();
     }
 }

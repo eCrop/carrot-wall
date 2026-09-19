@@ -2,11 +2,16 @@
   class="post-card"
   [class.post-card--pinned]="post().pinned"
   [class.post-card--highlighted]="highlighted()"
+  [class.post-card--hidden]="admin() && post().hidden"
+  [class.post-card--tv]="tv()"
 >
   <header class="post-card__header">
     <span class="post-card__type">{{ typeLabel() }}</span>
     @if (post().pinned) {
       <span class="post-card__pin" aria-hidden="true">📌</span>
+    }
+    @if (admin() && post().hidden) {
+      <span class="post-card__hidden-label">Oculto</span>
     }
   </header>
 
@@ -21,11 +26,26 @@
 
   @if (admin()) {
     <app-answer-editor [post]="post()" />
+    <app-moderation-controls [post]="post()" />
   }
 
   <footer class="post-card__footer">
     <span class="post-card__author">{{ authorName() }}</span>
     <span class="post-card__time">{{ relativeTime() }}</span>
-    <span class="post-card__upvotes">▲ {{ post().upvotes }}</span>
+    @if (tv()) {
+      <span class="post-card__upvotes">▲ {{ displayedUpvotes() }}</span>
+    } @else {
+      <button
+        type="button"
+        class="post-card__upvotes"
+        [class.post-card__upvotes--voted]="voted()"
+        [disabled]="voted()"
+        [attr.aria-pressed]="voted()"
+        aria-label="Votar nesta publicação"
+        (click)="upvote()"
+      >
+        ▲ {{ displayedUpvotes() }}
+      </button>
+    }
   </footer>
 </article>

@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 import java.util.UUID;
 
+import jakarta.transaction.Transactional;
+
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
@@ -129,5 +131,41 @@ class PostsResourceTest {
                     .then()
                     .statusCode(201);
         }
+    }
+
+    @Test
+    void upvotingAPostIncrementsItsCount() {
+        Long id =
+                post(null, "marker-" + UUID.randomUUID(), "livre", token())
+                        .then()
+                        .extract()
+                        .jsonPath()
+                        .getLong("id");
+
+        given().when().post("/api/posts/{id}/upvote", id).then().statusCode(200).body("upvotes", equalTo(1));
+        given().when().post("/api/posts/{id}/upvote", id).then().statusCode(200).body("upvotes", equalTo(2));
+    }
+
+    @Test
+    void upvotingAHiddenPostIsNotFound() {
+        Long id =
+                post(null, "marker-" + UUID.randomUUID(), "livre", token())
+                        .then()
+                        .extract()
+                        .jsonPath()
+                        .getLong("id");
+        hide(id);
+
+        given().when().post("/api/posts/{id}/upvote", id).then().statusCode(404);
+    }
+
+    @Test
+    void upvotingANonexistentPostIsNotFound() {
+        given().when().post("/api/posts/{id}/upvote", Long.MAX_VALUE).then().statusCode(404);
+    }
+
+    @Transactional
+    void hide(Long id) {
+        ((Post) Post.findById(id)).hide();
     }
 }

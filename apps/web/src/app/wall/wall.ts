@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
   effect,
   inject,
@@ -10,6 +11,8 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
+import { PromptSelectorComponent } from '../admin/prompt-selector';
+import { PinnedCarouselComponent } from './pinned-carousel';
 import { PostCardComponent } from './post-card';
 import { WallService } from './wall.service';
 
@@ -21,7 +24,7 @@ const HIGHLIGHT_DURATION_MS = 2000;
 @Component({
   selector: 'app-wall',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PostCardComponent],
+  imports: [PostCardComponent, PromptSelectorComponent, PinnedCarouselComponent],
   templateUrl: './wall.html',
   styleUrl: './wall.scss',
 })
@@ -39,6 +42,16 @@ export class WallComponent implements OnInit {
   readonly prompt = this.wallService.prompt;
   readonly hasMore = this.wallService.hasMore;
   readonly loaded = this.wallService.loaded;
+
+  /** `posts` is already pinned-first (see WallService) — these two are plain filters over it,
+   * not a second sort. Admin keeps everything in one grid (a moderator needs to see and act on
+   * every pinned post, not watch it rotate); the public wall splits pinned into its own
+   * carousel strip and shows only `unpinnedPosts` in the grid below it. */
+  readonly pinnedPosts = computed(() => this.posts().filter((post) => post.pinned));
+  readonly unpinnedPosts = computed(() => this.posts().filter((post) => !post.pinned));
+  /** What the grid itself renders: everything for admin, only the unpinned rest for the public
+   * wall (its pinned posts are in the carousel above instead). */
+  readonly gridPosts = computed(() => (this.admin() ? this.posts() : this.unpinnedPosts()));
 
   /** The id from `?highlight=<id>` (see PostComponent), while its coral ring is showing. */
   readonly highlightedPostId = signal<number | null>(null);

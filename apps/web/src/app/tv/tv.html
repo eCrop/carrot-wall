@@ -1,0 +1,47 @@
+<header class="tv-prompt">
+  @if (prompt(); as p) {
+    <p class="tv-prompt__text">{{ p.text }}</p>
+  }
+</header>
+
+<app-pinned-carousel
+  class="tv-pinned"
+  [posts]="pinnedPosts()"
+  [pageSize]="1"
+  [intervalMs]="pageTurnIntervalMs"
+  [interactive]="false"
+  [tv]="true"
+/>
+
+@if (loaded() && posts().length === 0) {
+  <div class="tv-empty">
+    <p>Ainda não há mensagens no mural.</p>
+    <p>Aponta a câmara ao código QR para escrever a primeira.</p>
+  </div>
+} @else {
+  <app-pinned-carousel
+    class="tv-unpinned"
+    [posts]="unpinnedPosts()"
+    [pageSize]="pageSize"
+    [intervalMs]="pageTurnIntervalMs"
+    [interactive]="false"
+    [tv]="true"
+  />
+}
+
+<div class="tv-qr" aria-hidden="true">
+  <svg
+    class="tv-qr__code"
+    [attr.viewBox]="'0 0 ' + qrCells.length + ' ' + qrCells.length"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <rect width="100%" height="100%" fill="var(--tv-qr-bg)" />
+    @for (row of qrCells; track $index; let r = $index) {
+      @for (dark of row; track $index; let c = $index) {
+        @if (dark) {
+          <rect [attr.x]="c" [attr.y]="r" width="1" height="1" fill="var(--tv-qr-fg)" />
+        }
+      }
+    }
+  </svg>
+</div>

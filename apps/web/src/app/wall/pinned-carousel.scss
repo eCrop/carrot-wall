@@ -1,0 +1,30 @@
+.pinned-carousel {
+  margin-bottom: 1.5rem;
+}
+
+.pinned-carousel__strip {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.pinned-carousel__dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.pinned-carousel__dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--wall-hairline);
+  cursor: pointer;
+}
+
+.pinned-carousel__dot--active {
+  background: var(--wall-accent);
+}
