@@ -1,10 +1,11 @@
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { TestBed } from '@angular/core/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 
 import { Post } from './wall.models';
 import { PostCardComponent } from './post-card';
+import { markUpvoted } from './upvoted-posts';
 
 function post(overrides: Partial<Post> = {}): Post {
   return {
@@ -28,6 +29,24 @@ async function render(input: Post, admin = false) {
   fixture.componentRef.setInput('admin', admin);
   await fixture.whenStable();
   return fixture.nativeElement as HTMLElement;
+}
+
+function renderFixture(input: Post): {
+  fixture: ComponentFixture<PostCardComponent>;
+  el: HTMLElement;
+} {
+  const fixture = TestBed.createComponent(PostCardComponent);
+  fixture.componentRef.setInput('post', input);
+  fixture.detectChanges();
+  return { fixture, el: fixture.nativeElement as HTMLElement };
+}
+
+/** Mirrors moderation-controls.spec.ts's `settle`: whenStable() alone doesn't wait for a
+ * `.then()`/`.catch()` layered on top of an HTTP call, so this adds the extra macrotask tick. */
+async function settle(fixture: ComponentFixture<unknown>): Promise<void> {
+  await fixture.whenStable();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  fixture.detectChanges();
 }
 
 describe('PostCardComponent', () => {
@@ -114,6 +133,76 @@ describe('PostCardComponent', () => {
     // response entirely), but the marker still must not render if it somehow did.
     const publicHidden = await render(post({ hidden: true }), false);
     expect(publicHidden.textContent).not.toContain('Oculto');
+  });
+
+  describe('upvoting', () => {
+    let httpMock: HttpTestingController;
+
+    beforeEach(() => {
+      httpMock = TestBed.inject(HttpTestingController);
+    });
+
+    afterEach(() => {
+      httpMock.verify();
+    });
+
+    it('clicking the button bumps the shown count immediately and disables further clicks', async () => {
+      const { fixture, el } = renderFixture(post({ id: 42, upvotes: 3 }));
+      const button = el.querySelector<HTMLButtonElement>('.post-card__upvotes')!;
+
+      button.click();
+      fixture.detectChanges();
+
+      // The count and the disabled state flip before the request resolves — the button doesn't
+      // wait for the network (spec: "responds immediately rather than waiting for the next poll").
+      expect(button.textContent).toContain('4');
+      expect(button.disabled).toBe(true);
+
+      const req = httpMock.expectOne('/api/posts/42/upvote');
+      expect(req.request.method).toBe('POST');
+      req.flush({ id: 42, upvotes: 4 });
+      await settle(fixture);
+    });
+
+    it('a second click on an already-voted post fires no second request', async () => {
+      const { fixture, el } = renderFixture(post({ id: 43, upvotes: 3 }));
+      const button = el.querySelector<HTMLButtonElement>('.post-card__upvotes')!;
+
+      button.click();
+      fixture.detectChanges();
+      httpMock.expectOne('/api/posts/43/upvote').flush({ id: 43, upvotes: 4 });
+      await settle(fixture);
+
+      button.click();
+      fixture.detectChanges();
+      httpMock.expectNone('/api/posts/43/upvote');
+    });
+
+    it('rolls back and re-enables the button if the request fails', async () => {
+      const { fixture, el } = renderFixture(post({ id: 44, upvotes: 3 }));
+      const button = el.querySelector<HTMLButtonElement>('.post-card__upvotes')!;
+
+      button.click();
+      fixture.detectChanges();
+      expect(button.disabled).toBe(true);
+
+      httpMock.expectOne('/api/posts/44/upvote').error(new ProgressEvent('error'));
+      await settle(fixture);
+
+      expect(button.disabled).toBe(false);
+      expect(button.textContent).toContain('3');
+    });
+
+    it('a post already upvoted by this browser renders disabled on first render (survives reload)', () => {
+      // markUpvoted persists to the same store a fresh page load reads from — this is what
+      // "survives reload" means for a component that only ever reads that store on init.
+      markUpvoted(45);
+
+      const { el } = renderFixture(post({ id: 45, upvotes: 5 }));
+      const button = el.querySelector<HTMLButtonElement>('.post-card__upvotes')!;
+
+      expect(button.disabled).toBe(true);
+    });
   });
 
   describe('answer timestamp', () => {

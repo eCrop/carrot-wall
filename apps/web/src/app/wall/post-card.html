@@ -31,6 +31,16 @@
   <footer class="post-card__footer">
     <span class="post-card__author">{{ authorName() }}</span>
     <span class="post-card__time">{{ relativeTime() }}</span>
-    <span class="post-card__upvotes">▲ {{ post().upvotes }}</span>
+    <button
+      type="button"
+      class="post-card__upvotes"
+      [class.post-card__upvotes--voted]="voted()"
+      [disabled]="voted()"
+      [attr.aria-pressed]="voted()"
+      aria-label="Votar nesta publicação"
+      (click)="upvote()"
+    >
+      ▲ {{ displayedUpvotes() }}
+    </button>
   </footer>
 </article>

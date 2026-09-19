@@ -101,3 +101,23 @@
   font-size: 0.8125rem;
   color: var(--wall-muted);
 }
+
+.post-card__upvotes {
+  font: inherit;
+  color: inherit;
+  background: var(--wall-bg);
+  border: 1px solid var(--wall-hairline);
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem;
+  margin-left: auto;
+  cursor: pointer;
+}
+
+.post-card__upvotes:disabled {
+  cursor: default;
+}
+
+.post-card__upvotes--voted {
+  color: var(--wall-accent);
+  border-color: var(--wall-accent);
+}

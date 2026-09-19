@@ -1,7 +1,18 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 
 import { AnswerEditorComponent } from '../admin/answer-editor';
 import { ModerationControlsComponent } from '../admin/moderation-controls';
+import { hasUpvoted, markUpvoted, unmarkUpvoted } from './upvoted-posts';
 import { Post } from './wall.models';
 
 const TYPE_LABELS: Record<string, string> = {
@@ -24,7 +35,9 @@ const ANSWER_DATE = new Intl.DateTimeFormat('pt-PT', { day: 'numeric', month: 's
   templateUrl: './post-card.html',
   styleUrl: './post-card.scss',
 })
-export class PostCardComponent {
+export class PostCardComponent implements OnInit {
+  private readonly http = inject(HttpClient);
+
   readonly post = input.required<Post>();
   readonly highlighted = input(false);
   /** Only true on `/admin` (see WallComponent/AdminComponent) — reveals the "Responder"
@@ -38,6 +51,42 @@ export class PostCardComponent {
     const answerUpdatedAt = this.post().answerUpdatedAt;
     return answerUpdatedAt === null ? '' : formatAnswerTime(answerUpdatedAt);
   });
+
+  /** Seeded from `localStorage` in `ngOnInit` rather than a field initializer or the
+   * constructor — a required `input()` has no value yet at either of those points. Reading
+   * `post()` once here (instead of in an `effect`) is safe because `@for (... track post.id)`
+   * (wall.html, pinned-carousel.html) never reuses a card instance for a different post, so this
+   * id can't change under a live component. */
+  readonly voted = signal(false);
+  /** Set the instant the button is clicked so the count moves before the request resolves; the
+   * server's own count always wins once it catches up (spec: "responds immediately rather than
+   * waiting for the next poll"). `Math.max` rather than clearing this back to `null` on poll,
+   * since one browser can only ever vote once — there's no later state to clear it for. */
+  private readonly optimisticUpvotes = signal<number | null>(null);
+  readonly displayedUpvotes = computed(() => {
+    const optimistic = this.optimisticUpvotes();
+    return optimistic === null ? this.post().upvotes : Math.max(this.post().upvotes, optimistic);
+  });
+
+  ngOnInit(): void {
+    this.voted.set(hasUpvoted(this.post().id));
+  }
+
+  upvote(): void {
+    if (this.voted()) {
+      return;
+    }
+    const id = this.post().id;
+    this.voted.set(true);
+    this.optimisticUpvotes.set(this.post().upvotes + 1);
+    markUpvoted(id);
+
+    firstValueFrom(this.http.post(`/api/posts/${id}/upvote`, null)).catch(() => {
+      this.voted.set(false);
+      this.optimisticUpvotes.set(null);
+      unmarkUpvoted(id);
+    });
+  }
 }
 
 function formatRelativeTime(epochMillis: number): string {
