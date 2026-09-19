@@ -3,6 +3,7 @@
   [class.post-card--pinned]="post().pinned"
   [class.post-card--highlighted]="highlighted()"
   [class.post-card--hidden]="admin() && post().hidden"
+  [class.post-card--tv]="tv()"
 >
   <header class="post-card__header">
     <span class="post-card__type">{{ typeLabel() }}</span>
@@ -31,16 +32,20 @@
   <footer class="post-card__footer">
     <span class="post-card__author">{{ authorName() }}</span>
     <span class="post-card__time">{{ relativeTime() }}</span>
-    <button
-      type="button"
-      class="post-card__upvotes"
-      [class.post-card__upvotes--voted]="voted()"
-      [disabled]="voted()"
-      [attr.aria-pressed]="voted()"
-      aria-label="Votar nesta publicação"
-      (click)="upvote()"
-    >
-      ▲ {{ displayedUpvotes() }}
-    </button>
+    @if (tv()) {
+      <span class="post-card__upvotes">▲ {{ displayedUpvotes() }}</span>
+    } @else {
+      <button
+        type="button"
+        class="post-card__upvotes"
+        [class.post-card__upvotes--voted]="voted()"
+        [disabled]="voted()"
+        [attr.aria-pressed]="voted()"
+        aria-label="Votar nesta publicação"
+        (click)="upvote()"
+      >
+        ▲ {{ displayedUpvotes() }}
+      </button>
+    }
   </footer>
 </article>

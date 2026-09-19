@@ -205,6 +205,34 @@ describe('PostCardComponent', () => {
     });
   });
 
+  describe('tv mode', () => {
+    it('toggles the large-type class only when tv is true', async () => {
+      const fixture = TestBed.createComponent(PostCardComponent);
+      fixture.componentRef.setInput('post', post());
+      fixture.componentRef.setInput('tv', true);
+      await fixture.whenStable();
+      expect((fixture.nativeElement as HTMLElement).querySelector('.post-card--tv')).not.toBeNull();
+    });
+
+    it('renders the upvote count as plain text, not a button, on tv', async () => {
+      const fixture = TestBed.createComponent(PostCardComponent);
+      fixture.componentRef.setInput('post', post({ upvotes: 9 }));
+      fixture.componentRef.setInput('tv', true);
+      await fixture.whenStable();
+      const el = fixture.nativeElement as HTMLElement;
+
+      expect(el.querySelector('button.post-card__upvotes')).toBeNull();
+      const upvotes = el.querySelector('.post-card__upvotes')!;
+      expect(upvotes.tagName).toBe('SPAN');
+      expect(upvotes.textContent).toContain('9');
+    });
+
+    it('still renders a clickable button when tv is false (default)', async () => {
+      const el = await render(post());
+      expect(el.querySelector('button.post-card__upvotes')).not.toBeNull();
+    });
+  });
+
   describe('answer timestamp', () => {
     // Fixed "now" so the same-day/earlier-day boundary is deterministic rather than depending
     // on when the test suite happens to run. Mocks Date.now() only (not vi.useFakeTimers, which

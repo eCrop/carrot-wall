@@ -8,11 +8,11 @@
   >
     <div class="pinned-carousel__strip">
       @for (post of currentPosts(); track post.id) {
-        <app-post-card [post]="post" />
+        <app-post-card [post]="post" [tv]="tv()" />
       }
     </div>
 
-    @if (pages().length > 1) {
+    @if (interactive() && pages().length > 1) {
       <div class="pinned-carousel__dots" role="tablist" aria-label="Publicações fixadas">
         @for (page of pages(); track $index) {
           <button

@@ -24,9 +24,21 @@ function posts(count: number): Post[] {
   return Array.from({ length: count }, (_, i) => post({ id: i + 1, message: `Post ${i + 1}` }));
 }
 
-function render(input: Post[]) {
+function render(
+  input: Post[],
+  opts: { pageSize?: number; intervalMs?: number; interactive?: boolean } = {},
+) {
   const fixture = TestBed.createComponent(PinnedCarouselComponent);
   fixture.componentRef.setInput('posts', input);
+  if (opts.pageSize !== undefined) {
+    fixture.componentRef.setInput('pageSize', opts.pageSize);
+  }
+  if (opts.intervalMs !== undefined) {
+    fixture.componentRef.setInput('intervalMs', opts.intervalMs);
+  }
+  if (opts.interactive !== undefined) {
+    fixture.componentRef.setInput('interactive', opts.interactive);
+  }
   fixture.detectChanges();
   return fixture;
 }
@@ -156,6 +168,68 @@ describe('PinnedCarouselComponent', () => {
 
       expect(el.textContent).toContain('Post 1');
       expect(el.textContent).not.toContain('Post 4');
+    } finally {
+      vi.useRealTimers();
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('pageSize input controls how many posts show per page', () => {
+    const fixture = render(posts(5), { pageSize: 1 });
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelectorAll('app-post-card').length).toBe(1);
+    expect(el.textContent).toContain('Post 1');
+    expect(el.textContent).not.toContain('Post 2');
+  });
+
+  it('intervalMs input controls the auto-advance period (not the 6s default)', () => {
+    vi.useFakeTimers();
+    try {
+      const fixture = render(posts(5), { intervalMs: 8000 });
+      const el = fixture.nativeElement as HTMLElement;
+
+      vi.advanceTimersByTime(6000);
+      fixture.detectChanges();
+      expect(el.textContent).not.toContain('Post 4');
+
+      vi.advanceTimersByTime(2000);
+      fixture.detectChanges();
+      expect(el.textContent).toContain('Post 4');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('interactive=false renders no dots and does not pause on hover/focus', () => {
+    vi.useFakeTimers();
+    try {
+      const fixture = render(posts(5), { interactive: false });
+      const el = fixture.nativeElement as HTMLElement;
+      const strip = el.querySelector('.pinned-carousel') as HTMLElement;
+
+      expect(el.querySelectorAll('.pinned-carousel__dot').length).toBe(0);
+
+      strip.dispatchEvent(new Event('mouseenter'));
+      vi.advanceTimersByTime(6000);
+      fixture.detectChanges();
+      expect(el.textContent).toContain('Post 4');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('interactive=false keeps auto-advancing even with prefers-reduced-motion set', () => {
+    const matchMediaSpy = vi.fn().mockReturnValue({ matches: true });
+    vi.stubGlobal('matchMedia', matchMediaSpy);
+    vi.useFakeTimers();
+    try {
+      const fixture = render(posts(5), { interactive: false });
+      const el = fixture.nativeElement as HTMLElement;
+
+      vi.advanceTimersByTime(6000);
+      fixture.detectChanges();
+
+      expect(el.textContent).toContain('Post 4');
     } finally {
       vi.useRealTimers();
       vi.unstubAllGlobals();

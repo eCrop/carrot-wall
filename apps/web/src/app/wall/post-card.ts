@@ -43,6 +43,10 @@ export class PostCardComponent implements OnInit {
   /** Only true on `/admin` (see WallComponent/AdminComponent) — reveals the "Responder"
    * editor. `/`'s cards never pass this, so their rendering is unchanged. */
   readonly admin = input(false);
+  /** Only true on `/tv` — scales type up past 32px and renders the upvote count as plain text
+   * instead of a button, since the projector has no pointer and nothing on it may be
+   * interactive. */
+  readonly tv = input(false);
 
   readonly authorName = computed(() => this.post().name ?? 'Anónimo');
   readonly typeLabel = computed(() => TYPE_LABELS[this.post().type] ?? this.post().type);
