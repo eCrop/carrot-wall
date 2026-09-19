@@ -51,6 +51,11 @@ Only env var: `ADMIN_PIN`. Node 20+ required (Node 25 works, warns).
   (V1 posts → V2 answers/moderation → V3 prompts + seed), because Day 1's exercise is
   "explain the migrations"; a hook in `.claude/settings.json` blocks edits to existing ones.
   Keep the SQL portable across H2-PG mode and real Postgres: no `JSONB`, no arrays.
+- **Never mutate a `Post` via a bulk `update(...)` string** (e.g. Panache's
+  `Post.update("upvotes = upvotes + 1 where id = ?1")`). Bulk updates bypass the entity's
+  `@PreUpdate`, leaving `updated_at` stale and making the change invisible to every polling
+  client. Use the entity's mutation methods (`pin()`, `hide()`, `upvote()`, `answer(text)`) —
+  load the row, call the method, let the flush happen.
 - **Post messages render as text, never HTML.** Angular interpolation only, no `[innerHTML]`
   anywhere — acceptance criterion 12 is an XSS check.
 - Hidden posts are a soft delete: excluded from every public response, never deleted from the DB.
