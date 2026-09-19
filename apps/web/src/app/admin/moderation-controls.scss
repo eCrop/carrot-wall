@@ -1,0 +1,29 @@
+.moderation-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.moderation-controls__button {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--wall-hairline);
+  border-radius: var(--wall-radius);
+  background: none;
+  color: inherit;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.moderation-controls__error {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--wall-accent);
+  font-size: 0.8125rem;
+}

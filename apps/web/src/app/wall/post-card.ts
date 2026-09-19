@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 import { AnswerEditorComponent } from '../admin/answer-editor';
+import { ModerationControlsComponent } from '../admin/moderation-controls';
 import { Post } from './wall.models';
 
 const TYPE_LABELS: Record<string, string> = {
@@ -19,7 +20,7 @@ const ANSWER_DATE = new Intl.DateTimeFormat('pt-PT', { day: 'numeric', month: 's
 @Component({
   selector: 'app-post-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AnswerEditorComponent],
+  imports: [AnswerEditorComponent, ModerationControlsComponent],
   templateUrl: './post-card.html',
   styleUrl: './post-card.scss',
 })

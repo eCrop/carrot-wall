@@ -13,6 +13,7 @@ function post(overrides: Partial<Post> = {}): Post {
     message: 'Olá mundo',
     type: 'livre',
     pinned: false,
+    hidden: false,
     upvotes: 3,
     createdAt: Date.now() - 5 * 60_000,
     answerText: null,
@@ -90,6 +91,29 @@ describe('PostCardComponent', () => {
     const adminCard = await render(post(), true);
     expect(adminCard.querySelector('app-answer-editor')).not.toBeNull();
     expect(adminCard.textContent).toContain('Responder');
+  });
+
+  it('shows the admin moderation controls only when admin is true', async () => {
+    const publicCard = await render(post());
+    expect(publicCard.querySelector('app-moderation-controls')).toBeNull();
+
+    const adminCard = await render(post(), true);
+    expect(adminCard.querySelector('app-moderation-controls')).not.toBeNull();
+  });
+
+  it('shows the "Oculto" marker and dims the card only for a hidden post in admin mode', async () => {
+    const adminHidden = await render(post({ hidden: true }), true);
+    expect(adminHidden.textContent).toContain('Oculto');
+    expect(adminHidden.querySelector('.post-card--hidden')).not.toBeNull();
+
+    const adminVisible = await render(post({ hidden: false }), true);
+    expect(adminVisible.textContent).not.toContain('Oculto');
+    expect(adminVisible.querySelector('.post-card--hidden')).toBeNull();
+
+    // A hidden post never reaches a non-admin card in practice (it's excluded from the public
+    // response entirely), but the marker still must not render if it somehow did.
+    const publicHidden = await render(post({ hidden: true }), false);
+    expect(publicHidden.textContent).not.toContain('Oculto');
   });
 
   describe('answer timestamp', () => {
