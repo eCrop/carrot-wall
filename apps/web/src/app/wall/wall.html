@@ -1,0 +1,26 @@
+<header class="wall-prompt">
+  @if (prompt(); as p) {
+    <p class="wall-prompt__text">{{ p.text }}</p>
+  }
+</header>
+
+@if (loaded() && posts().length === 0) {
+  <div class="wall-empty">
+    <p>Ainda não há mensagens no mural.</p>
+    <p>Sê a primeira pessoa a escrever — aponta a câmara ao código QR para começar.</p>
+  </div>
+} @else if (posts().length > 0) {
+  <div class="wall-grid">
+    @for (post of posts(); track post.id) {
+      <app-post-card
+        [post]="post"
+        [highlighted]="post.id === highlightedPostId()"
+        [admin]="admin()"
+      />
+    }
+  </div>
+
+  @if (hasMore()) {
+    <button type="button" class="wall-load-more" (click)="loadMore()">Ver mais antigas</button>
+  }
+}

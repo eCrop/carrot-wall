@@ -1,0 +1,28 @@
+@if (!checking()) {
+  @if (loggedIn()) {
+    <app-wall [admin]="true" />
+  } @else {
+    <main class="admin-gate">
+      <h1>Acesso da instrutora</h1>
+      <p class="subtitle">Introduz o PIN para abrir o painel.</p>
+
+      <form (ngSubmit)="submit()">
+        <label for="pin">PIN</label>
+        <input
+          id="pin"
+          name="pin"
+          type="password"
+          inputmode="numeric"
+          [ngModel]="pin()"
+          (ngModelChange)="pin.set($event)"
+        />
+
+        @if (error()) {
+          <p class="error" role="alert">{{ error() }}</p>
+        }
+
+        <button type="submit" class="submit" [disabled]="submitting()">Entrar</button>
+      </form>
+    </main>
+  }
+}

@@ -1,0 +1,28 @@
+<div class="answer-editor">
+  @if (!expanded()) {
+    <button type="button" class="answer-editor__toggle" (click)="toggle()">
+      {{ post().answerText ? 'Editar resposta' : 'Responder' }}
+    </button>
+  } @else {
+    <form class="answer-editor__form" (ngSubmit)="save()">
+      <textarea
+        rows="3"
+        [maxlength]="maxAnswerLength"
+        [ngModel]="text()"
+        (ngModelChange)="text.set($event)"
+        name="answerText"
+        placeholder="Escreve a resposta…"
+      ></textarea>
+      <p class="answer-editor__counter">{{ remaining() }} caracteres</p>
+
+      @if (error()) {
+        <p class="answer-editor__error" role="alert">{{ error() }}</p>
+      }
+
+      <div class="answer-editor__actions">
+        <button type="button" class="answer-editor__cancel" (click)="cancel()">Cancelar</button>
+        <button type="submit" class="answer-editor__save" [disabled]="!canSave()">Guardar</button>
+      </div>
+    </form>
+  }
+</div>

@@ -51,12 +51,20 @@ Only env var: `ADMIN_PIN`. Node 20+ required (Node 25 works, warns).
   (V1 posts → V2 answers/moderation → V3 prompts + seed), because Day 1's exercise is
   "explain the migrations"; a hook in `.claude/settings.json` blocks edits to existing ones.
   Keep the SQL portable across H2-PG mode and real Postgres: no `JSONB`, no arrays.
+- **Never mutate a `Post` via a bulk `update(...)` string** (e.g. Panache's
+  `Post.update("upvotes = upvotes + 1 where id = ?1")`). Bulk updates bypass the entity's
+  `@PreUpdate`, leaving `updated_at` stale and making the change invisible to every polling
+  client. Use the entity's mutation methods (`pin()`, `hide()`, `upvote()`, `answer(text)`) —
+  load the row, call the method, let the flush happen.
 - **Post messages render as text, never HTML.** Angular interpolation only, no `[innerHTML]`
   anywhere — acceptance criterion 12 is an XSS check.
 - Hidden posts are a soft delete: excluded from every public response, never deleted from the DB.
 - Admin routes and admin API endpoints return 401 without the PIN session cookie.
 - `docs/intents/` holds `spec.md` cut into eight buildable slices, in dependency order — start
-  there, not at the spec, when picking up work. New feature specs go in `docs/specs/`. Tests: JUnit beside the resource, Angular unit tests
+  there, not at the spec, when picking up work. New feature specs go in `docs/specs/`, named
+  `<NN>-<feature-name>.md` matching the intent's number and slug (`docs/intents/02-submit-a-post.md`
+  → `docs/specs/02-submit-a-post.md`); a plan for that slice is the same name with `-plan`
+  appended (`02-submit-a-post-plan.md`). Tests: JUnit beside the resource, Angular unit tests
   beside the component, Playwright e2e in `apps/web/e2e/` (convention not created yet).
 - Design tokens (ivory `#FAF9F5`, ink `#141413`, coral `#D97757`, hairline borders, no drop
   shadows, serif headings + Inter) are in spec §4 — follow `DESIGN.md` if it appears at the root.

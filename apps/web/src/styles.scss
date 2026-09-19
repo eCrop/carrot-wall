@@ -5,35 +5,47 @@
 // custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
 
+// Design tokens (spec.md §4). Angular Material's M3 palettes are generated from a handful of
+// preset hues and can't reproduce this exact ivory/coral pair, so the wall's own look is built
+// from these custom properties rather than Material's system tokens — Material stays available
+// underneath for whichever later slice needs a form field or a button.
+:root {
+  --wall-bg: #faf9f5;
+  --wall-surface: #f0eee6;
+  --wall-ink: #141413;
+  --wall-muted: #6b6a63;
+  --wall-hairline: #e2dfd6;
+  --wall-accent: #d97757;
+  --wall-radius: 12px;
+  --wall-font-serif: 'Source Serif 4', Georgia, serif;
+  --wall-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
 html {
   height: 100%;
   @include mat.theme(
     (
       color: (
-        primary: mat.$cyan-palette,
+        primary: mat.$orange-palette,
         tertiary: mat.$orange-palette,
       ),
-      typography: Roboto,
+      typography: Inter,
       density: 0,
     )
   );
 }
 
 body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
+  // The app commits to one look (§4: warm, editorial, calm) rather than following the
+  // viewer's system theme.
   color-scheme: light;
 
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-medium);
+  background-color: var(--wall-bg);
+  color: var(--wall-ink);
+  font-family: var(--wall-font-sans);
+  line-height: 1.5;
 
   // Reset the user agent margin.
   margin: 0;
   height: 100%;
 }
-/* You can add global styles to this file, and also import other style files */

@@ -1,0 +1,90 @@
+.post-card {
+  background: var(--wall-surface);
+  border: 1px solid var(--wall-hairline);
+  border-radius: var(--wall-radius);
+  padding: 1rem 1.25rem;
+  break-inside: avoid;
+  margin-bottom: 1rem;
+  // Fires once, on element creation only: `@for (... track post.id)` in wall.html means an
+  // already-loaded card is reused, never recreated, so a poll delta never replays this.
+  animation: post-card-in 200ms ease;
+  // The coral highlight ring (WallComponent toggles --highlighted for ~2s after a fresh
+  // submit): a transition, not a keyframe animation, so it fades smoothly in on class-add
+  // and back out on class-remove without needing to know which direction is happening.
+  box-shadow: 0 0 0 0 transparent;
+  transition: box-shadow 200ms ease;
+}
+
+@keyframes post-card-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .post-card {
+    animation: none;
+    transition: none;
+  }
+}
+
+.post-card--pinned {
+  border-color: var(--wall-accent);
+}
+
+.post-card--highlighted {
+  box-shadow: 0 0 0 2px var(--wall-accent);
+}
+
+.post-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.post-card__type {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: none;
+  color: var(--wall-muted);
+  background: var(--wall-bg);
+  border: 1px solid var(--wall-hairline);
+  border-radius: 999px;
+  padding: 0.125rem 0.625rem;
+}
+
+.post-card__message {
+  margin: 0 0 0.75rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.post-card__answer {
+  background: var(--wall-bg);
+  border-left: 2px solid var(--wall-accent);
+  border-radius: 0 8px 8px 0;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.post-card__answer-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--wall-accent);
+}
+
+.post-card__answer-text {
+  margin: 0.25rem 0 0;
+}
+
+.post-card__footer {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  font-size: 0.8125rem;
+  color: var(--wall-muted);
+}

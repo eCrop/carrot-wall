@@ -99,7 +99,7 @@ cat > .claude/settings.json <<'EOF'
       {
         "matcher": "Edit|Write",
         "hooks": [
-          { "type": "command", "command": "f=$(python3 -c 'import json,sys;print(json.load(sys.stdin).get(\"tool_input\",{}).get(\"file_path\",\"\"))'); case \"$f\" in */db/migration/V*) echo 'Existing migrations are immutable. Create a new versioned file instead.' >&2; exit 2;; esac" }
+          { "type": "command", "command": "f=$(python3 -c 'import json,sys;print(json.load(sys.stdin).get(\"tool_input\",{}).get(\"file_path\",\"\"))'); case \"$f\" in */db/migration/V*) if [ -e \"$f\" ]; then echo 'Existing migrations are immutable. Create a new versioned file instead.' >&2; exit 2; fi;; esac" }
         ]
       }
     ]

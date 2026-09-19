@@ -1,0 +1,50 @@
+<main class="post">
+  <h1>Escreve à vontade</h1>
+  <p class="subtitle">Respondemos durante a semana.</p>
+
+  <form (ngSubmit)="submit()">
+    <label for="message">Mensagem</label>
+    <textarea
+      id="message"
+      name="message"
+      rows="4"
+      [maxlength]="maxMessageLength"
+      [ngModel]="message()"
+      (ngModelChange)="message.set($event)"
+      placeholder="O que queres dizer à sala?"
+    ></textarea>
+    <p class="counter">{{ remaining() }} caracteres</p>
+
+    <label for="name">Nome (opcional)</label>
+    <input
+      id="name"
+      name="name"
+      type="text"
+      [maxlength]="maxNameLength"
+      [ngModel]="name()"
+      (ngModelChange)="name.set($event)"
+      placeholder="Anónimo"
+    />
+
+    <fieldset class="types">
+      <legend>Tipo</legend>
+      @for (option of typeOptions; track option.value) {
+        <button
+          type="button"
+          class="chip"
+          [class.selected]="type() === option.value"
+          [attr.aria-pressed]="type() === option.value"
+          (click)="selectType(option.value)"
+        >
+          {{ option.emoji }} {{ option.label }}
+        </button>
+      }
+    </fieldset>
+
+    @if (error()) {
+      <p class="error" role="alert">{{ error() }}</p>
+    }
+
+    <button type="submit" class="submit" [disabled]="!canSubmit()">Enviar</button>
+  </form>
+</main>

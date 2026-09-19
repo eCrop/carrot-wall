@@ -1,0 +1,31 @@
+<article
+  class="post-card"
+  [class.post-card--pinned]="post().pinned"
+  [class.post-card--highlighted]="highlighted()"
+>
+  <header class="post-card__header">
+    <span class="post-card__type">{{ typeLabel() }}</span>
+    @if (post().pinned) {
+      <span class="post-card__pin" aria-hidden="true">📌</span>
+    }
+  </header>
+
+  <p class="post-card__message">{{ post().message }}</p>
+
+  @if (post().answerText) {
+    <div class="post-card__answer">
+      <span class="post-card__answer-label">✓ Resposta · {{ answerTime() }}</span>
+      <p class="post-card__answer-text">{{ post().answerText }}</p>
+    </div>
+  }
+
+  @if (admin()) {
+    <app-answer-editor [post]="post()" />
+  }
+
+  <footer class="post-card__footer">
+    <span class="post-card__author">{{ authorName() }}</span>
+    <span class="post-card__time">{{ relativeTime() }}</span>
+    <span class="post-card__upvotes">▲ {{ post().upvotes }}</span>
+  </footer>
+</article>
