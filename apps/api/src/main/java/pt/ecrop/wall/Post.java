@@ -89,6 +89,20 @@ public class Post extends PanacheEntityBase {
         answerUpdatedAt = LocalDateTime.now();
     }
 
+    /**
+     * Creates and persists a new post. {@code name} and {@code message} are expected to
+     * already be trimmed and validated by the caller (see {@link PostsResource}); a blank name
+     * is stored as {@code null} — "Anónimo" is a display fallback, never a stored value.
+     */
+    public static Post create(String name, String message, String type) {
+        Post post = new Post();
+        post.name = (name == null || name.isBlank()) ? null : name;
+        post.message = message;
+        post.type = type;
+        post.persist();
+        return post;
+    }
+
     private static final Sort NEWEST_FIRST =
             Sort.by("createdAt", Sort.Direction.Descending).and("id", Sort.Direction.Descending);
 
