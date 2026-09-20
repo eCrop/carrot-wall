@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guide 1 · Foundations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#cc785c; --primary-active:#a9583e;
+  --ink:#141413; --body:#3d3d3a; --body-strong:#252523;
+  --muted:#6c6a64; --muted-soft:#8e8b82;
+  --hairline:#e6dfd8; --hairline-soft:#ebe6df;
+  --canvas:#faf9f5; --surface-soft:#f5f0e8; --surface-card:#efe9de;
+  --dark:#181715; --dark-soft:#1f1e1b; --on-dark:#faf9f5; --on-dark-soft:#a09d96;
+  --amber:#e8a55a; --warning:#d4a017;
+  --serif:"Cormorant Garamond","Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--canvas);color:var(--body);font-family:var(--sans);font-size:16.5px;line-height:1.62;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1140px;margin:0 auto;padding:0 32px;display:grid;grid-template-columns:1fr 216px;gap:56px;align-items:start}
+
+/* ---------- masthead ---------- */
+header{border-bottom:1px solid var(--hairline);margin-bottom:44px;padding:52px 0 30px}
+header .kicker{font-size:12px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:var(--primary);margin-bottom:16px;display:flex;gap:11px;align-items:center}
+header .kicker::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--primary)}
+header h1{font-family:var(--serif);font-weight:500;font-size:54px;line-height:1.05;letter-spacing:-1.4px;color:var(--ink)}
+header .sub{font-size:17px;color:var(--muted);margin-top:14px}
+header .intro{font-size:19px;line-height:1.55;color:var(--body-strong);margin-top:24px;max-width:66ch}
+
+/* ---------- flow ---------- */
+main{min-width:0;padding-bottom:96px}
+section{margin-bottom:52px;scroll-margin-top:24px}
+h2{font-family:var(--serif);font-weight:500;font-size:34px;line-height:1.15;letter-spacing:-.7px;color:var(--ink);margin:0 0 18px;display:flex;gap:16px;align-items:baseline}
+h2 .num{font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:1.4px;color:var(--primary);text-transform:uppercase;flex:none;padding-top:6px}
+h3{font-family:var(--serif);font-weight:500;font-size:24px;letter-spacing:-.4px;color:var(--ink);margin:30px 0 12px}
+p{margin:0 0 15px;max-width:72ch}
+strong{font-weight:600;color:var(--ink)}
+em{font-style:italic}
+a{color:var(--primary);text-decoration:none;border-bottom:1px solid rgba(204,120,92,.35)}
+ul,ol{margin:0 0 16px;padding-left:22px;max-width:72ch}
+li{margin-bottom:8px}
+ul{list-style:none;padding-left:20px}
+ul li{position:relative}
+ul li::before{content:"";position:absolute;left:-16px;top:11px;width:5px;height:5px;border-radius:50%;background:var(--primary)}
+ol li::marker{color:var(--primary);font-weight:600}
+code{font-family:var(--mono);font-size:.88em;background:var(--surface-card);padding:2px 6px;border-radius:5px;color:var(--ink)}
+
+/* ---------- code blocks ---------- */
+.code{position:relative;margin:0 0 20px;border-radius:12px;background:var(--dark);overflow:hidden}
+.code .label{font-size:11px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--on-dark-soft);padding:13px 20px 0}
+.code pre{margin:0;padding:18px 20px;overflow-x:auto;font-family:var(--mono);font-size:13.5px;line-height:1.72;color:var(--on-dark);white-space:pre}
+.code code{background:none;padding:0;color:inherit;font-size:inherit}
+.code button{
+  position:absolute;top:11px;right:11px;border:0;border-radius:7px;cursor:pointer;
+  background:#2b2823;color:var(--on-dark-soft);font-family:var(--sans);font-size:11.5px;font-weight:500;
+  padding:6px 11px;opacity:0;transition:opacity .12s;
+}
+.code:hover button,.code button:focus{opacity:1}
+.code button.done{color:var(--amber)}
+.code.prompt{background:var(--dark-soft);border-left:3px solid var(--primary)}
+
+/* ---------- callouts ---------- */
+.note{background:var(--surface-soft);border-radius:12px;padding:20px 24px;margin:0 0 20px}
+.note.warn{background:#faf1dd;border-left:3px solid var(--warning)}
+.note.goal{background:var(--primary);color:#fff}
+.note.goal strong,.note.goal .t{color:#fff}
+.note .t{display:block;font-size:12px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--primary);margin-bottom:8px}
+.note.warn .t{color:#8a6a0c}
+.note p:last-child,.note ul:last-child,.note ol:last-child{margin-bottom:0}
+.tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;background:var(--surface-card);color:var(--ink);border-radius:9999px;padding:4px 12px;margin-bottom:14px}
+
+/* ---------- sidebar ---------- */
+nav{position:sticky;top:32px;font-size:13.5px;padding-top:56px}
+nav .t{font-size:11px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted-soft);margin-bottom:14px}
+nav a{display:block;color:var(--muted);border:0;padding:5px 0 5px 12px;border-left:2px solid var(--hairline);line-height:1.4}
+nav a:hover{color:var(--ink)}
+nav a.on{color:var(--ink);border-left-color:var(--primary);font-weight:500}
+footer{border-top:1px solid var(--hairline);padding:28px 0 64px;font-size:14px;color:var(--muted-soft);max-width:72ch}
+
+@media (max-width:900px){
+  .wrap{grid-template-columns:1fr;gap:0;padding:0 22px}
+  nav{display:none}
+  header h1{font-size:38px}
+}
+@media print{
+  body{font-size:11pt}
+  nav,.code button{display:none}
+  .wrap{display:block;max-width:none;padding:0}
+  section{page-break-inside:avoid}
+  .code{background:#fff;border:1px solid #ccc}
+  .code pre{color:#000}
+  .code .label{color:#666}
+  .note.goal{background:#fff;border:2px solid var(--primary);color:var(--ink)}
+  .note.goal .t,.note.goal strong{color:var(--ink)}
+  a{color:var(--ink);border:0}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<main>
+<header><div class="kicker">Guide 1 · Day 1 · Monday 21 September</div><h1>Foundations</h1><div class="sub">The Carrot Wall project · the 2-hour block, at your pace</div><p class="intro">By the end of this guide the Carrot Wall runs on your machine, you have interrogated it like a colleague who knows the codebase, and your fork carries a harness you can defend: a CLAUDE.md of your own checked against the one that built the wall, the shipped hooks read and bounced, two tested guards installed, your first rule file, and a settings file that decides what never needs asking. Steps 1–3 are the morning's core; everything after is the same movement repeated on the remaining surfaces — go exactly as far as the block allows.</p></header>
+<section id="before">
+<h2><span class="num">Start here</span>Before you start</h2>
+<p>You need three things installed. Check them in a terminal:</p>
+<div class="code"><pre><code>java -version     # 21 or newer
+node -v           # 20 or newer
+claude --version  # any recent version; run `claude update` if in doubt</code></pre></div>
+<p>You also need the <strong>teaching harness</strong> from this morning — one worked example of each kind of thing on the tour. It sits in the repo you are about to clone, under <code>setup-docs/teaching-harness/</code>, so it arrives with Step 1.</p>
+<p>If Java or Node are missing, grab them now and wave me over if the install fights you. One more thing from this morning: make sure you are signed into the company workspace, not a personal account. Real code only travels on the right accounts.</p>
+</section>
+
+<section id="clean">
+<h2><span class="num">Step 0</span>A clean view, without touching your setup</h2>
+<p>Optional, and worth it if you have used Claude Code for a while. Your existing commands, skills, plugins and memory will shape everything you see today, and the mechanism is easier to learn when nothing is doing invisible work on your behalf.</p>
+<p><strong>Do not delete or move your own setup to get there.</strong> That accumulated <code>~/.claude</code> is your harness — the thing this whole week argues you should have. Claude Code will happily run a second, separate profile beside it, and everything below leaves yours exactly where it is.</p>
+<p>Look at what you have first. Half the value of today is comparing it with what you build:</p>
+<div class="code"><pre><code>ls -la ~/.claude 2&gt;/dev/null
+ls -la ~/.claude.json 2&gt;/dev/null</code></pre></div>
+<p>Then point <em>this one terminal</em> at a fresh profile for the workshop:</p>
+<div class="code"><div class="label">this terminal only · your ~/.claude is untouched</div><pre><code>export CLAUDE_CONFIG_DIR=~/.claude-workshop
+claude</code></pre></div>
+<p>While that variable is set, Claude Code keeps its settings, sign-in, plugins, session history and memory under that folder instead of <code>~/.claude</code>. Any terminal without it is your normal setup, unchanged. And there is nothing to restore afterwards: close the terminal or <code>unset CLAUDE_CONFIG_DIR</code> and you are back on your own harness; the workshop profile sits in one folder you can keep for the week or throw away when it is over.</p>
+<div class="note warn"><span class="t">The fresh profile starts signed out</span><p>Run <code>/login</code> once inside it and pick the <strong>company workspace</strong> — not a personal account.</p></div>
+<p>One thing the fresh profile deliberately does <em>not</em> blank out: the project level. The Wall you are about to clone <strong>ships with the <code>CLAUDE.md</code> and the <code>.claude/</code> folder that were used to build it</strong> — reading and extending those files is half of today. <code>/status</code> shows exactly which sources are in play at any moment. And in your own repos later, the same respect applies: leave any committed <code>.claude/</code> where it is. That is your team's harness, not clutter.</p>
+<p>Then confirm the install is healthy before you start:</p>
+<div class="code"><pre><code>claude update        # it ships almost daily
+claude --version
+claude               # then, inside the session:
+/doctor              # checks install, config, MCP servers, hooks</code></pre></div>
+</section>
+
+<section id="step1">
+<h2><span class="num">Step 1</span>Fork it, clone it, run it</h2>
+<p>Open the repo at <a href="https://github.com/eCrop/carrot-wall">github.com/eCrop/carrot-wall</a> and click <strong>Fork</strong>, top right. That gives you your own full copy under your own GitHub account. You will work there all week, and nothing you do can affect anyone else's copy.</p>
+<p>Then clone <em>your</em> fork (the URL with your username in it):</p>
+<div class="code"><pre><code>git clone https://github.com/&lt;your-username&gt;/carrot-wall.git
+cd carrot-wall</code></pre></div>
+<p>Two apps, two terminals:</p>
+<div class="code"><div class="label">terminal 1 · the API</div><pre><code>cd apps/api
+./mvnw quarkus:dev</code></pre></div>
+<div class="code"><div class="label">terminal 2 · the web app</div><pre><code>cd apps/web
+npm install
+npm start</code></pre></div>
+<p>Open <code>http://localhost:4200</code>. You should see the wall with a few seeded posts. If you see it, you are done with setup. If you do not, the two usual suspects are a busy port and a Node version below 20. Fix or flag.</p>
+<p>Now create a branch to work on. Everything you do this week goes here, on your own fork:</p>
+<div class="code"><pre><code>git checkout -b day1-setup
+git push -u origin day1-setup</code></pre></div>
+<p>At the end of each day, open a <strong>pull request</strong> from your branch back to the original repo. GitHub offers it automatically after you push: the <em>Compare &amp; pull request</em> button, with the base repository set to the original and the base branch <code>master</code>. Nothing gets merged; the pull request is simply where I read your work and leave comments between sessions. You will do this for the first time at the end of today.</p>
+</section>
+
+<section id="step2">
+<h2><span class="num">Step 2</span>Interrogate the codebase</h2>
+<p>This is the exercise. You just cloned a project you have never seen. Instead of reading files for an hour, ask.</p>
+<p>Start Claude Code at the repo root:</p>
+<div class="code"><pre><code>cd ../..   # back to the repo root
+claude</code></pre></div>
+<p>Then ask it the kind of questions you would ask the senior developer who wrote this. Ask at least five. Some to steal, but yours will be better because you are curious about different things:</p>
+<ul>
+<li>How does a post get from the submit form to the wall? Walk me through every file involved.</li>
+<li>Where is the rate limit enforced, and what exactly happens when someone hits it?</li>
+<li>What would I need to touch to add a new post type? List the files.</li>
+<li>Explain the Flyway migrations in this repo. What does each one set up?</li>
+<li>Why does the wall update without a page reload? Show me the mechanism.</li>
+<li>What is the ugliest part of this codebase, and why?</li>
+</ul>
+<p>Two habits to practice while you do this:</p>
+<h3>Check the citations</h3>
+<p>A good answer names real files and real lines. When it does, open one and confirm. When an answer feels confident but cites nothing, be suspicious. You are calibrating your trust, and that calibration is the actual skill here.</p>
+<h3>Watch your context</h3>
+<p>Run <code>/context</code> once mid-session and look at what is taking up space. We will talk a lot more about this on Wednesday, but it is good to see the numbers early.</p>
+<div class="note goal"><span class="t">Goal</span><p><strong>Three answers that cite real files and survive your checking.</strong></p></div>
+</section>
+
+<section id="step3">
+<h2><span class="num">Step 3</span>Write your own CLAUDE.md — against ours</h2>
+<p>CLAUDE.md is the file Claude Code reads at the start of every session in this project. The repo already has one: it was written by <code>/init</code> while the wall was being built — the exact moment you saw in this morning's recording — and then hand-tuned. That changes the exercise, for the better: you get to write yours and then check it against a real one.</p>
+<p><strong>First, read ours actively.</strong> Open <code>CLAUDE.md</code> and pick two claims to verify yourself — run the command, open the file it names. Two good candidates: "no eslint / <code>npm run lint</code> in this repo" and the rule about never mutating a <code>Post</code> through a bulk <code>update(...)</code>. A memory file earns trust one verified line at a time.</p>
+<p><strong>Then move it aside and write your own.</strong> In your fork this is safe and reversible:</p>
+<div class="code"><pre><code>mv CLAUDE.md CLAUDE.md.reference</code></pre></div>
+<p>Start a fresh session and let Claude draft from what it just learned answering your Step 2 questions:</p>
+<div class="code prompt"><div class="label">inside a fresh session</div><pre><code>/init — and use what you learned answering my questions just now. Prefer things
+you verified over things you assumed, and say which is which.</code></pre></div>
+<p>Edit the result by hand, ruthlessly. Generated context files tend to be generic, and generic is worse than nothing. The valuable lines are the surprising ones — one specific rule beats three paragraphs of description.</p>
+<p>Before you commit it, three tests, one pass each:</p>
+<ol>
+<li><strong>True all the time?</strong> Anything that only matters for one part of the codebase moves out — it becomes the rule file in Step 6.</li>
+<li><strong>Verified, not assumed?</strong> Every command in the file should be one you have actually run. <code>/init</code> held itself to that standard in the recording; hold yourself to the model's.</li>
+<li><strong>Short enough to always carry?</strong> It is read at the start of <em>every</em> session. A 200-line CLAUDE.md is not thorough, it is skimmed. Aim well under a page.</li>
+</ol>
+<p><strong>Now the payoff: diff yours against ours.</strong></p>
+<div class="code"><pre><code>diff CLAUDE.md CLAUDE.md.reference</code></pre></div>
+<p>Steal any line from the reference that you can verify. Notice what you wrote that we did not — that is not necessarily wrong; it may be the fresh pair of eyes. Keep <em>your</em> file as the live one, keep the reference beside it for the week, and from now on add to yours the cheap way: start any message with <code>#</code> and Claude saves the line as a memory without you opening the file.</p>
+<p>Commit both:</p>
+<div class="code"><pre><code>git add CLAUDE.md CLAUDE.md.reference
+git commit -m "My CLAUDE.md, with the original kept as reference"
+git push</code></pre></div>
+</section>
+
+<section id="shape">
+<h2><span class="num">Part two</span>Now the rest of the harness</h2>
+<p>Here is the part most tutorials get wrong, so we will say it plainly: <strong>the repo you cloned already carries the harness that built it.</strong> Part two is reading that harness surface by surface, and adding the three things it deliberately lacks.</p>
+<div class="code"><div class="label">what ships in the clone · what you add in the next five steps</div><pre><code>carrot-wall/
+├── CLAUDE.md                      ← yours from Step 3; ours lives on as CLAUDE.md.reference
+└── .claude/
+    ├── settings.json              ← ships: formatter + migration guard
+    │                                you add: permissions + two safety hooks (Step 5)
+    ├── commands/                  ← ships: spec · plan · migration · ship · cleanup-worktree
+    ├── agents/                    ← ships: code-reviewer (opus) · test-runner (haiku)
+    ├── skills/                    ← ships: project-conventions
+    ├── rules/                     ← you write: testing.md (Step 6)
+    ├── hooks/                     ← you install: the two tested guards (Step 5)
+    └── workflows/                 ← stays empty, on purpose</code></pre></div>
+<p>Build order matters: the guardrail hooks come first because they are the files that protect you while you experiment with everything else.</p>
+</section>
+
+<section id="step4">
+<h2><span class="num">Step 4</span>Read the harness you cloned</h2>
+<p>Ten minutes, no writing. See what is actually there:</p>
+<div class="code"><pre><code>find .claude -type f</code></pre></div>
+<p>Map each file to a surface from this morning's tour. <code>commands/</code> holds <code>/spec</code>, <code>/plan</code>, <code>/migration</code>, <code>/ship</code> and <code>/cleanup-worktree</code> — prompts with a name. <code>agents/</code> holds the opus reviewer and the haiku test-runner. <code>skills/project-conventions/</code> is the one skill, and its description is worth reading twice: it names the <em>situations</em> that should trigger it, not a topic.</p>
+<p>Then open <code>settings.json</code>. Two hooks live in it already:</p>
+<ul>
+<li><strong>The formatter</strong> (<code>PostToolUse</code>): every <code>.ts</code>, <code>.html</code>, <code>.scss</code> or <code>.json</code> file Claude edits gets prettier run on it. Boring, deterministic, gone from review comments forever.</li>
+<li><strong>The migration guard</strong> (<code>PreToolUse</code>): editing an <em>existing</em> Flyway migration is refused with exit code 2, and the message it prints to stderr goes back to Claude as the reason. That is the enforcement contract from this morning, live in the repo you are holding.</li>
+</ul>
+<p>Do not take the guard on faith — bounce it:</p>
+<div class="code prompt"><div class="label">prompt · watch it refuse</div><pre><code>Open the oldest file under apps/api/src/main/resources/db/migration/ and add a comment
+line at the top.</code></pre></div>
+<p>Watch the refusal come back with the hook's own words: <em>existing migrations are immutable</em>. Nothing in CLAUDE.md could guarantee that. This file just did.</p>
+</section>
+
+<section id="step5">
+<h2><span class="num">Step 5</span>Add what it lacks: safety hooks and permissions</h2>
+<p>The shipped harness formats and protects migrations, but nothing yet stops <code>rm -rf</code>, a force-push, or a read of <code>.env</code>. The teaching harness carries two stack-neutral guards for exactly this, each with a test file beside it. Bring them in:</p>
+<div class="code"><pre><code>mkdir -p .claude/{rules,hooks,workflows}
+cp setup-docs/teaching-harness/.claude/hooks/* .claude/hooks/
+bash .claude/hooks/block_destructive_bash.test.sh
+bash .claude/hooks/block_secrets_access.test.sh</code></pre></div>
+<p>Both test scripts green? They are the half of the lesson people skip: a hook that silently does nothing is worse than no hook, which is why every one of ours ships with its test. (The teaching harness also holds an exhibit rule file, a skill and a workflow — leave those where they are; they are reading material for Steps 6 and 7.)</p>
+<p>Now wire the guards into <code>.claude/settings.json</code>. It already has <code>hooks.PreToolUse</code> with the migration guard in it — <strong>add these two entries to that same array</strong>, do not replace it:</p>
+<div class="code"><div class="label">add inside the existing "PreToolUse": [ ... ]</div><pre><code>{
+  "matcher": "Bash",
+  "hooks": [ { "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/block_destructive_bash.sh",
+    "timeout": 10 } ]
+},
+{
+  "matcher": "Read|Edit|Write",
+  "hooks": [ { "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/block_secrets_access.sh",
+    "timeout": 10 } ]
+}</code></pre></div>
+<p>And add a <code>permissions</code> block at the top level of the same file — what never needs asking, and what is never allowed:</p>
+<div class="code"><div class="label">add at the top level of settings.json</div><pre><code>"permissions": {
+  "allow": [
+    "Bash(./mvnw test *)",
+    "Bash(npm test *)",
+    "Bash(git status)",
+    "Bash(git diff *)"
+  ],
+  "deny": [
+    "Read(./.env)",
+    "Read(./.env.*)",
+    "Read(./**/*.pem)"
+  ]
+}</code></pre></div>
+<p>Settings files are strict JSON: one trailing comma or <code>//</code> comment and the whole file is silently ignored — which would switch off the migration guard too. So verify immediately: run <code>/status</code> and check the <strong>Setting sources</strong> line still lists the project file. Then bounce a guard live: ask Claude to <code>rm -rf node_modules</code> and read the refusal.</p>
+<div class="note warn"><span class="t">Why deny beats advice</span><p>The three <code>deny</code> lines take thirty seconds and are the highest-value lines in this guide. A CLAUDE.md rule about secrets is a wish; a deny rule is a fact. This is the advise-vs-enforce line from this morning, now in a file you own.</p></div>
+</section>
+
+<section id="step6">
+<h2><span class="num">Step 6</span>Write your first rule file</h2>
+<p>One folder in the tree is still empty: <code>rules/</code>. A rule with a <code>paths:</code> glob loads only when Claude touches a matching file — knowledge attached to the code it applies to, costing nothing everywhere else. Write one for the Wall's tests:</p>
+<div class="code"><div class="label">.claude/rules/testing.md</div><pre><code>---
+paths:
+  - "apps/web/**/*.spec.ts"
+  - "apps/api/src/test/**/*.java"
+---
+
+# Testing conventions
+
+- Web tests run with `npm test` (vitest + jsdom). API tests run with `./mvnw test`.
+- A bug fix is not done until a test reproduces the bug first.
+- Never weaken or delete an existing assertion to make a suite pass —
+  say what you found instead.</code></pre></div>
+<p>Replace the bullets with what <em>you</em> learned during the challenge — the two-session test from the exercise section below applies here too. Rules without a <code>paths:</code> field load at launch alongside CLAUDE.md, so a scoped rule is strictly cheaper: same knowledge, paid for only when relevant.</p>
+</section>
+
+<section id="step7">
+<h2><span class="num">Step 7</span>Run /spec, then read its rival</h2>
+<p>The wall was built through the commands you found in Step 4, and the trace is in the repo: <code>docs/intents/</code> holds the spec cut into eight buildable slices, and <code>docs/specs/</code> holds the spec-and-plan pair for each one. That is what a harness's paper trail looks like after a real build.</p>
+<p>Now produce one of your own. Pick something small from <code>feature-ideas.md</code> and run the repo's spec command:</p>
+<div class="code prompt"><div class="label">prompt</div><pre><code>/spec let people react to a wall post with an emoji</code></pre></div>
+<p>It interviews you one question at a time, then writes <code>docs/specs/&lt;feature-name&gt;.md</code>. Do not skip the interview — the questions are the point. You will build from a spec like this tomorrow.</p>
+<p><strong>Then read the rival.</strong> The teaching harness carries a <code>spec</code> <em>skill</em> — same job, different mechanism — at <code>setup-docs/teaching-harness/.claude/skills/spec/SKILL.md</code>. Read it where it sits; do not install it, or it would collide with the <code>/spec</code> you just ran. The contrast is the lesson:</p>
+<ul>
+<li>A <strong>command</strong> is a prompt with a name — <em>you</em> decide when it runs.</li>
+<li>A <strong>skill</strong> is found by its description when the task matches — it decides when it is relevant, which is why its description names situations, not topics.</li>
+<li>The harness skill holds <strong>zero stack facts</strong>: every noun is looked up at runtime from a memory file. Generic procedure in the skill, project facts in memory — the split you will use when you build your own on Wednesday.</li>
+</ul>
+</section>
+
+<section id="step8">
+<h2><span class="num">Step 8</span>Put the agents to work, then upgrade one</h2>
+<p>Both agents ship already aimed at this repo. Use the mechanical one first:</p>
+<div class="code prompt"><div class="label">prompt</div><pre><code>Use the test-runner agent to run both suites and report only the first meaningful failure.</code></pre></div>
+<p>The test output lands in the agent's own context window, not yours; you get back a paragraph. Open <code>.claude/agents/test-runner.md</code> while it runs: four lines of frontmatter — <code>model: haiku</code> because the work is mechanical — and one paragraph of instructions. That is the whole file.</p>
+<p>Now the upgrade. Open the repo's <code>code-reviewer.md</code> next to the teaching harness's version (<code>setup-docs/teaching-harness/.claude/agents/code-reviewer.md</code>) and spot the differences: the harness one carries a <code>tools</code> allowlist, an <code>effort</code> level, confidence scoring and a fixed output contract. Steal the cheapest of those ideas into the repo's reviewer — add one line to its frontmatter:</p>
+<div class="code"><div class="label">.claude/agents/code-reviewer.md · add to the frontmatter</div><pre><code>tools: Read, Grep, Glob, Bash</code></pre></div>
+<p>That is an allowlist. A reviewer that only has <code>Read</code>, <code>Grep</code>, <code>Glob</code> and <code>Bash</code> physically cannot edit your code — a different kind of safety from asking nicely. Commit the edit; the agent is now partly yours, which is how every good harness file starts.</p>
+</section>
+
+<section id="workflows">
+<h2><span class="num">The last surface</span>Workflows can wait — here is the pointer</h2>
+<p>The empty <code>workflows/</code> folder is not an oversight. You do not hand-write these: you ask for one in words, watch it in <code>/workflows</code>, and if the run did what you wanted, press <code>s</code> — it saves into that folder and becomes a command. The exhibit <code>spec.js</code> in the teaching harness shows what a saved one looks like: a deterministic spine, one model per phase.</p>
+<p>If you want the honest demo, run <code>/deep-research</code> on something you actually care about and read the cited report it comes back with.</p>
+</section>
+
+<section id="alive">
+<h2><span class="num">Verify</span>Prove the harness is alive</h2>
+<p>A harness you have not tested is a pile of markdown. Six checks, three minutes:</p>
+<ol>
+<li><code>/status</code> — Setting sources lists the project settings file. If not, find the trailing comma; a broken file also switches off the migration guard.</li>
+<li><code>/context</code> — your CLAUDE.md is loaded, and the <code>project-conventions</code> skill's <em>description</em> appears in the skills list.</li>
+<li>Ask for a change to a <code>.spec.ts</code> file — your testing rule from Step 6 should load when the file is touched.</li>
+<li>Ask it to read <code>.env</code> — the deny rule refuses before any hook gets a turn.</li>
+<li>Ask it to edit an existing migration — the guard bounces it with its own reason.</li>
+<li><code>/memory</code> — just look. Claude has been keeping notes on you all day; you are allowed to read and prune them.</li>
+</ol>
+</section>
+
+<section id="surfaces">
+<h2><span class="num">Reference</span>The six surfaces</h2>
+<p>Everything you saw on the tour this morning is one of six things. You built or installed most of them in the steps above; this is the one page to come back to when you forget where something lives.</p>
+<ol>
+<li><strong>Rules</strong> — <code>CLAUDE.md</code> at the project root, and <code>.claude/rules/*.md</code> for anything bigger than a few lines. Loaded at the start of every session. A rule with a <code>paths:</code> glob in its frontmatter only loads when Claude touches a matching file, which is how a large project keeps its API rules out of a frontend session. Rules are <em>context</em>: Claude reads them and usually follows them. They do not enforce.</li>
+<li><strong>Skills</strong> — <code>.claude/skills/&lt;name&gt;/SKILL.md</code>. At startup only the <code>description</code> is in context; the body loads when the work matches, or when you type <code>/&lt;name&gt;</code>. Supporting files beside <code>SKILL.md</code> load only if Claude chooses to read them. Write the description as a sentence about <em>when to use it</em>, not what it is.</li>
+<li><strong>Agents</strong> — <code>.claude/agents/&lt;name&gt;.md</code>. A subagent runs on its own clean context window and hands back a summary, so a four-hundred-line test run costs you a paragraph. Frontmatter picks the <code>model</code> and can restrict <code>tools</code>, so a reviewer can be given <code>Read, Grep</code> and nothing else.</li>
+<li><strong>Workflows</strong> — <code>.claude/workflows/*.js</code>. A script that orchestrates many agents: <code>agent()</code>, <code>parallel()</code>, <code>pipeline()</code>, <code>phase()</code>. The script holds the loop and every intermediate result, so your context holds only the answer. You do not write these by hand — ask for one, watch it in <code>/workflows</code>, and press <code>s</code> to save the run as <code>/your-name</code>.</li>
+<li><strong>Hooks</strong> — wired in <code>settings.json</code>. Shell commands that run before or after a tool. A <code>PreToolUse</code> hook that exits with code <code>2</code> blocks the action, and whatever it prints to stderr goes back to Claude as the reason. This is the only surface that enforces.</li>
+<li><strong>Settings</strong> — <code>.claude/settings.json</code> and friends. Permissions, hooks, model, output style, everything below.</li>
+</ol>
+<div class="note"><span class="t">The one distinction to hold on to</span><p>Rules and skills <strong>advise</strong>. Hooks <strong>enforce</strong>. If a thing must never happen — reading <code>.env</code>, committing to <code>main</code>, dropping a table — writing it in CLAUDE.md is a wish. Write it as a hook or a deny rule.</p></div>
+</section>
+
+<section id="config">
+<h2><span class="num">Step 9</span>Set it up the way you like it</h2>
+<p>Ten minutes here will change how the rest of the week feels. Run <code>/config</code> to browse everything; the notes below are the settings worth touching on day one.</p>
+
+<h3>Know which file wins</h3>
+<p>Claude Code reads settings from several places and applies them in this order, highest first:</p>
+<ol>
+<li><strong>Managed settings</strong> — deployed by your organisation. Always wins.</li>
+<li><code>claude --settings '{...}'</code> — one session only.</li>
+<li><code>.claude/settings.local.json</code> — yours, in this project. Claude Code keeps it out of your commits.</li>
+<li><code>.claude/settings.json</code> — committed, so everyone who clones the repo gets it.</li>
+<li><code>~/.claude/settings.json</code> — you, in every project on this machine.</li>
+</ol>
+<p>When a setting is not doing what you expect, it is almost always a higher file. Run <code>/status</code> and read the <strong>Setting sources</strong> line. Settings files are strict JSON — one trailing comma or <code>//</code> comment and the whole file is ignored.</p>
+
+<h3>Spend your attention where it matters</h3>
+<p>Every prompt you dismiss on autopilot is a prompt you will dismiss on autopilot when it matters. Allow the boring things explicitly, and deny the dangerous ones outright:</p>
+<div class="code"><div class="label">~/.claude/settings.json</div><pre><code>{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(npm run lint)",
+      "Bash(npm run test *)",
+      "Bash(git status)",
+      "Bash(git diff *)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./**/*.pem)"
+    ]
+  }
+}</code></pre></div>
+<p>Those three <code>deny</code> lines take thirty seconds and are the highest-value thing in this guide if you work on anything regulated.</p>
+
+<h3>Change how Claude talks to you</h3>
+<p>An output style changes Claude's <em>voice and format</em>, not what it knows about your project. Five are built in: <strong>Default</strong>, <strong>Proactive</strong> (acts rather than asks), <strong>Concise</strong> (leads with the result, no narration), <strong>Explanatory</strong> (adds insights as it works) and <strong>Learning</strong> (leaves <code>TODO(human)</code> markers for you to fill in).</p>
+<div class="code"><pre><code>/output-style concise</code></pre></div>
+<p>Try <code>concise</code> today and <code>explanatory</code> tomorrow. Most people keep one of the two. You can write your own as a Markdown file in <code>~/.claude/output-styles/</code> — set <code>keep-coding-instructions: true</code> in the frontmatter if you still want Claude coding the way it normally does.</p>
+<div class="note"><span class="t">Not the same thing as CLAUDE.md</span><p>Project facts and conventions go in CLAUDE.md. Tone and format go in an output style. Putting "be concise" in CLAUDE.md spends context on every single session to say something a setting says for free.</p></div>
+
+<h3>See where you are without asking</h3>
+<p>A status line sits left of your prompt and can show your branch, model, and context use, so you stop typing <code>/context</code> to find out. Set it with <code>/statusline</code> — describe what you want and Claude writes the script — or point the <code>statusLine</code> setting at your own command.</p>
+
+<h3>Let it keep its own notes</h3>
+<p>Auto memory is on by default: as you correct Claude, it writes short notes for itself, stored per repository with a <code>MEMORY.md</code> index. Run <code>/memory</code> today and just <em>look</em> at what is in there. You can read it, prune it, correct it, or switch it off with the toggle in that same view. We open this properly on Day 3.</p>
+</section>
+
+<section id="harness">
+<h2><span class="num">The real exercise</span>Build the harness, not just the habit</h2>
+<p>The official tutorials will teach you to <em>use</em> the tool well, and they are worth an hour. What they cannot teach you is what <em>your</em> harness should contain, because that comes out of your codebase and your team's scars. These five challenges are designed to produce decisions, not output.</p>
+
+<h3>1 · Make it get something wrong, on purpose</h3>
+<p>Ask for a change that violates a convention in the reference CLAUDE.md — render a post message with <code>[innerHTML]</code>, or bump upvotes with a one-line bulk <code>Post.update(...)</code>. Does it notice? (Pick an advice-level rule: the migration one will not do, because the hook enforces it before the model gets a say.)</p>
+<p>If it does not, you have just found your first CLAUDE.md line. The skill here is not catching the model out; it is noticing <strong>what the repo never told it</strong>.</p>
+
+<h3>2 · The two-session test</h3>
+<div class="code"><pre><code>mv CLAUDE.md CLAUDE.md.off    # ask your question, then put it back
+mv CLAUDE.md.off CLAUDE.md</code></pre></div>
+<p>Ask the same question with and without the file, and compare the two answers. If they are identical, your CLAUDE.md is not doing anything yet. That is information, not failure — most first drafts are generic, and generic is worse than nothing.</p>
+
+<h3>3 · Count your repeats</h3>
+<p>Work for twenty minutes and write down every correction you type more than once. Each one is a harness candidate. Then make the decision that actually matters — <strong>where does it go?</strong></p>
+<table style="width:100%;border-collapse:collapse;font-size:15px;margin:0 0 16px">
+<tr><th style="text-align:left;font-size:11px;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted-soft);padding:0 14px 8px 0;border-bottom:1px solid var(--hairline)">Home</th><th style="text-align:left;font-size:11px;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted-soft);padding:0 0 8px;border-bottom:1px solid var(--hairline)">Choose it when</th></tr>
+<tr><td style="padding:9px 14px 9px 0;border-bottom:1px solid var(--hairline-soft)"><code>CLAUDE.md</code></td><td style="padding:9px 0;border-bottom:1px solid var(--hairline-soft)">It is true all the time and short enough to always carry</td></tr>
+<tr><td style="padding:9px 14px 9px 0;border-bottom:1px solid var(--hairline-soft)">a command</td><td style="padding:9px 0;border-bottom:1px solid var(--hairline-soft)">It is a prompt you retype, and <em>you</em> decide when</td></tr>
+<tr><td style="padding:9px 14px 9px 0;border-bottom:1px solid var(--hairline-soft)">a skill</td><td style="padding:9px 0;border-bottom:1px solid var(--hairline-soft)">It should find you when the task matches, without you asking</td></tr>
+<tr><td style="padding:9px 14px 9px 0">a hook</td><td style="padding:9px 0">It must hold whether or not anyone agrees</td></tr>
+</table>
+<p>Getting the row right is the whole design skill. Most harness mistakes are a thing in the wrong row — usually everything piled into CLAUDE.md until it is two hundred lines and gets skimmed.</p>
+
+<h3>4 · Write the rule that would have stopped it</h3>
+<p>Pick the worst thing it did today. Write the one sentence that would have prevented it. Then ask the question that separates a sentence from a hook: <strong>would advice have been enough?</strong></p>
+<p>Most things are advice. The few that are not — deleting things, pushing to main, reading secrets, editing a shipped migration — are your first hooks. You installed two today; on Wednesday you write your own.</p>
+
+<h3>5 · Delete a line</h3>
+<p>Take one line out of your CLAUDE.md, start a fresh session, and see whether behaviour changes. A file you have never tested is a file you are guessing about. This is the same instinct as writing a test for a hook, and it is the habit that separates a harness from a pile of markdown.</p>
+
+<div class="note"><span class="t">The official tutorials · read them for the mechanics</span>
+<p><a href="https://code.claude.com/docs/en/quickstart">Quickstart</a> — the fastest path through the basics.<br>
+<a href="https://code.claude.com/docs/en/common-workflows">Common workflows</a> — the patterns, including plan mode and extended thinking.<br>
+<a href="https://code.claude.com/docs/en/best-practices">Best practices</a> — where Tuesday's sizing rule comes from, verbatim.<br>
+<a href="https://academy.claude.com/products/code">Claude Academy · Claude Code course</a> — the longer guided version.</p>
+<p style="margin-top:12px">They will tell you what the tool does. They will not tell you what belongs in your harness — that is what the five challenges above are for, and what the rest of this week builds.</p></div>
+</section>
+
+<section id="stuck">
+<h2><span class="num">Help</span>If you get stuck</h2>
+<div class="note"><p>Post it on the wall at <a href="https://carrot.ecrop.dev">carrot.ecrop.dev</a>, or orange sticky and I will come around. The three most common snags today: a port already in use, Node below 20, and being signed into the wrong account. All three take a minute to fix.</p></div>
+</section>
+
+<section id="stretch">
+<h2><span class="num">Extra</span>Stretch, if you finished early</h2>
+<ul>
+<li>Ask Claude Code to draw you the module map of <code>apps/web</code> and check it against the folder structure.</li>
+<li>Ask for the history of the gnarliest file: what it does, why it might have ended up this way.</li>
+<li>Find something small that bothers you in the code. Do not fix it yet. Write it down. You will want it tomorrow, when we pick features from <code>feature-ideas.md</code> and size them.</li>
+<li><strong>Repeat the skeleton on one of your own repos, in fifteen minutes:</strong> <code>/init</code> and cut the generated file to the verified half, then a <code>settings.json</code> with the three deny lines and both hooks (they are stack-neutral — copy them straight in and run their tests), then one <code>allow</code> rule for your test command. Stop there; the skill, the rule file and the agents are better built after tomorrow teaches you the loop they serve. Step 0's workshop profile applies there too.</li>
+<li>The wall's own <code>spec.md</code> and <code>plan.md</code> sit in the repo root. They are tomorrow's opening exhibit; reading them now is optional and quietly useful.</li>
+</ul>
+</section>
+
+<footer>Work at your own speed and do not expect to finish everything — Steps 1 to 3 are the core, and every step after them stands alone. If you get stuck, put it on the wall or flag me down. Getting stuck is normal and usually more instructive than the happy path.</footer>
+</main>
+<nav><div class="t">On this page</div><div id="toc"></div></nav>
+</div>
+<script>
+// copy buttons on every code block
+document.querySelectorAll('.code').forEach(function(box){
+  var pre = box.querySelector('pre');
+  var b = document.createElement('button');
+  b.textContent = 'Copy';
+  b.onclick = function(){
+    navigator.clipboard.writeText(pre.innerText).then(function(){
+      b.textContent = 'Copied'; b.classList.add('done');
+      setTimeout(function(){ b.textContent = 'Copy'; b.classList.remove('done'); }, 1400);
+    }).catch(function(){ b.textContent = 'Select it'; });
+  };
+  box.appendChild(b);
+});
+// table of contents
+var toc = document.getElementById('toc');
+var secs = [].slice.call(document.querySelectorAll('section[id]'));
+secs.forEach(function(s){
+  var h = s.querySelector('h2');
+  if (!h) return;
+  var c = h.cloneNode(true);
+  var num = c.querySelector('.num');
+  var label = num ? num.textContent.trim() : '';
+  if (num) num.remove();
+  var a = document.createElement('a');
+  a.href = '#' + s.id;
+  a.textContent = c.textContent.trim();
+  if (label) a.title = label;
+  toc.appendChild(a);
+});
+var links = [].slice.call(toc.querySelectorAll('a'));
+var io = new IntersectionObserver(function(es){
+  es.forEach(function(e){
+    if (!e.isIntersecting) return;
+    var i = secs.indexOf(e.target);
+    links.forEach(function(l,j){ l.classList.toggle('on', j === i); });
+  });
+}, { rootMargin: '-10% 0px -80% 0px' });
+secs.forEach(function(s){ io.observe(s); });
+</script>
+</body>
+</html>

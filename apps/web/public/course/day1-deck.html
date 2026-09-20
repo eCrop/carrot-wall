@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 1 · Claude Code &amp; Agentic Engineering</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#cc785c; --primary-active:#a9583e;
+  --ink:#141413; --body:#3d3d3a; --body-strong:#252523;
+  --muted:#6c6a64; --muted-soft:#8e8b82;
+  --hairline:#e6dfd8; --hairline-soft:#ebe6df;
+  --canvas:#faf9f5; --surface-soft:#f5f0e8; --surface-card:#efe9de; --cream-strong:#e8e0d2;
+  --dark:#181715; --dark-elev:#252320; --dark-soft:#1f1e1b;
+  --on-dark:#faf9f5; --on-dark-soft:#a09d96;
+  --teal:#5db8a6; --amber:#e8a55a; --success:#5db872; --warning:#d4a017; --error:#c64545;
+  --serif:"Cormorant Garamond","Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+  --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--canvas); color:var(--ink);
+  font-family:var(--sans); font-size:16px; line-height:1.55;
+  overflow:hidden;
+}
+
+/* ---------- stage ---------- */
+#stage-wrap{position:fixed;inset:0;display:grid;place-items:center;background:var(--canvas)}
+body.notes-on #stage-wrap{inset:0 380px 0 0}
+#stage{
+  width:1280px;height:720px;position:relative;
+  transform-origin:center center;
+  background:var(--canvas);
+  box-shadow:0 1px 3px rgba(20,20,19,.08);
+  overflow:hidden;
+}
+.slide{
+  position:absolute;inset:0;display:none;
+  padding:56px 64px;
+  flex-direction:column;
+}
+.slide.active{display:flex}
+.slide.dark{background:var(--dark);color:var(--on-dark)}
+.slide.dark .eyebrow{color:var(--on-dark-soft)}
+.slide.dark h1,.slide.dark h2{color:var(--on-dark)}
+.slide.dark p,.slide.dark li{color:var(--on-dark-soft)}
+.slide.coral{background:var(--primary);color:#fff}
+.slide.coral h1,.slide.coral h2,.slide.coral p{color:#fff}
+
+/* ---------- type ---------- */
+.eyebrow{
+  font-size:12px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:20px;display:flex;gap:12px;align-items:center;
+}
+.eyebrow .dot{width:5px;height:5px;border-radius:50%;background:var(--primary);flex:none}
+h1{font-family:var(--serif);font-weight:500;font-size:58px;line-height:1.05;letter-spacing:-1.4px;color:var(--ink)}
+h2{font-family:var(--serif);font-weight:500;font-size:42px;line-height:1.1;letter-spacing:-1px;color:var(--ink)}
+h3{font-family:var(--serif);font-weight:500;font-size:29px;line-height:1.15;letter-spacing:-.5px;color:var(--ink)}
+.lead{font-size:20px;line-height:1.45;color:var(--body-strong);font-weight:400}
+p{font-size:17px;color:var(--body)}
+.sm{font-size:15px}
+.xs{font-size:13.5px;color:var(--muted)}
+strong{font-weight:600;color:var(--ink)}
+.slide.dark strong{color:var(--on-dark)}
+em.q{font-style:italic;font-family:var(--serif);font-size:1.1em;letter-spacing:-.2px}
+.coralword{color:var(--primary)}
+.slide.dark .coralword{color:var(--amber)}
+
+/* ---------- layout helpers ---------- */
+.body{flex:1;display:flex;flex-direction:column;gap:18px;min-height:0;justify-content:center}
+.cols{display:grid;gap:26px;flex:1;min-height:0}
+.c2{grid-template-columns:1fr 1fr}
+.c2w{grid-template-columns:1.15fr .85fr}
+.c2n{grid-template-columns:.82fr 1.18fr}
+.c3{grid-template-columns:repeat(3,1fr)}
+.c4{grid-template-columns:repeat(4,1fr)}
+.stack{display:flex;flex-direction:column;gap:14px;justify-content:center}
+.center{justify-content:center;align-items:flex-start}
+.mid{justify-content:center}
+
+/* ---------- cards ---------- */
+.card{background:var(--surface-card);border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:8px}
+.card.plain{background:transparent;border:1px solid var(--hairline)}
+.card.darkc{background:var(--dark);color:var(--on-dark)}
+.card.darkc h3,.card.darkc .k{color:var(--on-dark)}
+.card.darkc p,.card.darkc .v{color:var(--on-dark-soft)}
+.card.darkc .v strong{color:var(--on-dark)}
+.card .k{font-size:16px;font-weight:600;color:var(--ink)}
+.card .v{font-size:15px;color:var(--body);line-height:1.5}
+.stat{font-family:var(--serif);font-size:56px;line-height:1;letter-spacing:-2px;color:var(--primary);font-weight:500}
+.slide.dark .stat{color:var(--amber)}
+
+.hrm{display:grid;grid-template-columns:104px 1fr;gap:10px 18px;align-items:baseline}
+.hrm .lbl{font-size:11px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted-soft);padding-top:4px}
+.hrm .lbl.move{color:var(--primary)}
+.hrm .txt{font-size:17px;color:var(--body);line-height:1.45}
+.hrm .txt strong{color:var(--ink)}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-family:var(--mono);font-size:13.5px;background:var(--surface-card);color:var(--ink);border-radius:9999px;padding:5px 13px}
+.slide.dark .chip{background:var(--dark-elev);color:var(--on-dark)}
+.pill{font-size:11px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;border-radius:9999px;padding:4px 11px;background:var(--surface-card);color:var(--ink)}
+.pill.coral{background:var(--primary);color:#fff}
+.pill.warn{background:#f6e6c8;color:#7a5a08}
+.pill.term{background:var(--dark);color:var(--on-dark)}
+
+blockquote{
+  border-left:2px solid var(--primary);padding-left:20px;
+  font-family:var(--serif);font-size:27px;line-height:1.28;letter-spacing:-.4px;color:var(--ink);font-weight:500;
+}
+.slide.dark blockquote{color:var(--on-dark)}
+blockquote cite{display:block;font-family:var(--sans);font-size:13px;font-style:normal;color:var(--muted);margin-top:12px;letter-spacing:0;font-weight:500}
+.slide.dark blockquote cite{color:var(--on-dark-soft)}
+
+/* ---------- assets ---------- */
+figure{margin:0;display:flex;flex-direction:column;gap:7px;min-height:0;flex:1}
+figure img{
+  width:100%;height:100%;object-fit:cover;object-position:top left;
+  border-radius:12px;border:1px solid var(--hairline);background:var(--dark);
+  display:block;min-height:0;
+}
+figure img.contain{object-fit:contain;object-position:center;background:var(--dark)}
+figure img.bottom{object-position:bottom left}
+figcaption{font-size:12px;color:var(--muted-soft);font-family:var(--mono);flex:none}
+.slide.dark figcaption{color:var(--on-dark-soft)}
+.shotgrid{display:grid;gap:12px;flex:1;min-height:0}
+figure.vid{flex:none}
+figure.vid video{height:380px}
+video{width:100%;border-radius:12px;background:#000;object-fit:contain;display:block}
+
+.missing{
+  position:absolute;top:18px;right:22px;z-index:5;
+  font-size:10.5px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;
+  background:#f6e6c8;color:#7a5a08;border-radius:9999px;padding:5px 12px;
+  display:flex;gap:7px;align-items:center;cursor:default;
+}
+.slide.dark .missing{background:#4a3c18;color:#f0dcae}
+.gapnote{
+  background:#faf1dd;border-left:2px solid var(--warning);border-radius:0 8px 8px 0;
+  padding:11px 15px;font-size:13.5px;color:#6b5410;line-height:1.45;flex:none;
+}
+.slide.dark .gapnote{background:#2a2317;color:#d8c38c;border-color:var(--amber)}
+.gapnote b{color:#4a3a06}
+.slide.dark .gapnote b{color:#f0dcae}
+
+/* ---------- chrome ---------- */
+#chrome{position:fixed;left:0;right:0;bottom:0;height:0;z-index:40}
+body.notes-on #chrome{right:380px}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:var(--primary);transition:width .22s ease;z-index:41}
+#hud{
+  position:fixed;bottom:14px;left:0;right:0;display:flex;justify-content:center;gap:14px;
+  align-items:center;pointer-events:none;z-index:42;
+}
+body.notes-on #hud{right:380px}
+#hud .grp{
+  pointer-events:auto;display:flex;gap:2px;align-items:center;
+  background:rgba(250,249,245,.94);border:1px solid var(--hairline);border-radius:9999px;padding:4px;
+  backdrop-filter:blur(8px);
+}
+#hud button{
+  border:0;background:transparent;color:var(--muted);font-family:var(--sans);font-size:12.5px;font-weight:500;
+  padding:6px 12px;border-radius:9999px;cursor:pointer;
+}
+#hud button:hover{background:var(--surface-card);color:var(--ink)}
+#hud .count{font-family:var(--mono);font-size:12px;color:var(--muted);padding:0 12px;min-width:86px;text-align:center}
+#hud .act{font-size:11px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--primary);padding:0 10px}
+
+/* ---------- notes ---------- */
+#notes{
+  position:fixed;top:0;right:0;bottom:0;width:380px;background:var(--dark);color:var(--on-dark);
+  padding:26px 24px;overflow-y:auto;display:none;z-index:45;border-left:1px solid #000;
+}
+body.notes-on #notes{display:block}
+#notes h4{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--amber);margin-bottom:12px}
+#notes .nslide{font-family:var(--serif);font-size:24px;letter-spacing:-.4px;color:var(--on-dark);margin-bottom:6px;font-weight:500}
+#notes .ntime{font-family:var(--mono);font-size:12px;color:var(--on-dark-soft);margin-bottom:20px}
+#notes .ntext{font-size:14.5px;line-height:1.62;color:#d6d2ca;white-space:pre-wrap}
+#notes .nassets{margin-top:22px;padding-top:18px;border-top:1px solid #333029;font-size:13px;color:var(--on-dark-soft);line-height:1.6}
+#notes .nassets b{color:var(--amber);font-weight:600}
+#notes .nnext{margin-top:22px;padding-top:18px;border-top:1px solid #333029;font-size:13px;color:var(--on-dark-soft)}
+#notes .nnext b{color:#fff;display:block;margin-top:4px;font-family:var(--serif);font-size:17px;letter-spacing:-.3px}
+
+/* ---------- overview ---------- */
+#overview{
+  position:fixed;inset:0;background:rgba(250,249,245,.985);z-index:60;display:none;
+  overflow-y:auto;padding:40px 44px;
+}
+#overview.on{display:block}
+#overview h3{margin-bottom:22px}
+.ovgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:14px}
+.ovcell{
+  border:1px solid var(--hairline);border-radius:10px;background:var(--surface-soft);
+  padding:12px 13px;cursor:pointer;min-height:92px;display:flex;flex-direction:column;gap:6px;
+}
+.ovcell:hover{border-color:var(--primary)}
+.ovcell.cur{border-color:var(--primary);background:var(--surface-card)}
+.ovcell .n{font-family:var(--mono);font-size:11px;color:var(--muted-soft)}
+.ovcell .t{font-size:13.5px;font-weight:500;color:var(--ink);line-height:1.3}
+.ovcell .a{font-size:10px;letter-spacing:1.1px;text-transform:uppercase;color:var(--primary);font-weight:600;margin-top:auto}
+.ovcell .flag{font-size:10px;color:#7a5a08;background:#f6e6c8;border-radius:9999px;padding:2px 7px;align-self:flex-start}
+
+/* ---------- help ---------- */
+#help{position:fixed;inset:0;background:rgba(20,20,19,.72);z-index:70;display:none;place-items:center}
+#help.on{display:grid}
+#help .box{background:var(--canvas);border-radius:16px;padding:34px 38px;max-width:460px}
+#help h3{margin-bottom:18px}
+#help dl{display:grid;grid-template-columns:auto 1fr;gap:9px 18px;font-size:14.5px}
+#help dt{font-family:var(--mono);font-size:12.5px;color:var(--ink);background:var(--surface-card);padding:2px 9px;border-radius:5px;justify-self:start}
+#help dd{color:var(--body)}
+
+/* ---------- tables ---------- */
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+th{text-align:left;font-size:11px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted-soft);padding:0 12px 9px 0;border-bottom:1px solid var(--hairline)}
+td{padding:9px 12px 9px 0;border-bottom:1px solid var(--hairline-soft);color:var(--body);vertical-align:top}
+td.mono{font-family:var(--mono);font-size:13px;color:var(--ink)}
+td.ok{color:var(--ink);font-weight:500}
+tr:last-child td{border-bottom:0}
+
+ul.clean{list-style:none;display:flex;flex-direction:column;gap:9px}
+ul.clean li{font-size:16.5px;color:var(--body);padding-left:18px;position:relative;line-height:1.45}
+ul.clean li::before{content:"";position:absolute;left:0;top:10px;width:5px;height:5px;border-radius:50%;background:var(--primary)}
+ol.steps{list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:13px}
+ol.steps li{counter-increment:s;font-size:18px;color:var(--body);padding-left:42px;position:relative;line-height:1.4}
+ol.steps li::before{
+  content:counter(s);position:absolute;left:0;top:-1px;width:28px;height:28px;border-radius:50%;
+  background:var(--primary);color:#fff;font-size:13px;font-weight:600;display:grid;place-items:center;font-family:var(--sans);
+}
+.vidhead{display:flex;justify-content:space-between;align-items:center;gap:24px;flex:none;margin-bottom:12px}
+.vidhead .eyebrow{margin-bottom:0}
+.qrinline{display:flex;gap:13px;align-items:center}
+.qrinline img{width:96px;height:96px;border-radius:8px;background:var(--canvas);padding:4px;display:block}
+.qrinline .lbl{display:block;font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--on-dark-soft);margin-bottom:4px}
+.qrinline .url{display:block;font-family:var(--mono);font-size:14px;color:var(--amber)}
+.qr{width:168px;height:168px;border-radius:12px;flex:none;background:var(--canvas);padding:6px}
+figure.noimg img,figure.noimg figcaption{display:none}
+figure.noimg::before{content:"bizpliz-hero.png";display:grid;place-items:center;flex:1;border:2px dashed var(--hairline);border-radius:12px;font-family:var(--mono);font-size:12px;color:var(--muted-soft)}
+.slide.dark .qr{border-color:#3a352d;color:var(--on-dark-soft)}
+.logorow{display:flex;gap:26px;align-items:center;margin-top:auto}
+.logoplate{
+  margin-top:auto;align-self:flex-start;display:flex;align-items:center;gap:30px;
+  background:var(--canvas);border-radius:12px;padding:18px 30px;
+}
+.logoplate img{display:block;width:auto}
+.logoplate .lsep{width:1px;align-self:stretch;background:var(--hairline)}
+.logoslot{
+  height:42px;min-width:108px;border-radius:8px;border:1px dashed #3a352d;
+  display:grid;place-items:center;font-size:10.5px;color:var(--on-dark-soft);font-family:var(--mono);padding:0 14px;
+}
+.slide:not(.dark) .logoslot{border-color:var(--hairline);color:var(--muted-soft)}
+.foot{margin-top:auto;padding-top:14px;border-top:1px solid var(--hairline);font-size:13px;color:var(--muted);flex:none}
+.slide.dark .foot{border-color:#2c2823;color:var(--on-dark-soft)}
+.weekmap{display:grid;grid-template-columns:1fr 1fr 1fr 106px 1fr 1fr;gap:11px;align-items:stretch}
+.day{background:var(--surface-card);border-radius:12px;padding:19px 17px;display:flex;flex-direction:column;gap:7px}
+.day.gap{background:transparent;border:1px dashed var(--hairline)}
+.day.dest{background:var(--primary);color:#fff}
+.day .dnum{font-size:11px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted)}
+.day.dest .dnum{color:rgba(255,255,255,.8)}
+.day .dt{font-family:var(--serif);font-size:23px;letter-spacing:-.5px;line-height:1.1;color:var(--ink);font-weight:500}
+.day.dest .dt{color:#fff}
+.gapweek{border:1px dashed var(--hairline);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:10px 8px;text-align:center}
+.gapweek .gw1{font-family:var(--serif);font-size:15px;line-height:1.15;letter-spacing:-.2px;color:var(--muted);font-style:italic}
+.gapweek .gw2{font-size:10px;font-weight:600;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted-soft)}
+.loopdiag{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.loopstep{background:var(--surface-card);border-radius:9999px;padding:10px 20px;font-size:15.5px;font-weight:500;color:var(--ink)}
+.loopar{color:var(--primary);font-size:17px}
+.gear{border:1px solid var(--hairline);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:5px}
+.gear .gn{font-size:15px;font-weight:600;color:var(--ink)}
+.gear .gd{font-size:13.5px;color:var(--muted);line-height:1.45}
+.modelrow{display:grid;grid-template-columns:104px 1fr;gap:6px 18px;align-items:baseline;padding:11px 0;border-bottom:1px solid var(--hairline-soft)}
+.modelrow:last-of-type{border-bottom:0}
+.modelrow .mn{font-family:var(--serif);font-size:24px;letter-spacing:-.5px;color:var(--ink);font-weight:500}
+.modelrow .md{font-size:15px;color:var(--body)}
+.modecycle{position:relative;flex:none;height:186px;background:var(--dark);border-radius:12px;overflow:hidden}
+.mstate{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:9px;padding:22px 26px;opacity:0;animation:mcyc 8.4s infinite}
+.mstate:nth-child(1){animation-delay:0s}
+.mstate:nth-child(2){animation-delay:2.8s}
+.mstate:nth-child(3){animation-delay:5.6s}
+@keyframes mcyc{0%,1%{opacity:0}4%,29%{opacity:1}33%,100%{opacity:0}}
+.mstate .mprompt{font-family:var(--mono);font-size:14px;color:#57534a}
+.mstate .mbar{font-family:var(--mono);font-size:16.5px;font-weight:500;display:flex;gap:10px;align-items:center}
+.mstate .mwhat{font-size:14px;color:var(--on-dark-soft)}
+.mstate .mkey{font-family:var(--mono);font-size:12px;color:#57534a}
+.mcap{flex:none;font-size:12px;color:var(--muted-soft);font-family:var(--mono);margin-top:7px}
+.hooklist{display:flex;flex-direction:column;gap:7px}
+.hookrow{display:flex;gap:12px;align-items:baseline;padding:9px 14px;background:var(--surface-card);border-radius:9px}
+.hookrow .hx{color:var(--error);font-weight:700;font-size:14px;flex:none;line-height:1.3}
+.hookrow .ht{font-size:14.5px;color:var(--ink);line-height:1.35}
+.hookrow.ok{background:var(--surface-soft)}
+.hookrow.ok .hx{color:var(--success)}
+@media print{body{overflow:visible}.slide{display:flex!important;page-break-after:always}}
+</style>
+</head>
+<body>
+
+<div id="stage-wrap"><div id="stage"></div></div>
+<div id="bar"></div>
+<div id="hud">
+  <div class="grp">
+    <button data-go="prev">←</button>
+    <span class="count" id="count">00 · 1/29</span>
+    <button data-go="next">→</button>
+  </div>
+  <div class="grp"><span class="act" id="actlbl">Act 1</span></div>
+  <div class="grp">
+    <button data-go="notes">Notes</button>
+    <button data-go="overview">All slides</button>
+    <button data-go="help">?</button>
+  </div>
+</div>
+
+<aside id="notes">
+  <h4>Speaker notes</h4>
+  <div class="nslide" id="n-title"></div>
+  <div class="ntime" id="n-time"></div>
+  <div class="ntext" id="n-text"></div>
+  <div class="nassets" id="n-assets"></div>
+  <div class="nnext" id="n-next"></div>
+</aside>
+
+<div id="overview"><h3>Day 1 · all slides</h3><div class="ovgrid" id="ovgrid"></div></div>
+
+<div id="help"><div class="box">
+  <h3>Keyboard</h3>
+  <dl>
+    <dt>→ ↓ Space</dt><dd>Next slide</dd>
+    <dt>← ↑</dt><dd>Previous slide</dd>
+    <dt>Home / End</dt><dd>First / last slide</dd>
+    <dt>N</dt><dd>Speaker notes panel</dd>
+    <dt>O</dt><dd>Overview of all slides</dd>
+    <dt>F</dt><dd>Fullscreen</dd>
+    <dt>1–9</dt><dd>Jump to act</dd>
+    <dt>Esc</dt><dd>Close overlay</dd>
+  </dl>
+</div></div>
+
+<script>
+const SHOTS = ""; // assets sit beside this file
+const D = [
+
+/* ============ ACT 1 ============ */
+{
+ act:"Act 1 · The hook", n:"00", title:"Holding slide", time:"from −10 min",
+ html:`<div class="eyebrow"><span class="dot"></span>While we wait</div>
+ <div class="body">
+  <div class="cols c2w" style="align-items:center">
+   <div class="stack">
+    <h1>The wall is open.</h1>
+    <p class="lead" style="font-family:var(--serif);font-size:30px;letter-spacing:-.6px;color:var(--primary)">A única coisa que quero desta semana é…</p>
+   </div>
+   <div class="stack" style="align-items:center">
+    <img class="qr" src="qr-carrot.svg" alt="QR code to carrot.ecrop.dev">
+    <p class="lead" style="font-family:var(--mono);font-size:19px;color:var(--primary)">carrot.ecrop.dev</p>
+   </div>
+  </div>
+ </div>`,
+ notes:"Answer a post or two out loud as people settle. The wall is the parking lot and the pulse channel all week."
+},
+{
+ act:"Act 1 · The hook", n:"01", title:"Prediction prompt", time:"0:30", dark:true,
+ html:`<div class="eyebrow"><span class="dot"></span>Before the video</div>
+ <div class="body mid">
+  <h1 style="font-size:46px;line-height:1.15">Three minutes of real work.</h1>
+  <h1 style="font-size:46px;line-height:1.15;color:var(--amber)">Watch for the moment you would have stopped it to check something.</h1>
+ </div>`,
+ notes:"Say nothing else. Play."
+},
+{
+ act:"Act 1 · The hook", n:"02", title:"Cold open (video)", time:"3:30", dark:true,
+ html:`<div class="vidhead">
+  <div class="eyebrow"><span class="dot"></span>Cold open · silent · 3:24</div>
+  <div class="qrinline">
+   <img src="qr-carrot.svg" alt="QR code to carrot.ecrop.dev">
+   <div><span class="lbl">Post while it plays</span><span class="url">carrot.ecrop.dev</span></div>
+  </div>
+ </div>
+ <div class="body">
+  <figure class="vid">
+   <img src="deck-stills/probe/co-165.png" alt="Abertura do Dia 1">
+   <figcaption>day1-cold-open.mp4 · seven beats, each slowed enough to read, each captioned</figcaption>
+  </figure>
+  <div class="chips" style="flex:none;justify-content:center">
+   <span class="chip">0:00 spec</span><span class="chip">0:14 /plan</span>
+   <span class="chip" style="background:var(--primary);color:#fff">0:42 the plan + the gate</span>
+   <span class="chip">1:37 two worktrees</span><span class="chip">2:05 the wobble</span>
+   <span class="chip">2:29 ship stacks the PRs</span><span class="chip">2:57 verified</span>
+  </div>
+ </div>`,
+ notes:"The wall stays up in the corner for the whole three and a half minutes — tell them before you press play that anything they notice goes straight on it. A silent room watching a video is a room you can harvest from.\n\nOver black at the end: \"That is the wall you just posted on. Built through the exact loop you will learn this week. By Friday, you can do this. Safely.\"\n\nThen read two of the posts that landed during the video. That is the cheapest laugh and the fastest proof the wall is live."
+},
+{
+ act:"Act 1 · The hook", n:"03", title:"Title", time:"1:00", dark:true,
+ html:`<div class="eyebrow"><span class="dot"></span>September 21 to 29 · eCrop × Carrot</div>
+ <div class="body mid">
+  <h1 style="font-size:66px">Claude Code &amp;<br>Agentic Engineering</h1>
+  <p class="lead" style="color:var(--amber);font-size:23px;margin-top:8px">Agents make you fast. Systems make you safe. This week you get both.</p>
+ </div>
+ <div class="logoplate">
+  <img src="ecrop-mark.png" alt="eCrop" style="height:44px">
+  <span class="lsep"></span>
+  <img src="carrot-logo.png" alt="Carrot" style="height:34px">
+  <span class="lsep"></span>
+  <img src="nobleprog.png" alt="NobleProg" style="height:26px">
+ </div>`,
+ notes:"Shape of every day: two hours together, two hours building."
+},
+{
+ act:"Act 1 · The hook", n:"04", title:"The week map", time:"1:30",
+ html:`<div class="eyebrow"><span class="dot"></span>Where we are going</div>
+ <div class="body mid">
+  <div class="weekmap">
+   <div class="day"><span class="dnum">Mon 21</span><span class="dt">Foundations</span></div>
+   <div class="day"><span class="dnum">Tue 22</span><span class="dt">The loop</span></div>
+   <div class="day"><span class="dnum">Wed 23</span><span class="dt">Superpowers</span></div>
+   <div class="gapweek"><span class="gw1">a week of<br>real work</span><span class="gw2">your tickets</span></div>
+   <div class="day"><span class="dnum">Mon 28</span><span class="dt">Scale and trust</span></div>
+   <div class="day dest"><span class="dnum">Tue 29</span><span class="dt">Consolidation</span></div>
+  </div>
+ </div>
+ <div class="foot">"The gap week is where this becomes real, on your own tickets."</div>`,
+ notes:"Thirty seconds. It is a map, not a chapter."
+},
+/* ============ ACT 2 ============ */
+{
+ act:"Act 2 · Who we are", n:"05", title:"eCrop, and me", time:"2:30",
+ html:`<div class="eyebrow"><span class="dot"></span>Who is standing here</div>
+ <div class="body">
+  <div class="cols c2" style="align-items:center">
+   <div class="stack">
+    <img src="ecrop-mark.png" alt="eCrop" style="height:60px;width:auto;align-self:flex-start;margin-bottom:6px">
+    <h2>eCrop</h2>
+    <p class="lead">Portuguese venture builder · ecrop.dev</p>
+    <p>We build and ship products with agentic engineering, daily.</p>
+   </div>
+   <div class="stack">
+    <h2>Pedro Fonseca</h2>
+    <p class="lead">Software engineer, 7 years</p>
+    <ul class="clean">
+     <li>BSc Computer Engineering + MSc AI, ISEP</li>
+     <li>Co-founder, AI &amp; Innovation</li>
+     <li><strong>Claude Code daily for the last year.</strong> Coding agents for longer than that.</li>
+    </ul>
+   </div>
+  </div>
+ </div>`,
+ notes:"Formal but brief. No seniority framing over the room; they use the tool too. The credibility is the next slide, not the CV."
+},
+{
+ act:"Act 2 · Who we are", n:"06", title:"The proof: BizPliz", time:"4:30",
+ html:`<div class="eyebrow"><span class="dot"></span>The proof</div>
+ <div class="body">
+  <h2>Greenfield to production in 6 months,<br>with Claude Code and our harness.</h2>
+  <div class="cols c4" style="flex:none;margin-top:4px">
+   <div class="card"><span class="stat">2</span><span class="v">full-time developers</span></div>
+   <div class="card"><span class="stat">90%+</span><span class="v">of the code AI-written</span></div>
+   <div class="card"><span class="stat">100%</span><span class="v">human-reviewed, QA'd by a different person</span></div>
+   <div class="card"><span class="stat">Aug 1</span><span class="v">live to the public</span></div>
+  </div>
+  <div class="cols c2n" style="min-height:0">
+   <div class="stack" style="justify-content:center">
+    <p class="sm"><strong>bizpliz.pt</strong> — a live consumer job platform built for <strong>Media Capital</strong>. Workers, employers and shift work in one portal. Validated end to end: QA, security, code quality.</p>
+   </div>
+   <figure>
+    <img class="contain" src="bizpliz-hero.png" alt="The bizpliz.pt landing page">
+    <figcaption>bizpliz.pt · live since August 1</figcaption>
+   </figure>
+  </div>
+ </div>`,
+ notes:"The two-person rule (\"90 percent AI-written, 100 percent human-reviewed, and QA by a different person from the reviewer\"); the quality split (\"backend fewer bugs than expected, frontend about the same; our estimate, and the unevenness is why you can believe it\"); play R2.1, 20 seconds of the live product; then the refusal: \"I will not tell you that you will be 3x. We are about 3x on like-for-like work. Our numbers. Measure your own.\"\n\nClose the act: \"So that is what we do with this tool. Now let us step back and look at the tool itself, properly.\""
+},
+/* ============ ACT 3 ============ */
+{
+ act:"Act 3 · The tool", n:"07", title:"Where it came from", time:"3:30",
+ html:`<div class="eyebrow"><span class="dot"></span>Step back: what this tool actually is</div>
+ <div class="body">
+  <p class="lead">Started as an internal side project at Anthropic, late 2024. Public in February 2025. Terminal-first, on purpose: it lives where the work lives.</p>
+  <div class="cols c2" style="flex:none">
+   <div class="card plain"><span class="k">Before</span><span class="v">You were the clipboard — pasting code into a chat and pasting answers back.</span></div>
+   <div class="card darkc"><span class="k">Now</span><span class="v">The agent has hands. It reads your files, runs your commands, edits your code, and checks its own results, in your repo.</span></div>
+  </div>
+  <blockquote>The hottest new programming language is English.<cite>Andrej Karpathy</cite></blockquote>
+ </div>`,
+ notes:"The why-it-was-made beat: Anthropic's own engineers wanted the model where the work is, not in a browser tab; it grew from internal dogfooding into the reference harness.\n\nThe game-change sentence, slowly: \"Copy-paste chat made the model a consultant. Claude Code makes it a colleague with a keyboard. That difference is the whole week.\""
+},
+{
+ act:"Act 3 · The tool", n:"08", title:"How it works", time:"3:00",
+ html:`<div class="eyebrow"><span class="dot"></span>The loop, and the three gears</div>
+ <div class="body">
+  <div class="loopdiag">
+   <span class="loopstep">gather context</span><span class="loopar">→</span>
+   <span class="loopstep">take action</span><span class="loopar">→</span>
+   <span class="loopstep">verify work</span><span class="loopar">→</span>
+   <span class="loopstep" style="background:var(--primary);color:#fff">repeat</span>
+  </div>
+  <div class="cols c3" style="flex:none;margin-top:6px">
+   <div class="gear"><span class="gn">default</span><span class="gd">asks before it touches anything</span></div>
+   <div class="gear"><span class="gn">plan mode · Shift+Tab</span><span class="gd">explores and proposes, touches nothing</span></div>
+   <div class="gear"><span class="gn">auto-accept</span><span class="gd">for trusted ground</span></div>
+  </div>
+  <div class="modecycle">
+   <div class="mstate">
+    <span class="mprompt">&rsaquo; _</span>
+    <span class="mbar" style="color:var(--on-dark-soft)">&#9679;&#9679; default <span class="mkey">(shift+tab to cycle)</span></span>
+    <span class="mwhat">It proposes. You approve every edit and every command.</span>
+   </div>
+   <div class="mstate">
+    <span class="mprompt">&rsaquo; _</span>
+    <span class="mbar" style="color:var(--teal)">&#9208; plan mode on <span class="mkey">(shift+tab to cycle)</span></span>
+    <span class="mwhat">It reads, searches and proposes. It touches nothing.</span>
+   </div>
+   <div class="mstate">
+    <span class="mprompt">&rsaquo; _</span>
+    <span class="mbar" style="color:var(--amber)">&#9656;&#9656; auto-accept edits on <span class="mkey">(shift+tab to cycle)</span></span>
+    <span class="mwhat">It edits without asking. Trusted ground only.</span>
+   </div>
+  </div>
+  <div class="mcap">the footer is the gear indicator · Shift+Tab cycles it live</div>
+ </div>`,
+ notes:"\"When output disappoints, ask which part of the loop failed: the context it gathered, the action it took, or the verification it skipped.\"\n\nShow Shift+Tab cycling once, live. \"Plan mode separates thinking from touching files. Tomorrow it becomes the center of your workflow.\""
+},
+{
+ act:"Act 3 · The tool", n:"09", title:"The models, today", time:"3:30",
+ html:`<div class="eyebrow"><span class="dot"></span>Pick per task</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:flex-start;gap:0">
+    <div class="modelrow"><span class="mn">Haiku</span><span class="md">fast and cheap · mechanical work, test runs, exploration</span></div>
+    <div class="modelrow"><span class="mn">Sonnet</span><span class="md">the workhorse · most daily coding, the default for a reason</span></div>
+    <div class="modelrow"><span class="mn">Opus</span><span class="md">deep reasoning · planning, review, hard debugging</span></div>
+    <div class="modelrow"><span class="mn">Fable</span><span class="md">the frontier tier · the hardest problems, at frontier cost</span></div>
+    <p class="sm" style="margin-top:14px"><span class="chip">/model</span> picks per task. Your plan sets your default — check yours now.</p>
+   </div>
+   <figure>
+    <img class="contain" src="05-testing-greenfield-docker-setup.png" alt="/model sonnet setting the default model">
+    <figcaption>05-testing-greenfield-docker-setup.png · /model sonnet → "saved as your default for new sessions"</figcaption>
+   </figure>
+  </div>
+ </div>`,
+ notes:"One line of nuance on the current generation (5 and 5.1) without dwelling: newer mostly means better reasoning per token, not magic.\n\nThe misuse pattern both ways: \"Fable on boilerplate burns budget for nothing; Haiku on architecture is a false economy.\"\n\nName-drop once: \"opusplan plans with opus and builds with sonnet. Tomorrow's tool.\"\n\n⚠ Verify the current lineup and defaults the week before; models move.\n\nIf anyone asks about retention here, hold it — the next slide carries it. Short version: Fable is a covered model, 30-day retention, and it will not run at all in a zero-data-retention workspace."
+},
+{
+ act:"Act 3 · The tool", n:"10", title:"The right account", time:"2:00",
+ html:`<div class="eyebrow"><span class="dot"></span>And which account you are on</div>
+ <div class="body">
+  <h2>The right account.</h2>
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center">
+    <table>
+     <tr><th>Commercial workspace</th><th>Personal account</th></tr>
+     <tr><td class="ok">Your data is <strong>not</strong> trained on.</td><td>It is, by default.</td></tr>
+     <tr><td class="ok">Team / Enterprise / API</td><td>Free / Pro / Max</td></tr>
+    </table>
+   </div>
+   <figure>
+    <img class="contain bottom" src="00-clear.png" alt="Claude Code splash showing the Claude Team badge">
+    <figcaption>00-clear.png · the header tells you which account you are on — "Claude Team"</figcaption>
+   </figure>
+  </div>
+  <div class="card" style="flex:none;background:var(--surface-soft)">
+   <span class="k">One exception worth knowing: Fable</span>
+   <span class="v">Fable 5 and 5.1 are <strong>covered models</strong>. Prompts and outputs are kept for <strong>30 days</strong> for safety work, and zero-data-retention workspaces cannot call them at all until 30-day retention is switched on for that workspace. Still never trained on without express permission. <span style="color:var(--muted)">Verified September 2026 — re-check before the session.</span></span>
+  </div>
+ </div>`,
+ notes:"Keep it to a minute. Use the screenshot: the third line of the header says Claude Team. Tell them to look at their own header right now, and move on — no ceremony, no show of hands.\n\nThe Fable card is the part worth saying out loud, because it is the one that will actually bite someone: if your org runs zero data retention, Fable does not fail gracefully, it refuses the call. And the 30 days is for safety work, not training.\n\nRe-check that policy before the session — it is recent."
+},
+/* ============ ACT 4 ============ */
+{
+ act:"Act 4 · Why it matters", n:"11", title:"The industrial engineer", time:"3:30",
+ html:`<div class="eyebrow"><span class="dot"></span>Why this matters for engineers</div>
+ <div class="body">
+  <blockquote style="font-size:34px;line-height:1.2">The engineer runs the factory instead of operating each machine.<cite>as your own team put it</cite></blockquote>
+  <div class="cols c2" style="flex:none;margin-top:8px">
+   <p class="sm">Programming was the constraint. For decades, being an engineer meant spending most of the day operating the machine: syntax, boilerplate, plumbing.</p>
+   <p class="sm">The agent takes the machine. What is left is the engineering: architecture, trade-offs, specification, validation.</p>
+  </div>
+  <h2 style="margin-top:auto;color:var(--primary)">Less programming. More engineering.</h2>
+ </div>`,
+ notes:"Credit the room, then expand it, slowly: \"This does not take engineering away from engineers. It takes the programming away and gives the engineering back. The effort moves to the spec, before, and to validation, after. That is not a smaller job. It is the job you trained for.\""
+},
+{
+ act:"Act 4 · Why it matters", n:"12", title:"And the honest part", time:"2:30",
+ html:`<div class="eyebrow"><span class="dot"></span>The honest part</div>
+ <div class="body">
+  <div class="cols c3" style="flex:none">
+   <div class="card"><span class="stat">45%</span><span class="v">of AI-generated code introduces a vulnerability</span></div>
+   <div class="card"><span class="stat">&gt;95%</span><span class="v">syntax correctness</span></div>
+   <div class="card"><span class="stat">~55%</span><span class="v">security pass rate — flat for two years</span></div>
+  </div>
+  <h2 style="margin-top:20px">Capability improved. Security did not.<br>The engineering includes the safety system.</h2>
+  <div class="foot">Veracode · 100+ models · 80 tasks</div>
+ </div>`,
+ notes:"Veracode, 100+ models, 80 tasks, said out loud.\n\nThe human kicker: \"Stanford found developers with AI assistants wrote less secure code and felt more confident about it.\"\n\nClose: \"More engineering means owning this part too. That system is this week.\""
+},
+/* ============ ACT 5 ============ */
+{
+ act:"Act 5 · As intended", n:"13", title:"The intended way", time:"2:30",
+ html:`<div class="eyebrow"><span class="dot"></span>Using it as intended</div>
+ <div class="body">
+  <h2 style="flex:none">You all use Claude Code.<br>Here is what it was built for.</h2>
+  <div class="cols c2n" style="min-height:0">
+   <div class="stack" style="justify-content:center">
+    <p class="lead">And it starts with the decision nobody thinks about: <strong>where</strong> you start it.</p>
+    <ul class="clean">
+     <li>Its working directory is wherever you launched it. Anything above that is out of reach.</li>
+     <li>Start one level too deep and the repo's own <code>.claude/</code> is not there — your commands simply do not exist.</li>
+     <li>Start too high, at your home folder, and every search costs more while it can reach things this task has no business touching.</li>
+    </ul>
+   </div>
+   <div class="card darkc" style="font-family:var(--mono);font-size:12.5px;line-height:1.72;justify-content:center">
+    <div style="color:var(--on-dark-soft)">
+     <span style="color:var(--error)">✕</span> ~/<br>
+     &nbsp;&nbsp;&nbsp;too wide · slow, and in reach of everything<br><br>
+     <span style="color:var(--success)">✓</span> <span style="color:var(--on-dark)">~/carrot-wall/</span> &nbsp;<span style="color:var(--amber)">← start here</span><br>
+     &nbsp;&nbsp;&nbsp;├── CLAUDE.md<br>
+     &nbsp;&nbsp;&nbsp;├── .claude/ &nbsp;&nbsp;&nbsp;your commands<br>
+     &nbsp;&nbsp;&nbsp;├── apps/api/ &nbsp;&nbsp;the endpoint<br>
+     &nbsp;&nbsp;&nbsp;└── apps/web/ &nbsp;&nbsp;the form calling it<br><br>
+     <span style="color:var(--error)">✕</span> ~/carrot-wall/apps/web/<br>
+     &nbsp;&nbsp;&nbsp;cannot read the API it is calling
+    </div>
+   </div>
+  </div>
+  <div class="card" style="flex:none;background:var(--surface-soft)">
+   <span class="k">The rule</span>
+   <span class="v">Start at the <strong>smallest directory that holds everything the task touches</strong>. For a change that crosses the form and the endpoint, that is the repo root — not either app.</span>
+  </div>
+  <div class="foot" style="display:flex;justify-content:space-between;gap:20px;align-items:baseline">
+   <span><em>"There is no one right way to use Claude Code. Everyone's setup is different. Experiment."</em> · Boris Cherny</span>
+   <span class="chips" style="flex:none"><span class="chip">claude update</span><span class="chip">/doctor</span></span>
+  </div>
+ </div>`,
+ notes:"The gentle framing first, verbatim intent: \"I am not saying any of you do these next things. But every tool has an intended grain, and some habits work against it. Here is what people sometimes do, why it fights the tool, and the way that flows with it.\"\n\nThen the concrete one, because it is the cheapest mistake in the room. Ask them where they launched Claude Code this morning. Most will say the folder they happened to be in.\n\nThe demo if you want it live, and it takes thirty seconds: start in apps/web, ask how a post reaches the database, and watch it reason about an API it cannot see. Quit, restart at the root, ask again. Same question, completely different answer.\n\nThe .claude line is the one that bites hardest — start one level down and your own commands are not there. That is exactly why /ship failed in the recording you watched: that worktree had no .claude/ in it.\n\nLand on the rule and move: smallest directory that holds everything the task touches."
+},
+{
+ act:"Act 5 · As intended", n:"14", title:"Driving the session", time:"3:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Steering</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center">
+    <h2>Esc is steering,<br>not failure.</h2>
+    <p class="lead">When Claude goes wrong: rewind, do not type corrections.</p>
+    <ul class="clean">
+     <li><strong>Esc twice</strong> edits your last message</li>
+     <li><strong>/rewind</strong> restores a checkpoint</li>
+     <li><strong>/resume</strong> brings back a session</li>
+     <li>Drag screenshots straight in</li>
+    </ul>
+   </div>
+   <figure>
+    <img class="contain" src="06-slash-resume-session-setup.png" alt="/resume session picker listing previous sessions">
+    <figcaption>06-slash-resume-session-setup.png · /resume — every session is on disk, searchable, renameable</figcaption>
+   </figure>
+  </div>
+ </div>`,
+ notes:"Live: interrupt something, show /rewind and the checkpoint list. \"The people who get the best results interrupt the most.\"\n\nThe rewind-over-corrections habit comes straight from the team.\n\nThe screenshot is real: two sessions from the wall build, one from a minute earlier, one from sixteen minutes earlier."
+},
+{
+ act:"Act 5 · As intended", n:"15", title:"Pitfall 1 · the window as storage", time:"3:30",
+ html:`<div class="eyebrow"><span class="dot"></span>Pitfall 1 of 4</div>
+ <div class="body">
+  <div class="hrm" style="flex:none">
+   <span class="lbl">The habit</span><span class="txt">Filling the context because it is there. One endless session for everything.</span>
+   <span class="lbl">The reality</span><span class="txt">Quality degrades as the window fills. <strong>The instruction it "ignored" an hour in was not ignored. It was forgotten.</strong></span>
+   <span class="lbl move">The move</span><span class="txt"><span class="chip">/context</span> to audit · <span class="chip">/clear</span> between tasks · start hard tasks in a fresh window · commit before big changes</span>
+  </div>
+  <div class="shotgrid" style="grid-template-columns:1fr 1fr">
+   <figure><img src="03-context-light.png" alt="/context at 11%"><figcaption>03 · fresh — 109.6k / 1m (11%) · messages 73.6k</figcaption></figure>
+   <figure><img src="04c-context-after-work.png" alt="/context at 34%"><figcaption>04c · one work block later — 134.7k / 400k (34%) · messages 98.6k</figcaption></figure>
+  </div>
+  <p class="xs" style="flex:none">04d · the palette spells out the reassurance: <em>"/clear — start a new session with empty context; previous session stays on disk (resumable with /resume)."</em></p>
+ </div>`,
+ notes:"Run /context live, read it out loud. \"The meter measures fullness, not quality. Fresh beats bloated.\"\n\nPoint at the real numbers on screen: messages went from 73.6k to 98.6k tokens across one working block. Note the free-space line — that is the number that matters, not the percentage.\n\nThe /clear description on screen does the reassurance for you: the previous session stays on disk and is resumable. Clearing is not losing.\n\nWednesday goes deeper."
+},
+{
+ act:"Act 5 · As intended", n:"16", title:"Pitfall 2 · memory in chat", time:"3:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Pitfall 2 of 4</div>
+ <div class="body">
+  <div class="hrm" style="flex:none">
+   <span class="lbl">The habit</span><span class="txt">"Remember that we use PostgreSQL, not MySQL."</span>
+   <span class="lbl">The reality</span><span class="txt">Chat memory dies at compaction. <strong>Files survive.</strong></span>
+   <span class="lbl move">The move</span><span class="txt">CLAUDE.md, read every session · start a line with <span class="chip">#</span> to add a memory fast</span>
+  </div>
+  <div class="shotgrid" style="grid-template-columns:1fr 1fr">
+   <figure><img src="07-before-compact.png" alt="context before compaction"><figcaption>07 · before /compact — 34%, messages 98.6k</figcaption></figure>
+   <figure><img src="07b-after-compact.png" alt="context after compaction"><figcaption>07b · after — 17%, messages 19.4k. Memory files: still there.</figcaption></figure>
+  </div>
+  <p class="xs" style="flex:none">BC: <em class="q">"Update this file whenever Claude makes a mistake, so it learns not to repeat it."</em></p>
+ </div>`,
+ notes:"The two screenshots are the whole argument. Compaction took the conversation from 98.6k tokens of messages down to 19.4k — four fifths of what was said is gone. The Memory files line is still 1.6k, untouched.\n\n\"Anything you have told Claude twice belongs in a file. Short and true beats long and generic.\"\n\nToday's challenge ends with them writing one."
+},
+{
+ act:"Act 5 · As intended", n:"17", title:"Pitfall 3 · accepting \"should work\"", time:"3:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Pitfall 3 of 4</div>
+ <div class="body">
+  <div class="hrm" style="flex:none">
+   <span class="lbl">The habit</span><span class="txt">Confidence as verification.</span>
+   <span class="lbl">The reality</span><span class="txt"><strong>"Should work" is a guess wearing a suit.</strong></span>
+   <span class="lbl move">The move</span><span class="txt">Give Claude a way to verify its work. Hand over the build, test and lint commands.</span>
+  </div>
+  <div class="cols c2n" style="min-height:0">
+   <div class="stack" style="justify-content:center">
+    <blockquote style="font-size:22px">If Claude has that feedback loop, it will 2 to 3x the quality of the final result.<cite>Boris Cherny</cite></blockquote>
+    <p class="sm">Two build failures. One port conflict. One question back to the human. <strong>Six minutes to a healthy stack</strong> — and every step checked against a real endpoint, not a claim.</p>
+   </div>
+   <figure>
+    <img src="05b-steps-to-healthy-container.png" alt="16-step timeline of raising a container, with two failures fixed inline">
+    <figcaption>05b-steps-to-healthy-container.png · the receipts, asked for after the fact</figcaption>
+   </figure>
+  </div>
+ </div>`,
+ notes:"\"Claude tests every single change its creator lands. Yours should too.\"\n\nThis is the honest one. Read a couple of the numbered steps out loud — it failed twice, it diagnosed the port conflict with lsof, and it stopped and asked rather than killing someone else's container. Then it verified against real URLs and read the container logs.\n\nThe line to land: \"It did not tell me it worked. It showed me a 200 and a migration log.\""
+},
+{
+ act:"Act 5 · As intended", n:"18", title:"Pitfall 4 · over-engineering the harness", time:"3:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Pitfall 4 of 4 · and the daily kit</div>
+ <div class="body">
+  <div class="hrm" style="flex:none">
+   <span class="lbl">The habit</span><span class="txt">Collecting plugins and config before mastering the basics.</span>
+   <span class="lbl">The reality</span><span class="txt">The creator's own setup is <strong>"surprisingly vanilla."</strong> A harness grows from lessons, not from shopping.</span>
+  </div>
+  <div class="card" style="flex:none">
+   <span class="k">The daily kit</span>
+   <div class="chips" style="margin-top:4px">
+    <span class="chip">/help</span><span class="chip">/context</span><span class="chip">/cost</span><span class="chip">/model</span>
+    <span class="chip">/memory</span><span class="chip">/rewind</span><span class="chip">/resume</span><span class="chip">/doctor</span>
+   </div>
+  </div>
+  <div class="cols c3" style="flex:none">
+   <div class="card plain"><span class="v">Which gear never touches files?</span></div>
+   <div class="card plain"><span class="v">What does /clear cost you?</span></div>
+   <div class="card plain"><span class="v">Where does memory that survives live?</span></div>
+  </div>
+  <div class="foot">"All of this configures through one folder — <span class="chip">.claude</span> — checked into git. Which brings us to ours."</div>
+ </div>`,
+ notes:"\"Everything we show you next exists because something went wrong for us first.\"\n\nThirty seconds on the three questions; if one splits the room, back up.\n\nBridge into the tour."
+},
+/* ============ ACT 6 ============ */
+{
+ act:"Act 6 · The tour", n:"19", title:"Tour opener", time:"3:00",
+ html:`<div class="eyebrow"><span class="dot"></span>How we use it</div>
+ <div class="body">
+  <div class="cols c2n" style="align-items:center">
+   <div class="stack">
+    <h1 style="font-size:46px">Our setup,<br>shown not told.</h1>
+    <span class="pill term">→ TERMINAL</span>
+    <p class="lead" style="margin-top:8px">This is the whole thing. You are not getting the whole thing today.</p>
+    <p class="sm"><strong>Six surfaces.</strong> You get one worked example of each, and you build the rest the way you want it.</p>
+   </div>
+   <div class="card darkc" style="font-family:var(--mono);font-size:12.5px;line-height:1.62">
+    <span class="k" style="font-family:var(--sans);font-size:12.5px;color:var(--amber)">eCrop base template · .claude/</span>
+    <div style="color:var(--on-dark-soft)">
+     agents/ &nbsp;&nbsp;&nbsp;<span style="color:var(--on-dark)">code-reviewer</span> · migration-reviewer · <span style="color:var(--on-dark)">test-runner</span><br>
+     hooks/ &nbsp;&nbsp;&nbsp;&nbsp;compose_iron_rule · alembic_guardrails<br>
+     rules/api/ 18 files — you take <span style="color:var(--on-dark)">logging_and_tokens.md</span><br>
+     rules/web/ 7 files<br>
+     skills/ &nbsp;&nbsp;&nbsp;<span style="color:var(--on-dark)">spec</span> · plan · execute · ship · quality-gate<br>
+     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rgpd-field-reviewer · ponytail-review · +5<br>
+     workflows/ <span style="color:var(--on-dark)">spec.js</span> · plan.js · execute.js<br>
+     settings.json
+    </div>
+    <span class="v" style="font-size:12px;margin-top:6px">Highlighted = what you leave with — plus two hooks written for this room rather than lifted from here.</span>
+   </div>
+  </div>
+ </div>`,
+ notes:"`tree .claude/` on screen. Check-along: \"Open your repo's .claude folder. If it does not exist, notice that. That gap is the week.\"\n\nSay the stack thing out loud, because it is a choice and not an accident: \"What you are taking home is from our Python and Next repo. On purpose. If I handed you Quarkus files you would paste them in and learn nothing. These you have to actually read before you can translate them — and translating them is the exercise. Read for the shape: the frontmatter, the path glob, the hook's contract. Not the commands.\"\n\nThe two hooks are the exception and worth naming as such: stack-neutral, tested, theirs to keep today."
+},
+{
+ act:"Act 6 · The tour", n:"20", title:"Surface 1 · rules", time:"4:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Surface 1 of 6 · loaded before you type</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center">
+    <h2><span class="coralword">Rules.</span><br>Always in the room.</h2>
+    <span class="pill term">&rarr; TERMINAL</span>
+    <blockquote style="font-size:21px;margin-top:8px">Never build or clear .next beside a running dev server.</blockquote>
+    <p class="sm">Every good rule in this file is a scar. <strong>Rules advise — they are context, not a fence.</strong></p>
+   </div>
+   <figure>
+    <img src="02-following-markdown-setup-guide.png" alt="CLAUDE.md being written and verified">
+    <figcaption>02 · <code>/init</code> wrote CLAUDE.md — then <strong>verified</strong> two claims instead of copying them from the guide</figcaption>
+   </figure>
+  </div>
+  <div class="cols c3" style="flex:none">
+   <div class="card"><span class="k">CLAUDE.md</span><span class="v">Project root. Read at the start of every session. Facts that are true all the time.</span></div>
+   <div class="card"><span class="k">.claude/rules/*.md</span><span class="v">One topic per file. Add <code>paths:</code> and it only loads when a matching file is touched.</span></div>
+   <div class="card darkc"><span class="k">Auto memory</span><span class="v">Claude's own notes, kept per repo. <code>/memory</code> to read, prune or switch off.</span></div>
+  </div>
+ </div>`,
+ notes:"Open CLAUDE.md, show the AGENTS.md import in one sentence.\n\nThe story, unhurried: the build that silently corrupted a live dev server. \"That rule reads like paranoia until you have lost a session to it once.\"\n\nThe screenshot beat: it did not trust the guide. It checked that npm test is vitest + jsdom and that ./mvnw test actually resolves, then wrote what was true. \"That is what you want in a memory file — verified, not assumed.\"\n\nPath rules, the part people miss: a rule with a paths glob costs nothing until Claude opens a matching file. That is how eighteen API rules do not become eighteen rules of noise in a frontend session. You take one of them home: logging_and_tokens.md.\n\nAuto memory in one breath: it is on by default, it writes to a MEMORY.md index per repo, and you are allowed to read and correct it. Type /memory today and just look. We open it properly on Day 3.\n\nLand the limit before hooks: \"All of this is advice. Claude reads it and usually does it. If it must never happen, you need the next-but-one surface.\""
+},
+{
+ act:"Act 6 · The tour", n:"21", title:"Surface 2 · skills", time:"3:30",
+ html:`<div class="eyebrow"><span class="dot"></span>Surface 2 of 6 · loaded when it is relevant</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center">
+    <h2><span class="coralword">Skills.</span><br>Knowledge that<br>waits its turn.</h2>
+    <span class="pill term">&rarr; TERMINAL</span>
+    <p class="lead" style="margin-top:8px">At startup Claude sees only the <strong>description</strong>. The body arrives when the work matches.</p>
+    <p class="sm">Which is why the description is the whole game: name the <strong>situation</strong>, not the topic. "Project conventions" never fires. "Use when creating or modifying source files, tests, or migrations" does.</p>
+    <div class="chips"><span class="chip">/spec</span><span class="chip">/plan</span><span class="chip">/execute</span><span class="chip">/ship</span><span class="chip">/quality-gate</span></div>
+   </div>
+   <div class="card darkc" style="align-self:center;font-family:var(--mono);font-size:12.5px;line-height:1.66">
+    <span class="k" style="font-family:var(--sans);font-size:12.5px;color:var(--amber)">.claude/skills/spec/SKILL.md</span>
+    <div style="color:var(--on-dark-soft)">
+     ---<br>
+     name: <span style="color:var(--on-dark)">spec</span><br>
+     description: <span style="color:var(--on-dark)">Interview me, then write a<br>
+     &nbsp;&nbsp;one-page spec. Use when starting a feature<br>
+     &nbsp;&nbsp;before any code is written.</span><br>
+     argument-hint: [feature in a sentence]<br>
+     ---<br>
+     I want to build: <span style="color:var(--on-dark)">$ARGUMENTS</span><br>
+     Interview me one question at a time&hellip;
+    </div>
+    <span class="v" style="font-size:12px;margin-top:8px">A folder, a Markdown file, frontmatter. Extra files beside it load only if Claude decides to read them.</span>
+   </div>
+  </div>
+ </div>`,
+ notes:"Run /spec live on something small. Point at the fact that the file is a prompt you were going to type anyway.\n\n\"Progressive disclosure\" in plain words: only the description is loaded up front, so you can have thirty skills and pay for thirty sentences. The body is the cost, and you only pay it when it is needed.\n\nThe trap, said once and hard: a skill that never activates is just a file. Vague description names a topic; a good one names the situations. This is the single most common failure in a harness people abandon.\n\nWe have fifteen. You take one — spec — because you already have a prompt worth keeping and that is exactly how each of ours started. Day 3 is the morning we turn your own prompts into these."
+},
+{
+ act:"Act 6 · The tour", n:"22", title:"Surface 3 · agents", time:"3:30",
+ html:`<div class="eyebrow"><span class="dot"></span>Surface 3 of 6 · its own context window</div>
+ <div class="body">
+  <h2><span class="coralword">Agents.</span> The right model, in a room of its own.</h2>
+  <p class="lead" style="flex:none">A subagent starts on a <strong>clean window</strong>, does the job, and hands back a summary. The transcript never lands in yours.</p>
+  <div class="cols c3" style="flex:none">
+   <div class="card"><span class="k">code-reviewer &middot; opus</span><span class="v">Correctness, security, conventions. Review mistakes are expensive, so pay for the good model.</span></div>
+   <div class="card"><span class="k">test-runner &middot; haiku</span><span class="v">Runs both suites, reports the first meaningful error. Mechanical work, cheap model.</span></div>
+   <div class="card plain"><span class="k">migration-reviewer &middot; opus</span><span class="v">Reads every schema change against what already shipped.</span></div>
+  </div>
+  <div class="card darkc" style="flex:none">
+   <span class="k">The near-miss</span>
+   <span class="v">A log flag that would have put personal data one exception away from the logs. Caught in audit. It never fired. <strong>The review layer existed before the incident did.</strong></span>
+  </div>
+ </div>`,
+ notes:"Show one agent file: name, description, tools, model. Four lines of frontmatter and a paragraph. \"That is the whole file. The description is how Claude knows to reach for it.\"\n\nWhy the separate window matters, concretely: a test run is four hundred lines of output you never want to read. In a subagent it costs you one paragraph. Same for a big search, a log sweep, a doc crawl.\n\nAnd the tools field: you can hand a reviewer Read and Grep and nothing else. It physically cannot edit your code. That is a different kind of safety from asking nicely.\n\nThe near-miss story, slowly: the log flag that would have leaked personal data, caught in audit, never fired. \"The review layer existed before the incident did. In your business, that is the difference.\"\n\nYou take code-reviewer and test-runner home. Both stack-neutral."
+},
+{
+ act:"Act 6 · The tour", n:"23", title:"Surface 4 · workflows", time:"2:30",
+ html:`<div class="eyebrow"><span class="dot"></span>Surface 4 of 6 · the plan moves into code</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center">
+    <h2><span class="coralword">Workflows.</span><br>When the plan should not<br>live in a chat.</h2>
+    <p class="lead" style="margin-top:8px">A workflow is a <strong>script</strong> that runs agents. The script holds the loop, the branching and every intermediate result — so your window holds only the answer.</p>
+    <p class="sm">Subagents: Claude decides what runs next, turn by turn. Workflow: the script decides, the same way every time. That is the whole difference, and it is the difference between a habit and a process.</p>
+   </div>
+   <div class="card darkc" style="align-self:center;font-family:var(--mono);font-size:12.5px;line-height:1.66">
+    <span class="k" style="font-family:var(--sans);font-size:12.5px;color:var(--amber)">.claude/workflows/spec.js</span>
+    <div style="color:var(--on-dark-soft)">
+     export const meta = {<br>
+     &nbsp;&nbsp;name: <span style="color:var(--on-dark)">'spec'</span>,<br>
+     &nbsp;&nbsp;description: <span style="color:var(--on-dark)">'Interview, draft, cross-check'</span>,<br>
+     }<br><br>
+     const angles = await <span style="color:var(--on-dark)">parallel</span>(&hellip;)<br>
+     const checked = await <span style="color:var(--on-dark)">pipeline</span>(angles, &hellip;)<br>
+     return checked.filter(Boolean)
+    </div>
+    <span class="v" style="font-size:12px;margin-top:8px"><code>agent()</code> &middot; <code>parallel()</code> &middot; <code>pipeline()</code> &middot; <code>phase()</code>. Dozens of agents in one run, none of them in your context.</span>
+   </div>
+  </div>
+  <div class="card" style="flex:none"><span class="k">You do not write these by hand</span><span class="v">Ask for one in words. Watch it in <code>/workflows</code>. If the run did what you wanted, press <code>s</code> and it becomes <code>/your-name</code> forever. Try <code>/deep-research</code> tonight — it ships with Claude Code and it is the honest demo.</span></div>
+ </div>`,
+ notes:"Keep this one short and do not oversell it. This is the surface they are least likely to need in week one, and saying so buys credibility for the other five.\n\nThe one line that has to land: \"Everything else on this tour puts instructions in front of one agent. This one puts many agents behind a script you can read and rerun.\"\n\nOur three — spec.js, plan.js, execute.js — back the skills of the same name. The skill is the door, the workflow is the machine behind it. That is why /spec is worth taking home even though the machine is not.\n\nIf you have thirty seconds: run /deep-research on something they care about and let it sit in the background while you move on. Coming back to a cited report at the end of the act is a better argument than any slide."
+},
+{
+ act:"Act 6 · The tour", n:"24", title:"Surface 5 · hooks", time:"4:30",
+ html:`<div class="eyebrow"><span class="dot"></span>Surface 5 of 6 · not optional, not negotiable</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center">
+    <h2><span class="coralword">Hooks.</span><br>The one surface that<br>cannot be ignored.</h2>
+    <span class="pill term">&rarr; TERMINAL</span>
+    <p class="lead" style="margin-top:8px">Watch <code>rm -rf</code> bounce.</p>
+    <p class="sm"><strong>Everything so far advises. Hooks enforce.</strong> A shell command, run before or after a tool, that can refuse — whether or not Claude agrees.</p>
+   </div>
+   <div class="hooklist">
+    <div class="hookrow"><span class="hx">&#10005;</span><span class="ht"><code>rm -rf</code> and force-pushes</span></div>
+    <div class="hookrow"><span class="hx">&#10005;</span><span class="ht">Committing straight to <code>main</code></span></div>
+    <div class="hookrow"><span class="hx">&#10005;</span><span class="ht">Reading <code>.env</code>, <code>*.pem</code>, private keys</span></div>
+    <div class="hookrow"><span class="hx">&#10005;</span><span class="ht"><code>DROP TABLE</code> and destructive SQL</span></div>
+    <div class="hookrow"><span class="hx">&#10005;</span><span class="ht">Editing a migration that already shipped</span></div>
+    <div class="hookrow"><span class="hx">&#10005;</span><span class="ht">Touching test files during a bug fix</span></div>
+    <div class="hookrow ok"><span class="hx">&#10003;</span><span class="ht">Format every file on save — the one nobody argues with</span></div>
+   </div>
+  </div>
+  <div class="card" style="flex:none"><span class="k">You take both home</span><span class="v"><code>block_destructive_bash.sh</code> stops <code>rm -rf</code> and force-pushes · <code>block_secrets_access.sh</code> stops it reading <code>.env</code> or a <code>.pem</code>. Each ships with its <code>.test.sh</code> beside it — <strong>that second file is half the lesson</strong>. Both are stack-neutral: they work on your Java repo unchanged.</span></div>
+ </div>`,
+ notes:"Type the bare pip install, let the hook block it.\n\nMechanism in one sentence, because they will ask: it is a shell command wired to a tool event. Exit 2 and whatever you printed to stderr goes back to Claude as the reason it was refused. That is the entire contract.\n\nThere is a better, true story sitting in the capture: the harness's own hooks were broken — they read a legacy variable and would have silently done nothing during this very tour. It got caught while building the wall, on camera. And during the build the migration guard then over-blocked: it stopped Claude creating a brand-new migration, not just editing an old one. Both were fixed.\n\n\"A hook that silently does nothing is worse than no hook. That is why every one of ours has a test file beside it.\"\n\nHand-off to the last surface: \"And all of this — which hook, which model, what never needs asking — is wired in one file.\""
+},
+{
+ act:"Act 6 · The tour", n:"25", title:"Surface 6 · settings", time:"3:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Surface 6 of 6 · where it is all wired</div>
+ <div class="body">
+  <h2><span class="coralword">Settings.</span> One file decides what still needs asking.</h2>
+  <div class="cols c2n">
+   <div class="hrm">
+    <span class="lbl">1 &middot; org</span><span class="txt">Managed settings — <strong>your company wins</strong>, always</span>
+    <span class="lbl">2 &middot; session</span><span class="txt"><code>claude --settings</code> — just this once</span>
+    <span class="lbl move">3 &middot; you</span><span class="txt"><code>.claude/settings.local.json</code> — <strong>yours, gitignored</strong></span>
+    <span class="lbl move">4 &middot; team</span><span class="txt"><code>.claude/settings.json</code> — <strong>committed, everyone gets it</strong></span>
+    <span class="lbl">5 &middot; machine</span><span class="txt"><code>~/.claude/settings.json</code> — every project you open</span>
+   </div>
+   <div class="card darkc" style="font-family:var(--mono);font-size:12.5px;line-height:1.66">
+    <span class="k" style="font-family:var(--sans);font-size:12.5px;color:var(--amber)">.claude/settings.json</span>
+    <div style="color:var(--on-dark-soft)">
+     {<br>
+     &nbsp;&nbsp;<span style="color:var(--on-dark)">"permissions"</span>: {<br>
+     &nbsp;&nbsp;&nbsp;&nbsp;"allow": [<span style="color:var(--on-dark)">"Bash(npm run test *)"</span>],<br>
+     &nbsp;&nbsp;&nbsp;&nbsp;"deny":&nbsp; [<span style="color:var(--on-dark)">"Read(./.env)"</span>, <span style="color:var(--on-dark)">"Read(./.env.*)"</span>]<br>
+     &nbsp;&nbsp;},<br>
+     &nbsp;&nbsp;<span style="color:var(--on-dark)">"hooks"</span>: { "PreToolUse": [ &hellip; ] },<br>
+     &nbsp;&nbsp;<span style="color:var(--on-dark)">"outputStyle"</span>: "Concise"<br>
+     }
+    </div>
+    <span class="v" style="font-size:12px;margin-top:8px">Strict JSON. One trailing comma and the whole file is ignored — <code>/status</code> tells you what actually loaded.</span>
+   </div>
+  </div>
+  <div class="card" style="flex:none"><span class="k">Also in here, and worth ten minutes tonight</span><span class="v"><code>/config</code> browses the lot. <code>outputStyle</code> changes how Claude <em>talks</em>, not what it knows — <code>/output-style concise</code> is the one most of you will keep. <code>statusLine</code> puts your branch, model and context left of the prompt. <code>model</code>, <code>env</code>, and <code>autoMemoryEnabled</code> live here too.</span></div>
+ </div>`,
+ notes:"The one insight to sell: an allow rule is not laziness, it is where the attention budget goes. Every prompt you answer on autopilot is a prompt you will answer on autopilot when it matters. Allow the boring things explicitly so that a prompt means something again.\n\nDeny is the sharper half. Read(./.env) is thirty seconds of work and it is the single highest-value line in this deck for a regulated business.\n\nPrecedence, said once: local beats committed, committed beats your home file, and your company beats all of it. If a setting is not doing what you expect, it is almost always a higher file — /status, then look.\n\nOutput style is the sleeper. Two people in this room will find /output-style concise and never go back; one will find explanatory and learn faster because of it. It is thirty seconds to try and we will not mention it again until Day 3.\n\nClose the tour: \"Six surfaces. Nothing you saw is genius — accumulated lessons, written where the agent reads them. Each one gets its own morning this week.\""
+},
+/* ============ ACT 7 ============ */
+{
+ act:"Act 7 · Go build", n:"26", title:"Challenge 1 briefing", time:"3:00 → 2h block",
+ html:`<div class="eyebrow"><span class="dot"></span>Challenge 1 · Make it yours</div>
+ <div class="body">
+  <div class="cols c2">
+   <div class="stack" style="justify-content:center">
+    <ol class="steps">
+     <li>Clone the wall</li>
+     <li>Run both apps</li>
+     <li>Ask it five questions you would ask a senior colleague</li>
+     <li>Write your first CLAUDE.md</li>
+    </ol>
+   </div>
+   <div class="stack" style="justify-content:center">
+    <div class="card"><span class="k">Goal</span><span class="v">Three answers that cite real files.</span></div>
+    <div class="card"><span class="k">Everything you need</span><span class="v">Guide 1 · Foundations has every step.</span></div>
+    <p class="lead" style="font-family:var(--mono);font-size:19px;color:var(--primary);margin-top:6px">github.com/eCrop/carrot-wall</p>
+   </div>
+  </div>
+ </div>`,
+ notes:"\"You are cloning the thing you posted on an hour ago.\"\n\nThen circulate: sweep the room, guide, do not grab, two-minute triage, harvest for tomorrow."
+},
+{
+ act:"Act 7 · Go build", n:"27", title:"Debrief", time:"8:00",
+ html:`<div class="eyebrow"><span class="dot"></span>After the challenge</div>
+ <div class="body">
+  <h2 style="flex:none">Two hours ago these were slides.</h2>
+  <div class="cols c4" style="flex:none;gap:12px">
+   <div class="card" style="padding:16px 18px;gap:5px"><span class="k" style="font-size:15px">Where you started it</span><span class="v" style="font-size:13.5px">The working directory decided what it could see.</span></div>
+   <div class="card" style="padding:16px 18px;gap:5px"><span class="k" style="font-size:15px">The loop</span><span class="v" style="font-size:13.5px">Gather context, act, verify. Which part failed?</span></div>
+   <div class="card" style="padding:16px 18px;gap:5px"><span class="k" style="font-size:15px">The gears</span><span class="v" style="font-size:13.5px">Which gear were you in? Shift+Tab was there the whole time.</span></div>
+   <div class="card" style="padding:16px 18px;gap:5px"><span class="k" style="font-size:15px">The window</span><span class="v" style="font-size:13.5px"><code>/context</code> — what was actually filling it?</span></div>
+  </div>
+  <div class="cols c4" style="flex:none;gap:12px;margin-top:12px">
+   <div class="card" style="padding:16px 18px;gap:5px"><span class="k" style="font-size:15px">Files, not chat</span><span class="v" style="font-size:13.5px">The CLAUDE.md you wrote is the first thing that survives.</span></div>
+   <div class="card" style="padding:16px 18px;gap:5px"><span class="k" style="font-size:15px">Evidence</span><span class="v" style="font-size:13.5px">Did it cite real files, or just sound certain?</span></div>
+   <div class="card" style="padding:16px 18px;gap:5px"><span class="k" style="font-size:15px">Steering</span><span class="v" style="font-size:13.5px">Esc is not failure. Who interrupted it?</span></div>
+   <div class="card darkc" style="padding:16px 18px;gap:5px"><span class="k" style="font-size:15px">Nothing enforced</span><span class="v" style="font-size:13.5px">Did it ignore a rule you wrote? Nothing today could stop it.</span></div>
+  </div>
+  <h3 style="margin-top:auto">Where codebase Q&amp;A shines.<br>And where it starts making things up.</h3>
+ </div>`,
+ notes:"Do not read the cards out. Point at them one at a time and ask who hit that one — the room fills this slide, not you.\n\nThe two that always land: somebody started Claude Code in the wrong folder, and somebody trusted an answer that cited nothing. Both are better coming from them than from you.\n\nThe last card is the seed for Wednesday, so ask it rather than state it: did anyone watch it do something their CLAUDE.md told it not to? Whoever says yes has just made the argument for hooks, and you can say so — nothing you wrote today could have stopped it, and on Wednesday you write the thing that can.\n\nThen one attendee demos their best answer. The hallucination boundary is the seed for Wednesday, so end on it rather than on a win."
+},
+{
+ act:"Act 7 · Go build", n:"28", title:"The wall, answered", time:"8:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Your turn</div>
+ <div class="body">
+  <div class="cols c2w" style="align-items:center">
+   <div class="stack">
+    <h1 style="font-size:52px">Now your<br>questions.</h1>
+    <p class="lead">You have been posting on the wall since before we started. Let us go through them.</p>
+    <div class="cols c4" style="flex:none;gap:10px;margin-top:14px">
+     <div class="card" style="padding:13px 15px;gap:3px"><span class="k" style="font-size:14px">Answer now</span></div>
+     <div class="card" style="padding:13px 15px;gap:3px"><span class="k" style="font-size:14px">That is tomorrow</span></div>
+     <div class="card" style="padding:13px 15px;gap:3px"><span class="k" style="font-size:14px">That is Wednesday</span></div>
+     <div class="card darkc" style="padding:13px 15px;gap:3px"><span class="k" style="font-size:14px">I do not know</span></div>
+    </div>
+   </div>
+   <div class="stack" style="align-items:center">
+    <img class="qr" src="qr-carrot.svg" alt="QR code to carrot.ecrop.dev">
+    <p class="lead" style="font-family:var(--mono);font-size:18px;color:var(--primary)">carrot.ecrop.dev</p>
+    <p class="xs" style="text-align:center">Still open — post now<br>and I will pick it up</p>
+   </div>
+  </div>
+ </div>`,
+ notes:"Take them in the order they landed, not in the order that flatters you. Read each one out before answering it, so the person who wrote it knows it was seen.\n\nSort out loud using the four buckets. Parking something as \"that is Wednesday\" is not a dodge — it shows the week answering their own questions, which is worth more than answering it badly now.\n\nUse the fourth bucket at least once. \"I do not know\" said out loud, early, buys you every other answer you give this week. If nothing genuinely stumps you, say which answer you are least sure about.\n\nKeep an eye on the clock: eight minutes, and the needs-capture slide is next."
+},
+{
+ act:"Act 7 · Go build", n:"29", title:"What do you want this week", time:"6:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Needs-capture, touch 2</div>
+ <div class="body">
+  <div class="cols c2w" style="align-items:center">
+   <div class="stack">
+    <ol class="steps">
+     <li>One thing you want to learn this week.</li>
+     <li>One thing that frustrates you about Claude Code today.</li>
+    </ol>
+   </div>
+   <div class="stack" style="align-items:center">
+    <img class="qr" src="qr-carrot.svg" alt="QR code to carrot.ecrop.dev">
+    <p class="xs" style="font-family:var(--mono);color:var(--primary)">carrot.ecrop.dev</p>
+   </div>
+  </div>
+ </div>`,
+ notes:"Read two arrival posts back. Verbatim: \"Tonight this reshapes tomorrow. Literally.\""
+},
+{
+ act:"Act 7 · Go build", n:"30", title:"The loop, sized", time:"2:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Tomorrow, in one picture</div>
+ <div class="body">
+  <h2 style="flex:none">The loop grows with the risk, not with the ceremony.</h2>
+  <div style="flex:none;margin-top:6px"><svg viewBox="0 0 1070 288" width="100%" style="max-height:322px" role="img" aria-label="The sized loop: three tiers, each adding steps as risk grows"><defs><marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 1 L7 4 L0 7 z" fill="var(--muted-soft)"/></marker></defs><g font-family="var(--sans)"><text x="0" y="50" font-size="20" font-family="var(--serif)" fill="var(--ink)" letter-spacing="-.4">Tier 1</text><text x="0" y="70" font-size="12" fill="var(--muted)">Direct change</text><rect x="186" y="37" width="140" height="34" rx="17" fill="var(--surface-card)"/><text x="256" y="59" text-anchor="middle" font-size="13.5" font-weight="500" fill="var(--ink)">prompt directly</text><path d="M330 54 h14" stroke="var(--muted-soft)" stroke-width="1.5" marker-end="url(#ah)"/><rect x="352" y="37" width="110" height="34" rx="17" fill="var(--surface-card)"/><text x="408" y="59" text-anchor="middle" font-size="13.5" font-weight="500" fill="var(--ink)">self-verify</text><path d="M468 54 h14" stroke="var(--muted-soft)" stroke-width="1.5" marker-end="url(#ah)"/><rect x="490" y="37" width="110" height="34" rx="17" fill="var(--surface-card)"/><text x="545" y="59" text-anchor="middle" font-size="13.5" font-weight="500" fill="var(--ink)">commit / PR</text><text x="186" y="88" font-size="11.5" fill="var(--muted-soft)">one sentence of diff</text><text x="0" y="142" font-size="20" font-family="var(--serif)" fill="var(--ink)" letter-spacing="-.4">Tier 2</text><text x="0" y="162" font-size="12" fill="var(--muted)">Small feature</text><rect x="186" y="129" width="96" height="34" rx="17" fill="var(--surface-card)"/><text x="234" y="151" text-anchor="middle" font-size="13.5" font-weight="500" fill="var(--ink)">plan mode</text><path d="M287 146 h14" stroke="var(--muted-soft)" stroke-width="1.5" marker-end="url(#ah)"/><rect x="309" y="129" width="110" height="34" rx="17" fill="var(--primary)"/><text x="364" y="151" text-anchor="middle" font-size="13.5" font-weight="600" fill="#fff">you approve</text><path d="M424 146 h14" stroke="var(--muted-soft)" stroke-width="1.5" marker-end="url(#ah)"/><rect x="446" y="129" width="81" height="34" rx="17" fill="var(--surface-card)"/><text x="487" y="151" text-anchor="middle" font-size="13.5" font-weight="500" fill="var(--ink)">execute</text><path d="M532 146 h14" stroke="var(--muted-soft)" stroke-width="1.5" marker-end="url(#ah)"/><rect x="554" y="129" width="66" height="34" rx="17" fill="var(--surface-card)"/><text x="587" y="151" text-anchor="middle" font-size="13.5" font-weight="500" fill="var(--ink)">tests</text><path d="M626 146 h14" stroke="var(--muted-soft)" stroke-width="1.5" marker-end="url(#ah)"/><rect x="648" y="129" width="88" height="34" rx="17" fill="var(--surface-card)"/><text x="692" y="151" text-anchor="middle" font-size="13.5" font-weight="500" fill="var(--ink)">small PR</text><text x="186" y="180" font-size="11.5" fill="var(--muted-soft)">one module, approach clear</text><text x="0" y="234" font-size="20" font-family="var(--serif)" fill="var(--ink)" letter-spacing="-.4">Tier 3</text><text x="0" y="254" font-size="12" fill="var(--muted)">Touchpoints</text><rect x="186" y="221" width="81" height="34" rx="17" fill="var(--surface-card)"/><text x="227" y="243" text-anchor="middle" font-size="13.5" font-weight="500" fill="var(--ink)">spec.md</text><path d="M272 238 h14" stroke="var(--muted-soft)" stroke-width="1.5" marker-end="url(#ah)"/><rect x="294" y="221" width="88" height="34" rx="17" fill="var(--surface-card)"/><text x="338" y="243" text-anchor="middle" font-size="13.5" font-weight="500" fill="var(--ink)">opusplan</text><path d="M388 238 h14" stroke="var(--muted-soft)" stroke-width="1.5" marker-end="url(#ah)"/><rect x="410" y="221" width="110" height="34" rx="17" fill="var(--primary)"/><text x="465" y="243" text-anchor="middle" font-size="13.5" font-weight="600" fill="#fff">you approve</text><path d="M525 238 h14" stroke="var(--muted-soft)" stroke-width="1.5" marker-end="url(#ah)"/><rect x="547" y="221" width="81" height="34" rx="17" fill="var(--surface-card)"/><text x="587" y="243" text-anchor="middle" font-size="13.5" font-weight="500" fill="var(--ink)">execute</text><path d="M633 238 h14" stroke="var(--muted-soft)" stroke-width="1.5" marker-end="url(#ah)"/><rect x="655" y="221" width="161" height="34" rx="17" fill="var(--surface-card)"/><text x="736" y="243" text-anchor="middle" font-size="13.5" font-weight="500" fill="var(--ink)">failing test first</text><path d="M821 238 h14" stroke="var(--muted-soft)" stroke-width="1.5" marker-end="url(#ah)"/><rect x="843" y="221" width="74" height="34" rx="17" fill="var(--surface-card)"/><text x="880" y="243" text-anchor="middle" font-size="13.5" font-weight="500" fill="var(--ink)">review</text><path d="M922 238 h14" stroke="var(--muted-soft)" stroke-width="1.5" marker-end="url(#ah)"/><rect x="944" y="221" width="110" height="34" rx="17" fill="var(--surface-card)"/><text x="999" y="243" text-anchor="middle" font-size="13.5" font-weight="500" fill="var(--ink)">stacked PRs</text><text x="186" y="272" font-size="11.5" fill="var(--muted-soft)">cross-module, fragile, or spans people</text></g></svg></div>
+  <div class="foot">Ask in order: could you describe the diff in one sentence? → Tier 1. Does it cross modules, touch fragile code, or carry security surface? → Tier 3. Will someone review it cold? → Tier 3. Otherwise → Tier 2.</div>
+ </div>`,
+ notes:"Do not teach this today — just show it and let it sit. \"If you can describe the diff in one sentence, skip the plan. Those are Anthropic's words, not mine. Tomorrow we live inside the middle row, and by Thursday you will have run the bottom one.\"\n\nThe honest framing: it is a menu with a sizing rule, not a pipeline. Never \"from now on you must\"."
+},
+{
+ act:"Act 7 · Go build", n:"31", title:"Tomorrow, and the promise", time:"3:00", dark:true,
+ html:`<div class="eyebrow"><span class="dot"></span>Close</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center">
+    <h1 style="font-size:50px">Tomorrow:<br>the loop.</h1>
+    <blockquote style="font-size:22px;border-color:var(--amber)">If you can describe the diff in one sentence, skip the plan.<cite>Anthropic docs</cite></blockquote>
+    <p class="sm" style="color:var(--on-dark-soft);margin-top:8px">The wall's code, spec and plan are public now.<br><span style="font-family:var(--mono);color:var(--amber)">github.com/eCrop/carrot-wall</span></p>
+   </div>
+   <figure>
+    <img src="04b-intent-work-output.png" alt="eight intents with a dependency table">
+    <figcaption>04b · tomorrow's opening exhibit — one spec, split into eight intents with a dependency table</figcaption>
+   </figure>
+  </div>
+ </div>`,
+ notes:"\"Read how it was built tonight if you are curious. The spec and plan are in the root. That is tomorrow's opening exhibit.\"\n\nBy Friday you will have touched everything you saw today. On your own repos."
+}
+];
+
+/* ---------- render ---------- */
+const stage=document.getElementById('stage');
+D.forEach((s,i)=>{
+  const el=document.createElement('section');
+  el.className='slide'+(s.dark?' dark':'')+(s.coral?' coral':'');
+  el.dataset.i=i;
+  el.innerHTML=s.html;
+  stage.appendChild(el);
+});
+const slides=[...document.querySelectorAll('.slide')];
+let cur=0;
+
+function fit(){
+  const w=window.innerWidth-(document.body.classList.contains('notes-on')?380:0);
+  const h=window.innerHeight;
+  const k=Math.min((w-48)/1280,(h-72)/720);
+  stage.style.transform='scale('+k+')';
+}
+function show(i){
+  cur=Math.max(0,Math.min(D.length-1,i));
+  slides.forEach((s,j)=>s.classList.toggle('active',j===cur));
+  const s=D[cur];
+  document.getElementById('count').textContent=s.n+'  ·  '+(cur+1)+'/'+D.length;
+  document.getElementById('actlbl').textContent=s.act.split(' · ')[0];
+  document.getElementById('bar').style.width=((cur+1)/D.length*100)+'%';
+  document.getElementById('n-title').textContent=s.n+' · '+s.title;
+  document.getElementById('n-time').textContent=s.act+'  ·  '+s.time;
+  document.getElementById('n-text').textContent=s.notes||'';
+  document.getElementById('n-assets').innerHTML=s.gap?'<b>Gap:</b> '+s.gap:'<b>Assets:</b> complete';
+  const nx=D[cur+1];
+  document.getElementById('n-next').innerHTML=nx?'Next<b>'+nx.n+' · '+nx.title+'</b>':'Next<b>— end —</b>';
+  [...document.querySelectorAll('.ovcell')].forEach((c,j)=>c.classList.toggle('cur',j===cur));
+  location.hash=s.n;
+}
+/* overview */
+const og=document.getElementById('ovgrid');
+D.forEach((s,i)=>{
+  const c=document.createElement('div');
+  c.className='ovcell';
+  c.innerHTML='<span class="n">'+s.n+'</span><span class="t">'+s.title+'</span>'+
+    (s.gap?'<span class="flag">gap</span>':'')+'<span class="a">'+s.act.split(' · ')[0]+'</span>';
+  c.onclick=()=>{show(i);toggle('overview',false)};
+  og.appendChild(c);
+});
+function toggle(id,on){
+  const el=document.getElementById(id);
+  el.classList.toggle('on',on===undefined?!el.classList.contains('on'):on);
+}
+function notes(){document.body.classList.toggle('notes-on');fit()}
+
+document.addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  const k=e.key;
+  if(k==='Escape'){toggle('overview',false);toggle('help',false);return}
+  if(k==='ArrowRight'||k==='ArrowDown'||k===' '||k==='PageDown'){e.preventDefault();show(cur+1)}
+  else if(k==='ArrowLeft'||k==='ArrowUp'||k==='PageUp'){e.preventDefault();show(cur-1)}
+  else if(k==='Home'){show(0)} else if(k==='End'){show(D.length-1)}
+  else if(k==='n'||k==='N'){notes()}
+  else if(k==='o'||k==='O'){toggle('overview')}
+  else if(k==='?'){toggle('help')}
+  else if(k==='f'||k==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  else if(/^[1-7]$/.test(k)){
+    const t=D.findIndex(s=>s.act.startsWith('Act '+k));
+    if(t>=0)show(t);
+  }
+});
+document.querySelectorAll('#hud button').forEach(b=>{
+  b.onclick=()=>{const g=b.dataset.go;
+    if(g==='next')show(cur+1); else if(g==='prev')show(cur-1);
+    else if(g==='notes')notes(); else if(g==='overview')toggle('overview'); else toggle('help');
+  };
+});
+window.addEventListener('resize',fit);
+const start=D.findIndex(s=>s.n===location.hash.replace('#',''));
+fit();show(start>=0?start:0);
+</script>
+</body>
+</html>

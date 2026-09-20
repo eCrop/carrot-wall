@@ -13,7 +13,7 @@ import jakarta.enterprise.event.Observes;
 @ApplicationScoped
 public class SpaRoutes {
 
-    private static final String[] SPA_PATHS = { "/post", "/tv", "/admin" };
+    private static final String[] SPA_PATHS = { "/post", "/tv", "/admin", "/materials" };
 
     void registerSpaFallback(@Observes Router router) {
         for (String path : SPA_PATHS) {
