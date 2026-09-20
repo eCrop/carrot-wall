@@ -1,0 +1,16 @@
+<main class="materials">
+  <a routerLink="/" class="back">← Voltar ao mural</a>
+  <h1>Materiais</h1>
+  <p class="subtitle">Slides e guias do curso.</p>
+
+  <ul class="list">
+    @for (item of materials; track item.href) {
+      <li>
+        <a [href]="item.href" target="_blank" rel="noopener">
+          <span class="title">{{ item.title }}</span>
+          <span class="link-subtitle">{{ item.subtitle }} →</span>
+        </a>
+      </li>
+    }
+  </ul>
+</main>

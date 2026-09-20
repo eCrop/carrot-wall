@@ -53,15 +53,30 @@
   cursor: pointer;
 }
 
-.wall-new-post {
-  display: block;
-  width: fit-content;
+.wall-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
   margin: 0 auto 1.5rem;
+  width: fit-content;
+}
+
+.wall-new-post,
+.wall-materials {
   padding: 0.625rem 1.5rem;
-  background: var(--wall-accent);
-  color: var(--wall-bg);
   border-radius: 999px;
   font: inherit;
   font-weight: 500;
   text-decoration: none;
+}
+
+.wall-new-post {
+  background: var(--wall-accent);
+  color: var(--wall-bg);
+}
+
+.wall-materials {
+  background: transparent;
+  color: var(--wall-ink);
+  border: 1px solid var(--wall-hairline);
 }

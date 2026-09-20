@@ -8,7 +8,10 @@
 </header>
 
 @if (!admin()) {
-  <a routerLink="/post" class="wall-new-post">✍️ Nova mensagem</a>
+  <div class="wall-actions">
+    <a routerLink="/post" class="wall-new-post">✍️ Nova mensagem</a>
+    <a routerLink="/materials" class="wall-materials">📚 Materiais</a>
+  </div>
   <app-pinned-carousel [posts]="pinnedPosts()" />
 }
 
