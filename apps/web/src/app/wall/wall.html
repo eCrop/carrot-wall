@@ -8,13 +8,16 @@
 </header>
 
 @if (!admin()) {
+  <a routerLink="/post" class="wall-new-post">✍️ Nova mensagem</a>
   <app-pinned-carousel [posts]="pinnedPosts()" />
 }
 
 @if (loaded() && posts().length === 0) {
   <div class="wall-empty">
     <p>Ainda não há mensagens no mural.</p>
-    <p>Sê a primeira pessoa a escrever — aponta a câmara ao código QR para começar.</p>
+    <p>
+      Sê a primeira pessoa a escrever — carrega em «Nova mensagem» ou aponta a câmara ao código QR.
+    </p>
   </div>
 } @else if (gridPosts().length > 0) {
   <div class="wall-grid">

@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { getClientToken } from '../client-token';
 
@@ -37,7 +37,7 @@ const GENERIC_ERROR = 'Não foi possível enviar. Tenta outra vez.';
 @Component({
   selector: 'app-post',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './post.html',
   styleUrl: './post.scss',
 })
