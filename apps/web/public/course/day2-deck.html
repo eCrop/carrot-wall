@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 2 · The Loop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#cc785c; --primary-active:#a9583e;
+  --ink:#141413; --body:#3d3d3a; --body-strong:#252523;
+  --muted:#6c6a64; --muted-soft:#8e8b82;
+  --hairline:#e6dfd8; --hairline-soft:#ebe6df;
+  --canvas:#faf9f5; --surface-soft:#f5f0e8; --surface-card:#efe9de; --cream-strong:#e8e0d2;
+  --dark:#181715; --dark-elev:#252320; --dark-soft:#1f1e1b;
+  --on-dark:#faf9f5; --on-dark-soft:#a09d96;
+  --teal:#5db8a6; --amber:#e8a55a; --success:#5db872; --warning:#d4a017; --error:#c64545;
+  --serif:"Cormorant Garamond","Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+  --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--canvas); color:var(--ink);
+  font-family:var(--sans); font-size:16px; line-height:1.55;
+  overflow:hidden;
+}
+
+/* ---------- stage ---------- */
+#stage-wrap{position:fixed;inset:0;display:grid;place-items:center;background:var(--canvas)}
+body.notes-on #stage-wrap{inset:0 380px 0 0}
+#stage{
+  width:1280px;height:720px;position:relative;
+  transform-origin:center center;
+  background:var(--canvas);
+  box-shadow:0 1px 3px rgba(20,20,19,.08);
+  overflow:hidden;
+}
+.slide{
+  position:absolute;inset:0;display:none;
+  padding:56px 64px;
+  flex-direction:column;
+}
+.slide.active{display:flex}
+.slide.dark{background:var(--dark);color:var(--on-dark)}
+.slide.dark .eyebrow{color:var(--on-dark-soft)}
+.slide.dark h1,.slide.dark h2{color:var(--on-dark)}
+.slide.dark p,.slide.dark li{color:var(--on-dark-soft)}
+.slide.coral{background:var(--primary);color:#fff}
+.slide.coral h1,.slide.coral h2,.slide.coral p{color:#fff}
+
+/* ---------- type ---------- */
+.eyebrow{
+  font-size:12px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:20px;display:flex;gap:12px;align-items:center;
+}
+.eyebrow .dot{width:5px;height:5px;border-radius:50%;background:var(--primary);flex:none}
+h1{font-family:var(--serif);font-weight:500;font-size:58px;line-height:1.05;letter-spacing:-1.4px;color:var(--ink)}
+h2{font-family:var(--serif);font-weight:500;font-size:42px;line-height:1.1;letter-spacing:-1px;color:var(--ink)}
+h3{font-family:var(--serif);font-weight:500;font-size:29px;line-height:1.15;letter-spacing:-.5px;color:var(--ink)}
+.lead{font-size:20px;line-height:1.45;color:var(--body-strong);font-weight:400}
+p{font-size:17px;color:var(--body)}
+.sm{font-size:15px}
+.xs{font-size:13.5px;color:var(--muted)}
+strong{font-weight:600;color:var(--ink)}
+.slide.dark strong{color:var(--on-dark)}
+em.q{font-style:italic;font-family:var(--serif);font-size:1.1em;letter-spacing:-.2px}
+.coralword{color:var(--primary)}
+.slide.dark .coralword{color:var(--amber)}
+
+/* ---------- layout helpers ---------- */
+.body{flex:1;display:flex;flex-direction:column;gap:18px;min-height:0;justify-content:center}
+.cols{display:grid;gap:26px;flex:1;min-height:0}
+.c2{grid-template-columns:1fr 1fr}
+.c2w{grid-template-columns:1.15fr .85fr}
+.c2n{grid-template-columns:.82fr 1.18fr}
+.c3{grid-template-columns:repeat(3,1fr)}
+.c4{grid-template-columns:repeat(4,1fr)}
+.stack{display:flex;flex-direction:column;gap:14px;justify-content:center}
+.center{justify-content:center;align-items:flex-start}
+.mid{justify-content:center}
+
+/* ---------- cards ---------- */
+.card{background:var(--surface-card);border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:8px}
+.card.plain{background:transparent;border:1px solid var(--hairline)}
+.card.darkc{background:var(--dark);color:var(--on-dark)}
+.card.darkc h3,.card.darkc .k{color:var(--on-dark)}
+.card.darkc p,.card.darkc .v{color:var(--on-dark-soft)}
+.card.darkc .v strong{color:var(--on-dark)}
+.card .k{font-size:16px;font-weight:600;color:var(--ink)}
+.card .v{font-size:15px;color:var(--body);line-height:1.5}
+.stat{font-family:var(--serif);font-size:56px;line-height:1;letter-spacing:-2px;color:var(--primary);font-weight:500}
+.slide.dark .stat{color:var(--amber)}
+
+.hrm{display:grid;grid-template-columns:104px 1fr;gap:10px 18px;align-items:baseline}
+.hrm .lbl{font-size:11px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted-soft);padding-top:4px}
+.hrm .lbl.move{color:var(--primary)}
+.hrm .txt{font-size:17px;color:var(--body);line-height:1.45}
+.hrm .txt strong{color:var(--ink)}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-family:var(--mono);font-size:13.5px;background:var(--surface-card);color:var(--ink);border-radius:9999px;padding:5px 13px}
+.slide.dark .chip{background:var(--dark-elev);color:var(--on-dark)}
+.pill{font-size:11px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;border-radius:9999px;padding:4px 11px;background:var(--surface-card);color:var(--ink)}
+.pill.coral{background:var(--primary);color:#fff}
+.pill.warn{background:#f6e6c8;color:#7a5a08}
+.pill.term{background:var(--dark);color:var(--on-dark)}
+
+blockquote{
+  border-left:2px solid var(--primary);padding-left:20px;
+  font-family:var(--serif);font-size:27px;line-height:1.28;letter-spacing:-.4px;color:var(--ink);font-weight:500;
+}
+.slide.dark blockquote{color:var(--on-dark)}
+blockquote cite{display:block;font-family:var(--sans);font-size:13px;font-style:normal;color:var(--muted);margin-top:12px;letter-spacing:0;font-weight:500}
+.slide.dark blockquote cite{color:var(--on-dark-soft)}
+
+/* ---------- assets ---------- */
+figure{margin:0;display:flex;flex-direction:column;gap:7px;min-height:0;flex:1}
+figure img{
+  width:100%;height:100%;object-fit:cover;object-position:top left;
+  border-radius:12px;border:1px solid var(--hairline);background:var(--dark);
+  display:block;min-height:0;
+}
+figure img.contain{object-fit:contain;object-position:center;background:var(--dark)}
+figure img.bottom{object-position:bottom left}
+figcaption{font-size:12px;color:var(--muted-soft);font-family:var(--mono);flex:none}
+.slide.dark figcaption{color:var(--on-dark-soft)}
+.shotgrid{display:grid;gap:12px;flex:1;min-height:0}
+figure.vid{flex:none}
+figure.vid video{height:380px}
+video{width:100%;border-radius:12px;background:#000;object-fit:contain;display:block}
+
+.missing{
+  position:absolute;top:18px;right:22px;z-index:5;
+  font-size:10.5px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;
+  background:#f6e6c8;color:#7a5a08;border-radius:9999px;padding:5px 12px;
+  display:flex;gap:7px;align-items:center;cursor:default;
+}
+.slide.dark .missing{background:#4a3c18;color:#f0dcae}
+.gapnote{
+  background:#faf1dd;border-left:2px solid var(--warning);border-radius:0 8px 8px 0;
+  padding:11px 15px;font-size:13.5px;color:#6b5410;line-height:1.45;flex:none;
+}
+.slide.dark .gapnote{background:#2a2317;color:#d8c38c;border-color:var(--amber)}
+.gapnote b{color:#4a3a06}
+.slide.dark .gapnote b{color:#f0dcae}
+
+/* ---------- chrome ---------- */
+#chrome{position:fixed;left:0;right:0;bottom:0;height:0;z-index:40}
+body.notes-on #chrome{right:380px}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:var(--primary);transition:width .22s ease;z-index:41}
+#hud{
+  position:fixed;bottom:14px;left:0;right:0;display:flex;justify-content:center;gap:14px;
+  align-items:center;pointer-events:none;z-index:42;
+}
+body.notes-on #hud{right:380px}
+#hud .grp{
+  pointer-events:auto;display:flex;gap:2px;align-items:center;
+  background:rgba(250,249,245,.94);border:1px solid var(--hairline);border-radius:9999px;padding:4px;
+  backdrop-filter:blur(8px);
+}
+#hud button{
+  border:0;background:transparent;color:var(--muted);font-family:var(--sans);font-size:12.5px;font-weight:500;
+  padding:6px 12px;border-radius:9999px;cursor:pointer;
+}
+#hud button:hover{background:var(--surface-card);color:var(--ink)}
+#hud .count{font-family:var(--mono);font-size:12px;color:var(--muted);padding:0 12px;min-width:86px;text-align:center}
+#hud .act{font-size:11px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--primary);padding:0 10px}
+
+/* ---------- notes ---------- */
+#notes{
+  position:fixed;top:0;right:0;bottom:0;width:380px;background:var(--dark);color:var(--on-dark);
+  padding:26px 24px;overflow-y:auto;display:none;z-index:45;border-left:1px solid #000;
+}
+body.notes-on #notes{display:block}
+#notes h4{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--amber);margin-bottom:12px}
+#notes .nslide{font-family:var(--serif);font-size:24px;letter-spacing:-.4px;color:var(--on-dark);margin-bottom:6px;font-weight:500}
+#notes .ntime{font-family:var(--mono);font-size:12px;color:var(--on-dark-soft);margin-bottom:20px}
+#notes .ntext{font-size:14.5px;line-height:1.62;color:#d6d2ca;white-space:pre-wrap}
+#notes .nassets{margin-top:22px;padding-top:18px;border-top:1px solid #333029;font-size:13px;color:var(--on-dark-soft);line-height:1.6}
+#notes .nassets b{color:var(--amber);font-weight:600}
+#notes .nnext{margin-top:22px;padding-top:18px;border-top:1px solid #333029;font-size:13px;color:var(--on-dark-soft)}
+#notes .nnext b{color:#fff;display:block;margin-top:4px;font-family:var(--serif);font-size:17px;letter-spacing:-.3px}
+
+/* ---------- overview ---------- */
+#overview{
+  position:fixed;inset:0;background:rgba(250,249,245,.985);z-index:60;display:none;
+  overflow-y:auto;padding:40px 44px;
+}
+#overview.on{display:block}
+#overview h3{margin-bottom:22px}
+.ovgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:14px}
+.ovcell{
+  border:1px solid var(--hairline);border-radius:10px;background:var(--surface-soft);
+  padding:12px 13px;cursor:pointer;min-height:92px;display:flex;flex-direction:column;gap:6px;
+}
+.ovcell:hover{border-color:var(--primary)}
+.ovcell.cur{border-color:var(--primary);background:var(--surface-card)}
+.ovcell .n{font-family:var(--mono);font-size:11px;color:var(--muted-soft)}
+.ovcell .t{font-size:13.5px;font-weight:500;color:var(--ink);line-height:1.3}
+.ovcell .a{font-size:10px;letter-spacing:1.1px;text-transform:uppercase;color:var(--primary);font-weight:600;margin-top:auto}
+.ovcell .flag{font-size:10px;color:#7a5a08;background:#f6e6c8;border-radius:9999px;padding:2px 7px;align-self:flex-start}
+
+/* ---------- help ---------- */
+#help{position:fixed;inset:0;background:rgba(20,20,19,.72);z-index:70;display:none;place-items:center}
+#help.on{display:grid}
+#help .box{background:var(--canvas);border-radius:16px;padding:34px 38px;max-width:460px}
+#help h3{margin-bottom:18px}
+#help dl{display:grid;grid-template-columns:auto 1fr;gap:9px 18px;font-size:14.5px}
+#help dt{font-family:var(--mono);font-size:12.5px;color:var(--ink);background:var(--surface-card);padding:2px 9px;border-radius:5px;justify-self:start}
+#help dd{color:var(--body)}
+
+/* ---------- tables ---------- */
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+th{text-align:left;font-size:11px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted-soft);padding:0 12px 9px 0;border-bottom:1px solid var(--hairline)}
+td{padding:9px 12px 9px 0;border-bottom:1px solid var(--hairline-soft);color:var(--body);vertical-align:top}
+td.mono{font-family:var(--mono);font-size:13px;color:var(--ink)}
+td.ok{color:var(--ink);font-weight:500}
+tr:last-child td{border-bottom:0}
+
+ul.clean{list-style:none;display:flex;flex-direction:column;gap:9px}
+ul.clean li{font-size:16.5px;color:var(--body);padding-left:18px;position:relative;line-height:1.45}
+ul.clean li::before{content:"";position:absolute;left:0;top:10px;width:5px;height:5px;border-radius:50%;background:var(--primary)}
+ol.steps{list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:13px}
+ol.steps li{counter-increment:s;font-size:18px;color:var(--body);padding-left:42px;position:relative;line-height:1.4}
+ol.steps li::before{
+  content:counter(s);position:absolute;left:0;top:-1px;width:28px;height:28px;border-radius:50%;
+  background:var(--primary);color:#fff;font-size:13px;font-weight:600;display:grid;place-items:center;font-family:var(--sans);
+}
+.vidhead{display:flex;justify-content:space-between;align-items:center;gap:24px;flex:none;margin-bottom:12px}
+.vidhead .eyebrow{margin-bottom:0}
+.qrinline{display:flex;gap:13px;align-items:center}
+.qrinline img{width:96px;height:96px;border-radius:8px;background:var(--canvas);padding:4px;display:block}
+.qrinline .lbl{display:block;font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--on-dark-soft);margin-bottom:4px}
+.qrinline .url{display:block;font-family:var(--mono);font-size:14px;color:var(--amber)}
+.qr{width:168px;height:168px;border-radius:12px;flex:none;background:var(--canvas);padding:6px}
+figure.noimg img,figure.noimg figcaption{display:none}
+figure.noimg::before{content:"bizpliz-hero.png";display:grid;place-items:center;flex:1;border:2px dashed var(--hairline);border-radius:12px;font-family:var(--mono);font-size:12px;color:var(--muted-soft)}
+.slide.dark .qr{border-color:#3a352d;color:var(--on-dark-soft)}
+.logorow{display:flex;gap:26px;align-items:center;margin-top:auto}
+.logoplate{
+  margin-top:auto;align-self:flex-start;display:flex;align-items:center;gap:30px;
+  background:var(--canvas);border-radius:12px;padding:18px 30px;
+}
+.logoplate img{display:block;width:auto}
+.logoplate .lsep{width:1px;align-self:stretch;background:var(--hairline)}
+.logoslot{
+  height:42px;min-width:108px;border-radius:8px;border:1px dashed #3a352d;
+  display:grid;place-items:center;font-size:10.5px;color:var(--on-dark-soft);font-family:var(--mono);padding:0 14px;
+}
+.slide:not(.dark) .logoslot{border-color:var(--hairline);color:var(--muted-soft)}
+.foot{margin-top:auto;padding-top:14px;border-top:1px solid var(--hairline);font-size:13px;color:var(--muted);flex:none}
+.slide.dark .foot{border-color:#2c2823;color:var(--on-dark-soft)}
+.weekmap{display:grid;grid-template-columns:1fr 1fr 1fr 106px 1fr 1fr;gap:11px;align-items:stretch}
+.day{background:var(--surface-card);border-radius:12px;padding:19px 17px;display:flex;flex-direction:column;gap:7px}
+.day.gap{background:transparent;border:1px dashed var(--hairline)}
+.day.dest{background:var(--primary);color:#fff}
+.day .dnum{font-size:11px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted)}
+.day.dest .dnum{color:rgba(255,255,255,.8)}
+.day .dt{font-family:var(--serif);font-size:23px;letter-spacing:-.5px;line-height:1.1;color:var(--ink);font-weight:500}
+.day.dest .dt{color:#fff}
+.gapweek{border:1px dashed var(--hairline);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:10px 8px;text-align:center}
+.gapweek .gw1{font-family:var(--serif);font-size:15px;line-height:1.15;letter-spacing:-.2px;color:var(--muted);font-style:italic}
+.gapweek .gw2{font-size:10px;font-weight:600;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted-soft)}
+.loopdiag{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.loopstep{background:var(--surface-card);border-radius:9999px;padding:10px 20px;font-size:15.5px;font-weight:500;color:var(--ink)}
+.loopar{color:var(--primary);font-size:17px}
+.gear{border:1px solid var(--hairline);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:5px}
+.gear .gn{font-size:15px;font-weight:600;color:var(--ink)}
+.gear .gd{font-size:13.5px;color:var(--muted);line-height:1.45}
+.modelrow{display:grid;grid-template-columns:104px 1fr;gap:6px 18px;align-items:baseline;padding:11px 0;border-bottom:1px solid var(--hairline-soft)}
+.modelrow:last-of-type{border-bottom:0}
+.modelrow .mn{font-family:var(--serif);font-size:24px;letter-spacing:-.5px;color:var(--ink);font-weight:500}
+.modelrow .md{font-size:15px;color:var(--body)}
+.modecycle{position:relative;flex:none;height:186px;background:var(--dark);border-radius:12px;overflow:hidden}
+.mstate{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:9px;padding:22px 26px;opacity:0;animation:mcyc 8.4s infinite}
+.mstate:nth-child(1){animation-delay:0s}
+.mstate:nth-child(2){animation-delay:2.8s}
+.mstate:nth-child(3){animation-delay:5.6s}
+@keyframes mcyc{0%,1%{opacity:0}4%,29%{opacity:1}33%,100%{opacity:0}}
+.mstate .mprompt{font-family:var(--mono);font-size:14px;color:#57534a}
+.mstate .mbar{font-family:var(--mono);font-size:16.5px;font-weight:500;display:flex;gap:10px;align-items:center}
+.mstate .mwhat{font-size:14px;color:var(--on-dark-soft)}
+.mstate .mkey{font-family:var(--mono);font-size:12px;color:#57534a}
+.mcap{flex:none;font-size:12px;color:var(--muted-soft);font-family:var(--mono);margin-top:7px}
+.hooklist{display:flex;flex-direction:column;gap:7px}
+.hookrow{display:flex;gap:12px;align-items:baseline;padding:9px 14px;background:var(--surface-card);border-radius:9px}
+.hookrow .hx{color:var(--error);font-weight:700;font-size:14px;flex:none;line-height:1.3}
+.hookrow .ht{font-size:14.5px;color:var(--ink);line-height:1.35}
+.hookrow.ok{background:var(--surface-soft)}
+.hookrow.ok .hx{color:var(--success)}
+@media print{body{overflow:visible}.slide{display:flex!important;page-break-after:always}}
+</style>
+</head>
+<body>
+
+<div id="stage-wrap"><div id="stage"></div></div>
+<div id="bar"></div>
+<div id="hud">
+  <div class="grp">
+    <button data-go="prev">←</button>
+    <span class="count" id="count">00 · 1/29</span>
+    <button data-go="next">→</button>
+  </div>
+  <div class="grp"><span class="act" id="actlbl">Act 1</span></div>
+  <div class="grp">
+    <button data-go="notes">Notes</button>
+    <button data-go="overview">All slides</button>
+    <button data-go="help">?</button>
+  </div>
+</div>
+
+<aside id="notes">
+  <h4>Speaker notes</h4>
+  <div class="nslide" id="n-title"></div>
+  <div class="ntime" id="n-time"></div>
+  <div class="ntext" id="n-text"></div>
+  <div class="nassets" id="n-assets"></div>
+  <div class="nnext" id="n-next"></div>
+</aside>
+
+<div id="overview"><h3>Day 1 · all slides</h3><div class="ovgrid" id="ovgrid"></div></div>
+
+<div id="help"><div class="box">
+  <h3>Keyboard</h3>
+  <dl>
+    <dt>→ ↓ Space</dt><dd>Next slide</dd>
+    <dt>← ↑</dt><dd>Previous slide</dd>
+    <dt>Home / End</dt><dd>First / last slide</dd>
+    <dt>N</dt><dd>Speaker notes panel</dd>
+    <dt>O</dt><dd>Overview of all slides</dd>
+    <dt>F</dt><dd>Fullscreen</dd>
+    <dt>1–9</dt><dd>Jump to act</dd>
+    <dt>Esc</dt><dd>Close overlay</dd>
+  </dl>
+</div></div>
+
+<script>
+const SHOTS = ""; // assets sit beside this file
+const D = [
+/* ============ ACT 1 · RECONNECT ============ */
+{
+ act:"Act 1 · Reconnect", n:"00", title:"Holding slide", time:"from −10 min",
+ html:`<div class="eyebrow"><span class="dot"></span>While we wait</div>
+ <div class="body">
+  <div class="cols c2w" style="align-items:center">
+   <div class="stack">
+    <h1>Day 2. The wall is still open.</h1>
+    <p class="lead" style="font-family:var(--serif);font-size:28px;letter-spacing:-.6px;color:var(--primary)">What did you get working yesterday, and what fought you?</p>
+    <p class="sm">Both go on the wall. I read the second one more carefully than the first.</p>
+   </div>
+   <div class="stack" style="align-items:center">
+    <img class="qr" src="qr-carrot.svg" alt="QR code to carrot.ecrop.dev">
+    <p class="lead" style="font-family:var(--mono);font-size:19px;color:var(--primary)">carrot.ecrop.dev</p>
+   </div>
+  </div>
+ </div>`,
+ notes:"Same wall, second day. The prompt changes: yesterday was what they wanted from the week, today it is what worked and what fought them.\n\nAnswer two or three out loud as they settle, and hold the good ones back for the kickoff."
+},
+{
+ act:"Act 1 · Reconnect", n:"01", title:"The wall · speed vs the gates", time:"4:30",
+ html:`<div class="eyebrow"><span class="dot"></span>Yesterday's wall · batch 1 of 3</div>
+ <div class="body">
+  <h2 style="flex:none">Can review keep up with it?</h2>
+  <div class="cols c3" style="flex:none">
+   <div class="card plain" style="gap:6px"><span class="k" style="font-size:14px">"Como garantem QA com human review com a velocidade que o Claude gera código?"</span><span class="v" style="font-size:12px;color:var(--muted)">Filipe · &#9650;1</span></div>
+   <div class="card plain" style="gap:6px"><span class="k" style="font-size:14px">"Como é que no BizPliz a code review, que é 100% humana, acompanha a velocidade de produção do Claude?"</span><span class="v" style="font-size:12px;color:var(--muted)">Anónimo</span></div>
+   <div class="card plain" style="gap:6px"><span class="k" style="font-size:14px">"How can we use AI or Claude Code for testing?"</span><span class="v" style="font-size:12px;color:var(--muted)">Anónimo</span></div>
+  </div>
+  <div class="card darkc" style="flex:none">
+   <span class="k">The honest answer</span>
+   <span class="v">Not at that speed, and we will not drop the human gates to chase it. What we did instead: everything <strong>repeatable</strong> got automated. Claude runs every kind of test a person would run: unit, integration, end to end in a real browser, curl against the API. That leaves the human reviewer with the decisions that need a human. The overhead never fully goes away. At BizPliz it was always there. What changed is that reviewers now gate the work instead of chasing it.</span>
+  </div>
+  <p class="sm" style="margin-top:auto">Open floor: who felt this yesterday? Today's loop is the long answer. Verify and ship are these gates.</p>
+ </div>`,
+ notes:"Batch of three because they are one question: what happens to human verification at machine speed.\n\nThe BizPliz truth, unhurried: the process did not fully keep up. Atomic reviews of each other's work; the review pile always larger than the work pile. The silver lining — developers ended up more involved in QA of their own project. Automated review gates made it as digestible and fast as it could be, and the overhead was still there. Do not pretend otherwise; the credibility of the whole week rests on this answer staying honest.\n\nOn testing: all of it — generation and execution. Unit, integration, e2e through Playwright CLI or MCP in a real browser, curl against APIs. Everything a human tests, it tests.\n\nThen the bridge, and it is a gift: \"You asked this before I taught it. The loop we build today IS the answer — execute and verify are the automated gates, ship is where the human stays.\"\n\nOpen floor two minutes: anyone else hit the review wall yesterday?"
+},
+{
+ act:"Act 1 · Reconnect", n:"02", title:"The wall · where the tokens go", time:"4:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Yesterday's wall · batch 2 of 3</div>
+ <div class="body">
+  <h2 style="flex:none">Where do the tokens go?</h2>
+  <div class="cols c2" style="flex:none">
+   <div class="card plain" style="gap:6px"><span class="k" style="font-size:14.5px">"Já uso bastante, gostava de otimizar o meu token consumption."</span><span class="v" style="font-size:12px;color:var(--muted)">Filipe</span></div>
+   <div class="card plain" style="gap:6px"><span class="k" style="font-size:14.5px">"How do you integrate Claude Code with other MCP and external tools? The do's and dont's."</span><span class="v" style="font-size:12px;color:var(--muted)">Anónimo</span></div>
+  </div>
+  <div class="card darkc" style="flex:none">
+   <span class="k">One discipline answers both: audit, then judge</span>
+   <span class="v">First find the big spenders. <code>/context</code> is the audit. Then ask whether each one has earned it. Heavy spend on light work usually means the <strong>wrong model, too much effort, or too many steps</strong>. Sometimes it means a harness with rules that contradict each other, so the model burns tokens deciding which one to follow. MCPs work the same way: every connected server puts its tool definitions into your context. <strong>Keep the ones you use every day. Switch the rest off.</strong></span>
+  </div>
+  <p class="sm" style="margin-top:auto">Sizing and effort are this morning. The MCP session, with the full do's and don'ts, is Wednesday.</p>
+ </div>`,
+ notes:"These two are the same lesson wearing different clothes: context is the budget, and both questions are about spending it deliberately.\n\nThe audit order matters: identify the biggest spenders first, THEN judge whether each is worth it. Big spend on hard work is fine — that is what fable and high effort are for. Big spend on mechanical work means wrong model or over-processing. And the sneaky one: a harness with contradictory information makes the model spend tokens being indecisive. Depends on the case; it has to be audited.\n\nMCP economics in one line: docs at code.claude.com/docs/en/mcp, install is often as easy as 'install the notion MCP' — but every tool definition is injected into the system prompt, so an exhaustive list of connections pollutes the window. Daily-useful stays connected, the rest gets switched off.\n\nBridge: \"The Sized Loop in an hour is exactly this discipline — matching spend to the size of the job.\""
+},
+{
+ act:"Act 1 · Reconnect", n:"03", title:"The wall · the harness answers", time:"4:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Yesterday's wall · batch 3 of 3</div>
+ <div class="body">
+  <h2 style="flex:none">Two different questions. Same answer.</h2>
+  <div class="cols c2" style="flex:none">
+   <div class="card plain" style="gap:6px"><span class="k" style="font-size:14.5px">"Como evitar ao máximo AI slop e alucinações?"</span><span class="v" style="font-size:12px;color:var(--muted)">Anónimo</span></div>
+   <div class="card plain" style="gap:6px"><span class="k" style="font-size:14.5px">"Como usar em equipa?"</span><span class="v" style="font-size:12px;color:var(--muted)">Filipe</span></div>
+  </div>
+  <div class="card darkc" style="flex:none">
+   <span class="k">The harness</span>
+   <span class="v">Against slop: use the capable models where the work is hard, and write rules and skills that carry <strong>the engineering knowledge you want the model to follow</strong>. For the team: that same harness is a folder in the repo, so whoever pulls gets it. A skill can also reach further. It can read the board and your teammates' open branches, and plan around what the team is already doing.</span>
+  </div>
+  <p class="sm" style="margin-top:auto">You built the first pieces of yours yesterday. The shared, team version is Wednesday.</p>
+ </div>`,
+ notes:"The satisfying pair: a quality question and a collaboration question with the same root answer.\n\nSlop and hallucinations, two levers: more capable models incide less (opus, fable — for the tasks that deserve them), and the harness — rules, skills, the engineering judgment written where the model reads it. Yesterday's four pitfalls were the free half of this answer.\n\nTeam use, the part they have not seen: .claude/ persists in the repo, so the setup is shared by git, not by onboarding docs. Then the step beyond: a spec or plan skill that contextualizes the Jira board and pulls teammates' branches, so Claude sees in-flight work and can flag collisions or opportunities to collaborate before the plan is written.\n\nBridge: \"Yesterday you each built a harness alone. Wednesday we make one the whole team shares.\"\n\nOpen floor: anything from yesterday these three batches did not cover? Miguel's bmad and hero.ai question is deliberately parked for Wednesday, when plugins and plugin selection get their own morning. Say so if he asks. Then the bridge into effort."
+},
+{
+ act:"Act 1 · Reconnect", n:"04", title:"Effort · the dial we skipped", time:"6:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Two dials, not one</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center">
+    <h2>Model is how well<br>it thinks. Effort is<br>how long.</h2>
+    <p class="lead">Yesterday we picked the model per task. We skipped the second dial. It is the one your token question was really about.</p>
+    <p class="sm"><code>/effort</code> opens a slider. <code>/effort high</code> sets it; press <code>s</code> for this session only. <code>ultrathink</code> anywhere in a prompt buys one deep turn without touching the setting. A command can pin it per step. That is this afternoon.</p>
+   </div>
+   <div class="stack" style="justify-content:center;gap:8px">
+    <div class="hrm" style="gap:8px 16px">
+     <span class="lbl">low</span><span class="txt" style="font-size:15px">Short, scoped, latency-sensitive. Not intelligence-sensitive.</span>
+     <span class="lbl">medium</span><span class="txt" style="font-size:15px">Cost-sensitive work that can trade a little intelligence.</span>
+     <span class="lbl move">high</span><span class="txt" style="font-size:15px"><strong>The default.</strong> Balances spend and intelligence.</span>
+     <span class="lbl">xhigh</span><span class="txt" style="font-size:15px">Deeper reasoning, more tokens. Spec and plan live here.</span>
+     <span class="lbl">max</span><span class="txt" style="font-size:15px">Diminishing returns, prone to overthinking. Test before adopting.</span>
+    </div>
+   </div>
+  </div>
+ </div>`,
+ notes:"Open /effort live and show the slider; the levels are from the model-config docs, verbatim. Default is high on every current model.\n\nThe one idea: model and effort are independent dials. Yesterday's slide said pick the model per task. Today: pick the effort per STEP. Spec and plan are decision-dense and text-light — that is where xhigh pays for itself. Execute is mostly typing against a plan — high is plenty, and for the mechanical parts, less.\n\nName the trap in the docs' own words: max is prone to overthinking. Turning everything to max is not diligence, it is the token version of over-engineering the harness — yesterday's pitfall four.\n\nSeed the afternoon: \"Remembering to set this per step is exactly the kind of thing humans forget. In two hours you will make the command remember for you.\""
+},
+/* ============ ACT 2 · THE LOOP ============ */
+{
+ act:"Act 2 · The loop", n:"05", title:"Title", time:"2:00", dark:true,
+ html:`<div class="eyebrow"><span class="dot"></span>Day 2 · 22 September</div>
+ <div class="body mid">
+  <h1 style="font-size:54px">The loop:<br>intent → spec → plan → execute → ship</h1>
+  <p class="lead" style="color:var(--amber);font-size:23px;margin-top:10px">Yesterday you saw the factory. Today we walk the assembly line.</p>
+ </div>
+ <div class="foot">Two hours together, two hours building. Same as yesterday.</div>`,
+ notes:"Short. The exhibit is the real opening, not this."
+},
+{
+ act:"Act 2 · The loop", n:"06", title:"Nothing here is new", time:"6:00",
+ html:`<div class="eyebrow"><span class="dot"></span>The lineage</div>
+ <div class="body">
+  <h2 style="flex:none">None of this is new.<br>It is the engineering you were taught, with the typing removed.</h2>
+  <div class="cols c3" style="flex:none;gap:14px;margin-top:6px">
+   <div class="card" style="gap:5px"><span class="k">Intent · used to be refinement</span><span class="v" style="font-size:14px">Boehm showed it in 1981: the later you find a mistake, the more it costs to fix. The conversation about what we actually want has always been the cheapest place to be wrong.</span></div>
+   <div class="card" style="gap:5px"><span class="k">Spec · used to be the written requirement</span><span class="v" style="font-size:14px">Amazon writes the press release first. Google writes the design doc first. Every good team had acceptance criteria and a definition of done. All of them are reviewed before any code exists.</span></div>
+   <div class="card" style="gap:5px"><span class="k">Plan · used to be the technical design</span><span class="v" style="font-size:14px">A design is a document a colleague reads and pushes back on before anyone builds it. Basecamp's Shape Up adds the other half: decide how much a problem is worth before you design the solution. That is sizing.</span></div>
+  </div>
+  <div class="cols c2" style="flex:none;gap:14px;margin-top:14px">
+   <div class="card" style="gap:5px"><span class="k">Execute · used to be test-driven development</span><span class="v" style="font-size:14px">Kent Beck, 2002: write the failing test, make it pass, clean up. Execute and verify is the same discipline with an agent doing the typing. The test is the one thing it does not get to change.</span></div>
+   <div class="card" style="gap:5px"><span class="k">Ship · used to be code review and CI</span><span class="v" style="font-size:14px">The DORA research found that smaller changes fail less often in production. Small stacked pull requests are that finding, applied to an author who never gets tired.</span></div>
+  </div>
+  <div class="card darkc" style="flex:none;margin-top:auto;padding:14px 18px;gap:3px"><span class="k" style="font-size:14px">What changed</span><span class="v" style="font-size:14px">Typing became nearly free. What is left is the thinking, and every step above is a thinking step we used to rush because the typing was waiting.</span></div>
+ </div>`,
+ notes:"Go slowly here; this is the slide that earns the room's respect, because it says the loop is THEIR discipline, not a vendor's.\n\nWalk the five: refinement (why Boehm's curve — the later, the dearer), the written artifact before code (Amazon, Google; every good team already had one), the design you read and push back on (Shape Up's appetite is the sizing rule from a company that never used an agent), TDD (Beck), and small batches (DORA — smaller changes fail less; if anyone asks, it is Accelerate, Forsgren, Humble and Kim).\n\nThen the turn: everyone in this room used to skip half of these under deadline pressure, because the typing was the bottleneck and the thinking got squeezed. The typing is now nearly free. What is left IS the thinking. \"The loop is not a new process. It is the process you were taught, now that you finally have time for it.\"\n\nBridge: \"And the numbers say the thinking pays.\""
+},
+{
+ act:"Act 2 · The loop", n:"07", title:"Why a loop at all", time:"5:00",
+ html:`<div class="eyebrow"><span class="dot"></span>The arithmetic</div>
+ <div class="body">
+  <div class="cols c3" style="flex:none">
+   <div class="card"><span class="stat">1 in 3</span><span class="v">Anthropic's own number for first-attempt success on small and medium PRs</span></div>
+   <div class="card"><span class="stat">1 in 100</span><span class="v">Twenty small decisions in a row, each one 80% right, none of them checked. That is the chance the last one is still on track.</span></div>
+   <div class="card"><span class="stat">45%</span><span class="v">of AI-generated code introduces a vulnerability when nobody specified the security requirement. Veracode, 100+ models.</span></div>
+  </div>
+  <h2 style="margin-top:22px">Plan-shaped tasks need plans.<br>One-decision tasks do not.</h2>
+  <blockquote style="font-size:20px;flex:none;margin-top:14px">Time spent making the spec precise pays off more than time spent watching the implementation.<cite>code.claude.com/docs/en/best-practices, quoted as written</cite></blockquote>
+  <div class="foot">The gate exists to catch wrong direction while it is still a document edit.</div>
+ </div>`,
+ notes:"Do the compounding out loud, slowly: eighty per cent per decision sounds fine until you chain twenty of them.\n\nThen the honest half: \"this is also why a typo does not get a spec. The overhead has to be proportional or you will stop doing it by Thursday.\""
+},
+/* ============ ACT 3 · THE FIVE STEPS ============ */
+{
+ act:"Act 3 · The five steps", n:"08", title:"The loop as files", time:"4:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Five steps, five artifacts</div>
+ <div class="body">
+  <h2 style="flex:none">Each step leaves a file behind.<br>That file is what the next step reads.</h2>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;flex:none;margin-top:10px">
+   <div class="card" style="gap:6px;padding:18px"><span class="k" style="font-size:14px;color:var(--primary)">1 · intent</span><span class="v" style="font-family:var(--mono);font-size:12.5px">docs/intents/<br>NN-slug.md</span><span class="v" style="font-size:13px">The problem, plainly. No solution.</span></div>
+   <div class="card" style="gap:6px;padding:18px"><span class="k" style="font-size:14px;color:var(--primary)">2 · spec</span><span class="v" style="font-family:var(--mono);font-size:12.5px">docs/specs/<br>NN-slug.md</span><span class="v" style="font-size:13px">Scope and checkable acceptance criteria.</span></div>
+   <div class="card" style="gap:6px;padding:18px"><span class="k" style="font-size:14px;color:var(--primary)">3 · plan</span><span class="v" style="font-family:var(--mono);font-size:12.5px">docs/specs/<br>NN-slug-plan.md</span><span class="v" style="font-size:13px">Files, order, risks, proof. Gated by you.</span></div>
+   <div class="card" style="gap:6px;padding:18px"><span class="k" style="font-size:14px;color:var(--primary)">4 · execute</span><span class="v" style="font-family:var(--mono);font-size:12.5px">tests + the<br>evidence</span><span class="v" style="font-size:13px">Show the output. Failing test first for bugs.</span></div>
+   <div class="card" style="gap:6px;padding:18px"><span class="k" style="font-size:14px;color:var(--primary)">5 · ship</span><span class="v" style="font-family:var(--mono);font-size:12.5px">the PR</span><span class="v" style="font-size:13px">What changed, how it was verified. Small, stacked.</span></div>
+  </div>
+  <p class="sm" style="flex:none;margin-top:14px">The wall's own trail is in the repo: eight intents, eight specs, eight plans, the PRs. Same names, same numbers, end to end.</p>
+  <div class="card" style="flex:none;padding:12px 18px;gap:2px;margin-top:auto"><span class="k" style="font-size:13px;color:var(--primary)">Yesterday →</span><span class="v" style="font-size:13.5px"><strong>Pitfall 2, memory in chat.</strong> A loop that lives in the conversation dies with the session. A loop that lives in files survives <code>/clear</code>, survives the weekend, and a colleague who was not in the room can pick it up. So can that colleague's agent.</span></div>
+ </div>`,
+ notes:"Point at the numbering: 02-submit-a-post in intents, in specs, in the plan file, in the branch name slice-02-submit. One slug, end to end. That is not tidiness; it is what lets /ship find the predecessor slice and what lets a reviewer read the whole story of a change in four files.\n\nThe execute artifact is the odd one — it is not a document you write, it is the evidence the agent produces: test output, a screenshot, the command and what it returned. Yesterday's debrief card: did it cite real files or just sound certain? Same standard, applied to itself.\n\nBridge: \"Now each step properly. Where it comes from, what it must contain, and what it looks like in the wall.\""
+},
+{
+ act:"Act 3 · The five steps", n:"09", title:"Step 1 · intent", time:"6:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Step 1 of 5 · Intent · what the ticket should have told you</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center">
+    <h2>State the problem<br>before anyone<br>picks a solution.</h2>
+    <p class="lead">Anthropic's SDLC playbook calls it a proto-spec in the originator's own terms: <strong>what is wanted, why, and under which constraints.</strong> Written before any design or code.</p>
+    <ul class="clean">
+     <li>Ideally the ticket already says it. When it does not, <strong>you go and get it.</strong> The model cannot ask your product owner.</li>
+     <li>List the open questions inside it, by name. An intent with no open questions is usually a guess.</li>
+     <li>Write it down as <code>intent.md</code>. It is version-controlled, it is the input to <code>/spec</code>, and it replaces the refinement meeting for the small stuff.</li>
+    </ul>
+   </div>
+   <div class="card darkc" style="font-family:var(--mono);font-size:12.5px;line-height:1.66;align-self:center">
+    <span class="k" style="font-family:var(--sans);font-size:12.5px;color:var(--amber)">docs/intents/02-submit-a-post.md · the wall's own</span>
+    <div style="color:var(--on-dark-soft)">
+     # Intent: writing to the wall<br>
+     Covers: spec F2 · Depends on: 01<br><br>
+     ## <span style="color:var(--on-dark)">Problem</span><br>
+     ## <span style="color:var(--on-dark)">Proposed outcome</span><br>
+     ## <span style="color:var(--on-dark)">Affected users and systems</span><br>
+     ## <span style="color:var(--on-dark)">Constraints</span><br>
+     ## <span style="color:var(--on-dark)">Open questions</span> &nbsp;<span style="color:var(--amber)">← 3 of them, one about the office IP</span>
+    </div>
+    <span class="v" style="font-size:12px;margin-top:8px">No endpoint names. No components. Five headings and a problem someone can state.</span>
+   </div>
+  </div>
+  <div class="card" style="flex:none;padding:12px 18px;gap:2px"><span class="k" style="font-size:13px;color:var(--primary)">Yesterday →</span><span class="v" style="font-size:13.5px">The agent loop starts with <strong>gather context</strong>. The intent is the context it cannot gather on its own: the why, the who, and the constraint nobody wrote down. And <strong>files, not chat</strong>: an intent in your head evaporates with the session; an intent in the repo is what tomorrow's <code>/spec</code> reads.</span></div>
+ </div>`,
+ notes:"Open docs/intents/02-submit-a-post.md live if you did not on slide 06; otherwise point at the card and read the five headings.\n\nThe Jira narrative, in your own words: an intent is what a ticket should contain. We all know tickets arrive thin. The move was always the same — go to the people responsible, gather the context, build the intent in your head, then you could spec. The only change is that now you write that down first, because the next stage needs it as input.\n\nThe Open questions heading is the tell. Read the office-IP one aloud: the spec said five posts per minute per IP, the whole room comes through one public IP, so the sixth post on Monday morning gets refused. That question was caught at intent time, in a paragraph, not in production. \"This is the cheapest place in the whole loop to be wrong.\"\n\nSource, if asked: Anthropic Academy's AI-native SDLC playbook has a whole module called capture intent — the README in docs/intents links it. Our definition is lifted from there: proto-spec, plain words, before design or code.\n\nBridge: \"Once the problem is stated, and only then, we let the model interview us. That is the spec.\""
+},
+{
+ act:"Act 3 · The five steps", n:"10", title:"Step 2 · spec", time:"8:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Step 2 of 5 · Spec · one page that says what done means</div>
+ <div class="body">
+  <div class="cols c2">
+   <div class="stack" style="justify-content:center">
+    <h2>One page.<br>No code.</h2>
+    <ul class="clean">
+     <li><strong>Problem</strong>: why, in one paragraph</li>
+     <li><strong>In scope, out of scope</strong>: two short lists</li>
+     <li><strong>Acceptance criteria</strong>: statements you can <em>check</em></li>
+     <li><strong>Constraints</strong>: what must not change</li>
+    </ul>
+   </div>
+   <div class="stack" style="justify-content:center">
+    <div class="card"><span class="k">Checkable</span><span class="v">"Posting with an empty message shows an error and stores nothing."</span></div>
+    <div class="card plain"><span class="k" style="color:var(--muted)">Not checkable</span><span class="v" style="color:var(--muted)">"The form should handle errors gracefully."</span></div>
+   </div>
+  </div>
+  <div class="card" style="flex:none;padding:12px 18px;gap:2px"><span class="k" style="font-size:13px;color:var(--primary)">From the docs, and from yesterday</span><span class="v" style="font-size:13.5px">"The most useful specs are self-contained: they name the files and interfaces involved, state what is out of scope, and end with an end-to-end verification step that proves the feature works." That last part is the evidence habit from yesterday's debrief, written down ahead of time. Name the security requirement in it too. Left unspecified, the model chooses, and it chooses the insecure path about half the time.</span></div>
+ </div>`,
+ notes:"The two example criteria are the whole slide. Read both, ask the room which one they could test tonight.\n\nCredit the prototype-first inversion to Filipe out loud and by name — he raised it, it is a good idea, and crediting the room is how the week stays theirs.\n\n\"Fixing a bad acceptance criterion here is a text edit. Fixing it after execution is an afternoon.\""
+},
+{
+ act:"Act 3 · The five steps", n:"11", title:"Step 3 · plan", time:"8:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Step 3 of 5 · Plan · decide before you touch a file</div>
+ <div class="body">
+  <h2 style="flex:none">Two ways to plan. Use both.</h2>
+  <div class="cols c2" style="flex:none;margin-top:2px">
+   <div class="card" style="gap:8px">
+    <span class="k">The native one: plan mode</span>
+    <ul class="clean" style="gap:6px;font-size:14px">
+     <li><strong>Shift+Tab</strong> until the status bar says plan mode, or prefix one prompt with <code>/plan</code>.</li>
+     <li>Claude reads files and runs read-only commands. It <strong>cannot edit</strong> until you approve.</li>
+     <li>It presents the plan and asks: approve, approve and review each edit, or keep planning.</li>
+     <li><strong>Ctrl+G</strong> opens the plan in your editor. Change it there before anything runs.</li>
+     <li><code>/model opusplan</code>: Opus writes the plan, Sonnet builds it. One setting.</li>
+    </ul>
+   </div>
+   <div class="card darkc" style="gap:8px">
+    <span class="k">Your own: the /plan command</span>
+    <ul class="clean" style="gap:6px">
+     <li style="color:var(--on-dark);font-size:14px">Reads the spec. Answers four questions: which files and why, in what order, what could go wrong, how we will know it worked.</li>
+     <li style="color:var(--on-dark);font-size:14px">Writes the approved plan to <code style="background:#2b2823;color:var(--on-dark)">docs/specs/NN-slug-plan.md</code> and commits it.</li>
+     <li style="color:var(--on-dark);font-size:14px">A committed plan is something a colleague, or a colleague's agent, can pick up later. Plan mode on its own leaves nothing behind.</li>
+     <li style="color:var(--on-dark);font-size:14px">Run it <em>inside</em> plan mode. The mode stops edits; the command decides what the plan contains.</li>
+    </ul>
+   </div>
+  </div>
+  <p class="sm" style="flex:none;margin-top:4px;font-size:14px">The docs’ own rule for when this step deserves a document: you are unsure of the approach, the change crosses several files, or the code is unfamiliar to you.</p>
+  <div class="card" style="flex:none;padding:12px 18px;gap:2px;margin-top:auto"><span class="k" style="font-size:13px;color:var(--primary)">Yesterday →</span><span class="v" style="font-size:13.5px">This is the <strong>third gear</strong> from the loop slide, used on purpose: thinking, separated from touching. And the <strong>window is not storage</strong>: a plan that lives in a file lets the build start in a fresh session with clean context.</span></div>
+ </div>`,
+ notes:"Two mechanisms, and people confuse them. Plan mode is a permission mode: it stops Claude editing. The /plan command is a prompt: it decides what a plan contains. You want both at once: the mode so nothing is touched, the command so the plan has the four parts you can review.\n\nWalk the plan-mode facts off the permission-modes page if anyone doubts them: Shift+Tab or /plan prefix, read-only until approval, the three approve options, Ctrl+G to edit the text directly, Shift+Tab again to leave without approving. defaultMode: plan in settings makes it the default for a project.\n\nOpusplan: Opus in plan mode, automatic switch to Sonnet for execution. The caveat from the model-config page: the model switch resets the prompt cache, so do not bounce in and out of plan mode for fun.\n\nThe when-to-plan rule is the docs' own: uncertain approach, multi-file change, unfamiliar code. Its mirror image is on the sizing slide in a few minutes.\n\nDo not talk about the gate here. Reading the plan is a human gate, and where the human gates sit is the whole point of the tier slide. Save it."
+},
+{
+ act:"Act 3 · The five steps", n:"12", title:"Step 4 · execute and verify", time:"8:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Step 4 of 5 · Execute and verify · one change, one check, evidence</div>
+ <div class="body">
+  <div class="cols c2n" style="align-items:center">
+   <div class="stack" style="justify-content:center">
+    <h2>One change.<br>One check.<br>Show me.</h2>
+    <p class="lead">Work the plan one step at a time. After every meaningful change, run the check that applies. Ask for the output, not a summary.</p>
+    <p class="sm">A check is anything that returns pass or fail: a test suite, a build, a linter, a screenshot compared to the design. The docs say it directly: this is the difference between a session you watch and one you can walk away from.</p>
+   </div>
+   <div class="stack" style="justify-content:center;gap:10px">
+    <div class="card" style="gap:5px"><span class="k">Which model builds</span><span class="v" style="font-size:14px">Sonnet, at <code>high</code>. The decisions were made in the plan; this is typing against them. Bring Opus back for a hard bug, not for the build. <code>opusplan</code> makes that switch for you.</span></div>
+    <div class="card" style="gap:5px"><span class="k">Bugs: failing test first</span><span class="v" style="font-size:14px">Reproduce it in a test, then fix until green. Fix the code, never the test. Anthropic’s own research shows models weakening assertions to reach green, because green was the goal and that was the cheap path.</span></div>
+    <div class="card darkc" style="gap:5px"><span class="k">Restraint that costs no time</span><span class="v" style="font-size:14px">Hooks, scoped so they never slow the loop. A <code>PreToolUse</code> guard on the exact files that must not change is a millisecond check, and it runs before the edit. A <code>Stop</code> hook runs the suite once at the end of the turn, not after every edit, and refuses to let Claude stop while it fails. Anything heavy runs with <code>"async": true</code>, off the critical path. A rule in a file is advice. These are enforced, and the fast ones are free.</span></div>
+   </div>
+  </div>
+ </div>`,
+ notes:"The docs' framing is the one to use: give Claude a check it can run. Without one, 'looks done' is the only signal it has, and you become the verification loop. With one, it iterates until the check passes and you read evidence instead of re-running things yourself.\n\nAtomising is the habit: one plan step, one change, one check. Not because the model cannot do more at once, but because when the check fails you know exactly which change broke it.\n\nModel: Sonnet builds. The best-practices page and the opusplan design both say the same thing: reasoning goes into the plan, execution is cheaper. Opus for the nasty bug where the plan was wrong, not for typing.\n\nHooks as restraint, three flavours from the docs: PostToolUse formatter (master has it), PreToolUse guard on test files during fixes (Guide 3's sharp example, exit 2 plus reason), and the Stop hook that runs your check and blocks the turn from ending until it passes (Claude Code gives up after eight consecutive blocks). The point: quality that does not depend on anyone remembering.\n\nThe reward-hacking line is the reason 'fix the code, not the test' deserves a hook and not a sentence in CLAUDE.md. Say it once, without drama."
+},
+{
+ act:"Act 3 · The five steps", n:"13", title:"Step 5 · ship", time:"7:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Step 5 of 5 · Ship · small, described, reviewable</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center">
+    <h2>Small pull requests,<br>each one telling<br>its story.</h2>
+    <p class="lead">The agent can produce a day of code in an hour. A human review only survives that if every unit stays small and the agent writes the story of each one: what changed, and how it was verified.</p>
+    <p class="sm">GitHub shipped native stacked pull requests in August 2026: a <code>gh-stack</code> CLI, a stack map on github.com, partial merges of the lower layers while the upper ones stay open, automatic rebasing, and your branch protections and merge queues still apply. The repo’s <code>/ship</code> does the same by hand: it finds the previous slice, stacks the PR on it if that slice is still open, and writes the description from the evidence.</p>
+   </div>
+   <div class="stack" style="justify-content:center;gap:10px">
+    <div class="cols c2" style="flex:none;gap:10px">
+     <div class="card" style="gap:4px;padding:16px 18px"><span class="stat" style="font-size:40px">3×</span><span class="v" style="font-size:13px">faster approval for PRs under 200 lines, with about 40% fewer defects</span></div>
+     <div class="card" style="gap:4px;padding:16px 18px"><span class="stat" style="font-size:40px">+25 min</span><span class="v" style="font-size:13px">of review time for every extra 100 lines in a PR</span></div>
+    </div>
+    <div class="cols c2" style="flex:none;gap:10px">
+     <div class="card" style="gap:4px;padding:16px 18px"><span class="stat" style="font-size:40px">3.5×</span><span class="v" style="font-size:13px">bigger average PR after teams adopted AI coding (232 to 817 lines), and review caught fewer bugs</span></div>
+     <div class="card" style="gap:4px;padding:16px 18px"><span class="stat" style="font-size:40px">200</span><span class="v" style="font-size:13px">lines. Past this, reviewer effectiveness trails off. SmartBear and Cisco, 2,500 reviews</span></div>
+    </div>
+    <div class="card darkc" style="gap:5px"><span class="k">Review is a pipeline, not one person</span><span class="v" style="font-size:14px">CI runs the checks. A reviewer agent in a fresh context reads only the diff and the criteria, so it is not biased toward code it just wrote, and sorts the PR by risk. The human signs last, with the evidence already laid out. Vercel runs this on the AI SDK: agents author 25 to 35% of merged PRs each week, and nothing merges without a human.</span></div>
+   </div>
+  </div>
+ </div>`,
+ notes:"The argument in one line: the agent's speed only breaks review if the units stay agent-sized. Keep them human-sized and let the agent write each one's story, and review gets faster, not slower.\n\nThe numbers, with sources. PRs under 200 lines approve about 3x faster with roughly 40% fewer defects, and every extra 100 lines adds close to 25 minutes of review: the research GitHub cited when it launched stacked PRs in August 2026. SmartBear's study with Cisco, 2,500 reviews: effectiveness trails off past 200 lines. And the warning from the other direction, Brodzinski's two-project comparison: average PR size grew 3.5x after Claude adoption (232 to 817 lines), one-line PRs almost vanished, and review caught fewer bugs. That is what happens when the agent's output sets the unit size.\n\nGitHub's native stacked PRs, public preview 3 August 2026: gh-stack CLI, stack map, partial merge of lower layers, auto-rebase, branch protections and merge queues unchanged. TED's engineering team said the quiet part out loud: AI made developers productive enough that their PRs started overwhelming reviewers. The repo's /ship predates the native feature and does the same dance by hand. Either works.\n\nThen the pipeline: CI for the mechanical checks, a fresh-context reviewer agent for the first read (the docs' own point: a fresh context is not biased toward code it just wrote), and the human last, with the evidence in front of them. Vercel's factory is the existence proof: a third of merged PRs authored by agents, every one human-approved.\n\nThe boundary, said verbally: how this lands in their repos, plan only, local commit or PR, is their call and their permissions. You have no opinion about their GitHub."
+},
+/* ============ ACT 4 · SIZE IT ============ */
+{
+ act:"Act 4 · Size it", n:"14", title:"The Sized Loop", time:"8:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Same five steps every time · the tier decides what gets written down, and where a human signs</div>
+ <div class="body">
+  <h2 style="flex:none">No tier skips a step. The tier decides which steps become files, and where a human signs off.</h2>
+  <div style="flex:none;margin-top:6px"><svg viewBox="0 0 893 288" width="100%" style="max-height:292px" role="img" aria-label="The sized loop: three tiers, same five steps, human gates marked"><defs><marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 1 L7 4 L0 7 z" fill="var(--muted-soft)"/></marker></defs><g font-family="var(--sans)"><rect x="186" y="8" width="14" height="14" rx="7" fill="var(--primary)"/><text x="206" y="19" font-size="11.5" fill="var(--muted)">a human reads it and approves</text><rect x="420" y="8" width="14" height="14" rx="7" fill="var(--canvas)" stroke="var(--primary)" stroke-width="1.5" stroke-dasharray="4 3"/><text x="440" y="19" font-size="11.5" fill="var(--muted)">optional</text><text x="0" y="50" font-size="20" font-family="var(--serif)" fill="var(--ink)" letter-spacing="-.4">Tier 1</text><text x="0" y="70" font-size="12" fill="var(--muted)">Direct change</text><rect x="186" y="37" width="276" height="34" rx="17" fill="var(--surface-card)"/><text x="324" y="59" text-anchor="middle" font-size="13.5" font-weight="500" fill="var(--ink)">intent · spec · plan, in your head</text><path d="M462 54 h14" stroke="var(--muted-soft)" stroke-width="1.5" marker-end="url(#ah)"/><rect x="484" y="37" width="137" height="34" rx="17" fill="var(--surface-card)"/><text x="552" y="59" text-anchor="middle" font-size="13.5" font-weight="500" fill="var(--ink)">execute + check</text><path d="M621 54 h14" stroke="var(--muted-soft)" stroke-width="1.5" marker-end="url(#ah)"/><rect x="643" y="37" width="71" height="34" rx="17" fill="var(--canvas)" stroke="var(--primary)" stroke-width="1.5" stroke-dasharray="5 4"/><text x="678" y="59" text-anchor="middle" font-size="13.5" font-weight="500" fill="var(--primary)">review</text><text x="186" y="88" font-size="11.5" fill="var(--muted-soft)">one sentence of diff · a human reads the PR if it touches anything shared</text><text x="0" y="142" font-size="20" font-family="var(--serif)" fill="var(--ink)" letter-spacing="-.4">Tier 2</text><text x="0" y="162" font-size="12" fill="var(--muted)">Small feature</text><rect x="186" y="129" width="247" height="34" rx="17" fill="var(--surface-card)"/><text x="309" y="151" text-anchor="middle" font-size="13.5" font-weight="500" fill="var(--ink)">intent + spec, inside the plan</text><path d="M433 146 h14" stroke="var(--muted-soft)" stroke-width="1.5" marker-end="url(#ah)"/><rect x="455" y="129" width="57" height="34" rx="17" fill="var(--primary)"/><text x="483" y="151" text-anchor="middle" font-size="13.5" font-weight="600" fill="#fff">plan</text><path d="M512 146 h14" stroke="var(--muted-soft)" stroke-width="1.5" marker-end="url(#ah)"/><rect x="534" y="129" width="137" height="34" rx="17" fill="var(--surface-card)"/><text x="602" y="151" text-anchor="middle" font-size="13.5" font-weight="500" fill="var(--ink)">execute + tests</text><path d="M671 146 h14" stroke="var(--muted-soft)" stroke-width="1.5" marker-end="url(#ah)"/><rect x="693" y="129" width="71" height="34" rx="17" fill="var(--primary)"/><text x="728" y="151" text-anchor="middle" font-size="13.5" font-weight="600" fill="#fff">review</text><text x="186" y="180" font-size="11.5" fill="var(--muted-soft)">one module, approach clear · you read the plan, someone reads the PR</text><text x="0" y="234" font-size="20" font-family="var(--serif)" fill="var(--ink)" letter-spacing="-.4">Tier 3</text><text x="0" y="254" font-size="12" fill="var(--muted)">Touchpoints</text><rect x="186" y="221" width="71" height="34" rx="17" fill="var(--primary)"/><text x="221" y="243" text-anchor="middle" font-size="13.5" font-weight="600" fill="#fff">intent</text><path d="M257 238 h14" stroke="var(--muted-soft)" stroke-width="1.5" marker-end="url(#ah)"/><rect x="279" y="221" width="57" height="34" rx="17" fill="var(--primary)"/><text x="307" y="243" text-anchor="middle" font-size="13.5" font-weight="600" fill="#fff">spec</text><path d="M336 238 h14" stroke="var(--muted-soft)" stroke-width="1.5" marker-end="url(#ah)"/><rect x="358" y="221" width="57" height="34" rx="17" fill="var(--primary)"/><text x="386" y="243" text-anchor="middle" font-size="13.5" font-weight="600" fill="#fff">plan</text><path d="M415 238 h14" stroke="var(--muted-soft)" stroke-width="1.5" marker-end="url(#ah)"/><rect x="437" y="221" width="225" height="34" rx="17" fill="var(--surface-card)"/><text x="549" y="243" text-anchor="middle" font-size="13.5" font-weight="500" fill="var(--ink)">execute, failing test first</text><path d="M662 238 h14" stroke="var(--muted-soft)" stroke-width="1.5" marker-end="url(#ah)"/><rect x="684" y="221" width="71" height="34" rx="17" fill="var(--primary)"/><text x="719" y="243" text-anchor="middle" font-size="13.5" font-weight="600" fill="#fff">review</text><path d="M755 238 h14" stroke="var(--muted-soft)" stroke-width="1.5" marker-end="url(#ah)"/><rect x="777" y="221" width="108" height="34" rx="17" fill="var(--surface-card)"/><text x="831" y="243" text-anchor="middle" font-size="13.5" font-weight="500" fill="var(--ink)">stacked PRs</text><text x="186" y="272" font-size="11.5" fill="var(--muted-soft)">cross-module, fragile, or spans people · a human signs off at every written step</text></g></svg></div>
+  <blockquote style="font-size:20px;flex:none;margin-top:2px">If you could describe the diff in one sentence, skip the plan.<cite>code.claude.com/docs/en/best-practices, read live off the docs. Skip the plan <em>document</em>. The plan still happens, in one sentence, in your head.</cite></blockquote>
+ </div>`,
+ notes:"Now the gates, all of them, in one place. Intent, spec and plan are each a human gate when they are written down: somebody reads the file and says yes before the next step starts. Ship always ends at one: code review. Nothing merges without a human, and that is not our rule, it is what Vercel found running an actual software factory on the AI SDK: agents classify, spec, implement and pre-review, and still \"nothing is merged without approval from a human on the AI SDK team\". Their trick is the chain of evidence that makes the human review fast.\n\nSo: Tier 3 signs at intent, spec, plan and review. Tier 2 signs at plan and review; intent and spec still happen, folded into the plan you read. Tier 1 signs at review if the change touches anything shared, and otherwise the check is the gate.\n\nRead the sizing quote off the live docs, then the correction: skip the plan DOCUMENT. The plan still happens, in one sentence, in your head.\n\nNever you-must. Here is what each gate protects; you choose."
+},
+{
+ act:"Act 4 · Size it", n:"15", title:"Tier 1 in sixty seconds", time:"3:00",
+ html:`<div class="eyebrow"><span class="dot"></span>What most of a normal day looks like</div>
+ <div class="body mid">
+  <h1 style="font-size:48px">Ask. Check. Move on.</h1>
+  <div class="chips" style="margin-top:10px">
+   <span class="chip">a typo</span><span class="chip">a log line</span><span class="chip">a rename</span>
+   <span class="chip">a config value</span><span class="chip">a docs fix</span>
+  </div>
+  <p class="lead" style="margin-top:20px">Most of a normal day is this size. You still walk the five steps; you just do the first three in your head in about four seconds. Say what you want, say how you will know it is right, and let it run.</p>
+  <p class="sm" style="margin-top:10px;color:var(--muted)">Tier 2 is the same thing with one written step: a plan you actually read before anything is touched.</p>
+  <div class="foot">Everything else in this act is about the other kind of work. This is most of it.</div>
+ </div>`,
+ notes:"Say the honest thing: most of what they do all week is this row, and the deck spends twenty minutes on the other two rows because those are the ones that go wrong.\n\nOne line worth landing: even here, the verification ask goes in the same prompt. Tier 1 skips the plan, not the proof."
+},
+{
+ act:"Act 4 · Size it", n:"16", title:"The routing questions", time:"4:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Ask in order · handout</div>
+ <div class="body">
+  <ol class="steps" style="gap:16px">
+   <li>Could you describe the diff in one sentence? → <strong>Tier 1.</strong></li>
+   <li>Does it cross module or repo boundaries, touch fragile or money-handling code, or carry security surface? → <strong>Tier 3.</strong></li>
+   <li>Will someone else review it cold, or will the work span more than one session? → <strong>Tier 3.</strong></li>
+   <li>Otherwise → <strong>Tier 2.</strong></li>
+  </ol>
+  <div class="card" style="flex:none;margin-top:16px">
+   <span class="k">The tiebreaker</span>
+   <span class="v">Plan when the cost of a bad edit exceeds the cost of a slower first turn.</span>
+  </div>
+ </div>`,
+ notes:"This is the handout. Card on every table, and it goes on the wall.\n\n\"You will disagree with each other about tier 2 versus tier 3. That disagreement is the useful part — it is a conversation about risk, which is the conversation you want to be having.\""
+},
+/* ============ ACT 5 · MAKE IT A COMMAND ============ */
+{
+ act:"Act 5 · Make it a command", n:"17", title:"A step with a contract", time:"7:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Why the loop becomes commands</div>
+ <div class="body">
+  <div class="cols c2n" style="align-items:start">
+   <div class="stack" style="justify-content:flex-start">
+    <h2>A command is a step<br>with a contract.</h2>
+    <p class="lead">Repeatability is the obvious reason. The stronger one: <strong>the file can pin what a human forgets.</strong></p>
+    <ul class="clean">
+     <li><strong>The model.</strong> <code>/plan</code> always thinks on Opus. <code>/execute</code> builds on Sonnet.</li>
+     <li><strong>The effort.</strong> <code>xhigh</code> for spec and plan, <code>high</code> for execute. Set once, and nobody has to remember it again.</li>
+     <li><strong>The tools.</strong> Pre-approve <code>git</code> and <code>gh</code> for <code>/ship</code>, and nothing else.</li>
+     <li><strong>The invocation.</strong> <code>disable-model-invocation</code> on <code>/ship</code>, so anything with side effects waits for a human to type the word.</li>
+     <li><strong>The inputs.</strong> <code>$ARGUMENTS</code> for the feature, and <code>!&#96;git status&#96;</code> to read the real state before the prompt runs.</li>
+    </ul>
+   </div>
+   <div class="stack" style="justify-content:flex-start;gap:14px">
+   <div class="card darkc" style="align-self:start;font-family:var(--mono);font-size:12.5px;line-height:1.66">
+    <span class="k" style="font-family:var(--sans);font-size:12.5px;color:var(--amber)">.claude/skills/plan/SKILL.md · the contract half</span>
+    <div style="color:var(--on-dark-soft)">
+     ---<br>
+     name: plan<br>
+     description: <span style="color:var(--on-dark)">Turn an approved spec into a reviewable plan. Use after /spec, before any code.</span><br>
+     argument-hint: [path to the spec]<br>
+     <span style="color:var(--on-dark)">model: opus</span><br>
+     <span style="color:var(--on-dark)">effort: xhigh</span><br>
+     ---<br>
+     Read $ARGUMENTS. Propose a plan with: the files you will<br>
+     change and why, the order, the risks, how we verify&hellip;
+    </div>
+    <span class="v" style="font-size:12px;margin-top:8px">Below the line is the prompt you ran by hand. Above the line is the part you kept forgetting.</span>
+   </div>
+     <div class="card" style="padding:12px 18px;gap:2px"><span class="k" style="font-size:13px;color:var(--primary)">This morning → yesterday</span><span class="v" style="font-size:13.5px"><strong>Como usar em equipa?</strong> This is the answer with teeth: the team's <code>/plan</code> runs the same way for everyone who pulls the repo. And <strong>hand-written beats generated</strong>: the ETH study found LLM-generated context files hurt in five of eight settings. You write these. That is the afternoon.</span></div>
+   </div>
+  </div>
+ </div>`,
+ notes:"The frontmatter fields are from the skills reference: description, argument-hint, model, effort, allowed-tools, disable-model-invocation, and $ARGUMENTS plus the !-backtick dynamic-context form. Master's loop lives in the older single-file .claude/commands/ format, which still works; the guide has them write theirs in the skill-folder format the docs now prefer, because that is where the whole contract is documented. Both are invoked as /name.\n\nSay the effort line slowly — it closes the loop with slide 06. Nobody remembers to run /effort xhigh before planning. The file remembers.\n\nThe invocation field matters for ship more than anything: the docs recommend disable-model-invocation for workflows with side effects. A command that pushes and opens PRs should wait for a human to type it.\n\nThen the team point: this is Filipe's question from the wall answered structurally. The harness in the repo means every clone runs the same /plan at the same effort with the same checks. Homogenisation is not a policy document; it is a file.\n\nAnd the ETH finding is the reason the challenge is WRITE, not GENERATE."
+},
+{
+ act:"Act 5 · Make it a command", n:"18", title:"Three of five ship", time:"4:00",
+ html:`<div class="eyebrow"><span class="dot"></span>What the wall already has, and what it is missing</div>
+ <div class="body">
+  <h2 style="flex:none">The wall ships three of the five.<br>You write the other two, and rewrite the three.</h2>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;flex:none;margin-top:12px">
+   <div class="card darkc" style="gap:6px;padding:18px"><span class="k" style="font-size:14px;color:var(--amber)">/intent</span><span class="v" style="font-size:13px"><strong>Missing.</strong> You write it. It interviews you to the five headings, lists the open questions and writes the file to <code>docs/intents/</code>.</span></div>
+   <div class="card" style="gap:6px;padding:18px"><span class="k" style="font-size:14px">/spec</span><span class="v" style="font-size:13px">Ships. It interviews you and writes four headings to <code>docs/specs/</code>. Rewrite it in your words, then pin the model and effort.</span></div>
+   <div class="card" style="gap:6px;padding:18px"><span class="k" style="font-size:14px">/plan</span><span class="v" style="font-size:13px">Ships. Files, order, risks, proof. Rewrite it in your words, then pin the model and effort.</span></div>
+   <div class="card darkc" style="gap:6px;padding:18px"><span class="k" style="font-size:14px;color:var(--amber)">/execute</span><span class="v" style="font-size:13px"><strong>Missing.</strong> You write it. It works the plan in order, checks after each change, shows the output, and never touches a test to get to green.</span></div>
+   <div class="card" style="gap:6px;padding:18px"><span class="k" style="font-size:14px">/ship</span><span class="v" style="font-size:13px">Ships. It finds the previous slice, stacks the PR on it and writes the description. Keep the body, pin the tools and the invocation.</span></div>
+  </div>
+  <div class="card" style="flex:none;margin-top:auto;padding:14px 18px;gap:3px"><span class="k" style="font-size:14px">Your version of each step is the deliverable</span><span class="v" style="font-size:14px">What must a spec contain in your codebase? What does verified mean on your pipeline? Write that into the files. Tomorrow we refine them together and build the rest of the harness around them. <strong>Wednesday evening you push the fork. I read every one before Monday.</strong></span></div>
+ </div>`,
+ notes:"This is the bridge into the guide, so be concrete about what exists. In master: .claude/commands/ has spec, plan, migration, ship, cleanup-worktree. No intent. No execute. Yesterday they read those files in Step 4 of Guide 1.\n\nThe two missing ones are not an accident to apologise for — they are the exercise. Intent is the human arrow, so of course nobody had automated it; execute is where every team's definition of verified differs, so it should be theirs.\n\nFor the three that ship: reinterpret means rewrite the body in your own words for your own stack, THEN add the contract — model, effort, tools, invocation. Do not paste and rename.\n\nThe hand-off, stated exactly once and clearly: not the wall, not tonight. Wednesday we refine these in the room. Wednesday evening you push your fork. I read all of them in the gap week and Monday opens with what I found. \"Guide 2 has the contract table and a starting body for every one of the five.\""
+},
+/* ============ ACT 6 · GO BUILD ============ */
+{
+ act:"Act 6 · Go build", n:"19", title:"You run the line", time:"5:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Before you build</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center">
+    <h2>You run<br>the production line.</h2>
+    <p class="lead">Claude can draft a command in ten seconds. It cannot know what your pipeline calls verified, or which file in your repo nobody may touch. That part is yours.</p>
+    <p class="sm">Take one step from this morning and build it for <em>your</em> system. It will fail somewhere. When it does, that is not a verdict on you. It is the next line in the file.</p>
+   </div>
+   <div class="stack" style="justify-content:center">
+    <div class="card"><span class="k">Hand-written beats generated</span><span class="v">ETH Zurich found LLM-generated context files hurt in five of eight settings. The valuable lines are the surprising ones, the things an agent could not have guessed. Use Claude to draft; you decide what stays.</span></div>
+    <div class="card"><span class="k">Tuning is the engineering</span><span class="v">The factory at Vercel merges 25 to 35 percent of its weekly PRs from agents, and a human still signs every one. The agents did not build that line. Engineers did, and they keep adjusting it.</span></div>
+    <div class="card plain"><span class="v">None of this is a personal dotfile. It is committed, versioned team knowledge, and it only gets better if someone owns it. Today that is you.</span></div>
+   </div>
+  </div>
+ </div>`,
+ notes:"This is the reframe before the challenge, and it is the industrial-engineer slide from Monday landing on their desk: the engineer runs the factory instead of operating each machine. Today the factory is five files, and the machine operator is Claude.\n\nSay the responsibility part plainly. Claude will happily generate all five commands in a minute. They will be generic, and generic is worse than nothing (the ETH finding). The value is in what only they know: what verified means on their pipeline, which migrations are frozen, what a spec must say about security in a regulated product.\n\nThen the permission to fail: a command that produced a bad plan today is not a failed exercise, it is a line you now know to add. The run tells you which file to fix. That loop, run, notice, edit the command, is the job for the rest of the week and after.\n\nVercel is the proof that this is not theory: agents author a third of merged PRs and humans sign every one, and it took engineers building and tuning the line to get there.\n\nOne CLAUDE.md line before they stop today, as always. Then the challenge."
+},
+{
+ act:"Act 6 · Go build", n:"20", title:"Challenge 2 briefing", time:"3:00 → 2h block",
+ html:`<div class="eyebrow"><span class="dot"></span>Challenge 2 · Write the loop, then run it</div>
+ <div class="body">
+  <div class="cols c2">
+   <div class="stack" style="justify-content:center">
+    <ol class="steps">
+     <li>Pick a Tier-2 feature from <code>feature-ideas.md</code>; write its intent</li>
+     <li>Write <code>/intent</code> and <code>/execute</code>. Rewrite <code>/spec</code>, <code>/plan</code> and <code>/ship</code>, and add the contract to each</li>
+     <li>Run the loop on your feature <strong>through your own commands</strong></li>
+     <li>Push your branch</li>
+    </ol>
+   </div>
+   <div class="stack" style="justify-content:center">
+    <div class="card"><span class="k">Goal</span><span class="v">Five commands you can defend, and one feature that went through them. The run is the test of the commands.</span></div>
+    <div class="card"><span class="k">The hand-off</span><span class="v">Tomorrow we refine them and build around them. <strong>Wednesday evening, push the fork.</strong> I read every one before Monday.</span></div>
+    <p class="xs">Guide 2 has the contract table and a starting body for each of the five.</p>
+   </div>
+  </div>
+  <div class="foot">Write it yourself. A command you wrote and ran is one you understand, and one you can defend on Wednesday.</div>
+ </div>`,
+ notes:"\"Two hours. The first forty minutes are writing five short files. The rest is running one feature through them and fixing what the run teaches you.\"\n\nTier 2 on purpose: big enough that every command fires, small enough to finish. Tier 3 is Wednesday's stretch.\n\nCirculate with one question: show me your /execute. That file is where the room's definition of verified lives, and it is the one I most want to read on Thursday.\n\nNo take-home. Whatever is not done in the block, Wednesday's refinement picks up."
+},
+{
+ act:"Act 6 · Go build", n:"21", title:"Tomorrow", time:"5:00", dark:true,
+ html:`<div class="eyebrow"><span class="dot"></span>Close</div>
+ <div class="body mid">
+  <h1 style="font-size:50px">Today you wrote the loop<br>as five commands.</h1>
+  <h1 style="font-size:50px;color:var(--amber)">Tomorrow we build around them.</h1>
+  <p class="lead" style="color:var(--on-dark-soft);margin-top:18px">Skills that find you, agents with their own window, hooks that cannot be argued with, tools, memory. Then Wednesday evening: push the fork. I read every one before Monday.</p>
+ </div>
+ <div class="foot">Minute cards on the wall: one thing that worked, one thing that fought you.</div>`,
+ notes:"The close writes itself if slide 14's framing landed. A command is just a prompt with a name.\n\nMinute cards, then let them go."
+}
+
+];
+
+/* ---------- render ---------- */
+const stage=document.getElementById('stage');
+D.forEach((s,i)=>{
+  const el=document.createElement('section');
+  el.className='slide'+(s.dark?' dark':'')+(s.coral?' coral':'');
+  el.dataset.i=i;
+  el.innerHTML=s.html;
+  stage.appendChild(el);
+});
+const slides=[...document.querySelectorAll('.slide')];
+let cur=0;
+
+function fit(){
+  const w=window.innerWidth-(document.body.classList.contains('notes-on')?380:0);
+  const h=window.innerHeight;
+  const k=Math.min((w-48)/1280,(h-72)/720);
+  stage.style.transform='scale('+k+')';
+}
+function show(i){
+  cur=Math.max(0,Math.min(D.length-1,i));
+  slides.forEach((s,j)=>s.classList.toggle('active',j===cur));
+  const s=D[cur];
+  document.getElementById('count').textContent=s.n+'  ·  '+(cur+1)+'/'+D.length;
+  document.getElementById('actlbl').textContent=s.act.split(' · ')[0];
+  document.getElementById('bar').style.width=((cur+1)/D.length*100)+'%';
+  document.getElementById('n-title').textContent=s.n+' · '+s.title;
+  document.getElementById('n-time').textContent=s.act+'  ·  '+s.time;
+  document.getElementById('n-text').textContent=s.notes||'';
+  document.getElementById('n-assets').innerHTML=s.gap?'<b>Gap:</b> '+s.gap:'<b>Assets:</b> complete';
+  const nx=D[cur+1];
+  document.getElementById('n-next').innerHTML=nx?'Next<b>'+nx.n+' · '+nx.title+'</b>':'Next<b>— end —</b>';
+  [...document.querySelectorAll('.ovcell')].forEach((c,j)=>c.classList.toggle('cur',j===cur));
+  location.hash=s.n;
+}
+/* overview */
+const og=document.getElementById('ovgrid');
+D.forEach((s,i)=>{
+  const c=document.createElement('div');
+  c.className='ovcell';
+  c.innerHTML='<span class="n">'+s.n+'</span><span class="t">'+s.title+'</span>'+
+    (s.gap?'<span class="flag">gap</span>':'')+'<span class="a">'+s.act.split(' · ')[0]+'</span>';
+  c.onclick=()=>{show(i);toggle('overview',false)};
+  og.appendChild(c);
+});
+function toggle(id,on){
+  const el=document.getElementById(id);
+  el.classList.toggle('on',on===undefined?!el.classList.contains('on'):on);
+}
+function notes(){document.body.classList.toggle('notes-on');fit()}
+
+document.addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  const k=e.key;
+  if(k==='Escape'){toggle('overview',false);toggle('help',false);return}
+  if(k==='ArrowRight'||k==='ArrowDown'||k===' '||k==='PageDown'){e.preventDefault();show(cur+1)}
+  else if(k==='ArrowLeft'||k==='ArrowUp'||k==='PageUp'){e.preventDefault();show(cur-1)}
+  else if(k==='Home'){show(0)} else if(k==='End'){show(D.length-1)}
+  else if(k==='n'||k==='N'){notes()}
+  else if(k==='o'||k==='O'){toggle('overview')}
+  else if(k==='?'){toggle('help')}
+  else if(k==='f'||k==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  else if(/^[1-7]$/.test(k)){
+    const t=D.findIndex(s=>s.act.startsWith('Act '+k));
+    if(t>=0)show(t);
+  }
+});
+document.querySelectorAll('#hud button').forEach(b=>{
+  b.onclick=()=>{const g=b.dataset.go;
+    if(g==='next')show(cur+1); else if(g==='prev')show(cur-1);
+    else if(g==='notes')notes(); else if(g==='overview')toggle('overview'); else toggle('help');
+  };
+});
+window.addEventListener('resize',fit);
+const start=D.findIndex(s=>s.n===location.hash.replace('#',''));
+fit();show(start>=0?start:0);
+</script>
+</body>
+</html>

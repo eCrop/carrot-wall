@@ -18,6 +18,16 @@ const MATERIALS: readonly MaterialLink[] = [
     subtitle: 'Guia de preparação',
     href: '/course/guide-1-foundations.html',
   },
+  {
+    title: 'Dia 2 · O Loop: intent → spec → plan → execute → ship',
+    subtitle: 'Slides da sessão',
+    href: '/course/day2-deck.html',
+  },
+  {
+    title: 'Guia 2 · O Loop',
+    subtitle: 'Escrever os cinco comandos e correr uma feature por eles',
+    href: '/course/guide-2-the-loop.html',
+  },
 ];
 
 /** Static list of course materials — plain files under public/course/, opened in a new tab. */

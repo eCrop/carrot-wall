@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guide 2 · The Loop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#cc785c; --primary-active:#a9583e;
+  --ink:#141413; --body:#3d3d3a; --body-strong:#252523;
+  --muted:#6c6a64; --muted-soft:#8e8b82;
+  --hairline:#e6dfd8; --hairline-soft:#ebe6df;
+  --canvas:#faf9f5; --surface-soft:#f5f0e8; --surface-card:#efe9de;
+  --dark:#181715; --dark-soft:#1f1e1b; --on-dark:#faf9f5; --on-dark-soft:#a09d96;
+  --amber:#e8a55a; --warning:#d4a017;
+  --serif:"Cormorant Garamond","Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--canvas);color:var(--body);font-family:var(--sans);font-size:16.5px;line-height:1.62;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1140px;margin:0 auto;padding:0 32px;display:grid;grid-template-columns:1fr 216px;gap:56px;align-items:start}
+
+/* ---------- masthead ---------- */
+header{border-bottom:1px solid var(--hairline);margin-bottom:44px;padding:52px 0 30px}
+header .kicker{font-size:12px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:var(--primary);margin-bottom:16px;display:flex;gap:11px;align-items:center}
+header .kicker::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--primary)}
+header h1{font-family:var(--serif);font-weight:500;font-size:54px;line-height:1.05;letter-spacing:-1.4px;color:var(--ink)}
+header .sub{font-size:17px;color:var(--muted);margin-top:14px}
+header .intro{font-size:19px;line-height:1.55;color:var(--body-strong);margin-top:24px;max-width:66ch}
+
+/* ---------- flow ---------- */
+main{min-width:0;padding-bottom:96px}
+section{margin-bottom:52px;scroll-margin-top:24px}
+h2{font-family:var(--serif);font-weight:500;font-size:34px;line-height:1.15;letter-spacing:-.7px;color:var(--ink);margin:0 0 18px;display:flex;gap:16px;align-items:baseline}
+h2 .num{font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:1.4px;color:var(--primary);text-transform:uppercase;flex:none;padding-top:6px}
+h3{font-family:var(--serif);font-weight:500;font-size:24px;letter-spacing:-.4px;color:var(--ink);margin:30px 0 12px}
+p{margin:0 0 15px;max-width:72ch}
+strong{font-weight:600;color:var(--ink)}
+em{font-style:italic}
+a{color:var(--primary);text-decoration:none;border-bottom:1px solid rgba(204,120,92,.35)}
+ul,ol{margin:0 0 16px;padding-left:22px;max-width:72ch}
+li{margin-bottom:8px}
+ul{list-style:none;padding-left:20px}
+ul li{position:relative}
+ul li::before{content:"";position:absolute;left:-16px;top:11px;width:5px;height:5px;border-radius:50%;background:var(--primary)}
+ol li::marker{color:var(--primary);font-weight:600}
+code{font-family:var(--mono);font-size:.88em;background:var(--surface-card);padding:2px 6px;border-radius:5px;color:var(--ink)}
+
+/* ---------- code blocks ---------- */
+.code{position:relative;margin:0 0 20px;border-radius:12px;background:var(--dark);overflow:hidden}
+.code .label{font-size:11px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--on-dark-soft);padding:13px 20px 0}
+.code pre{margin:0;padding:18px 20px;overflow-x:auto;font-family:var(--mono);font-size:13.5px;line-height:1.72;color:var(--on-dark);white-space:pre}
+.code code{background:none;padding:0;color:inherit;font-size:inherit}
+.code button{
+  position:absolute;top:11px;right:11px;border:0;border-radius:7px;cursor:pointer;
+  background:#2b2823;color:var(--on-dark-soft);font-family:var(--sans);font-size:11.5px;font-weight:500;
+  padding:6px 11px;opacity:0;transition:opacity .12s;
+}
+.code:hover button,.code button:focus{opacity:1}
+.code button.done{color:var(--amber)}
+.code.prompt{background:var(--dark-soft);border-left:3px solid var(--primary)}
+
+/* ---------- callouts ---------- */
+.note{background:var(--surface-soft);border-radius:12px;padding:20px 24px;margin:0 0 20px}
+.note.warn{background:#faf1dd;border-left:3px solid var(--warning)}
+.note.goal{background:var(--primary);color:#fff}
+.note.goal strong,.note.goal .t{color:#fff}
+.note .t{display:block;font-size:12px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--primary);margin-bottom:8px}
+.note.warn .t{color:#8a6a0c}
+.note p:last-child,.note ul:last-child,.note ol:last-child{margin-bottom:0}
+.tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;background:var(--surface-card);color:var(--ink);border-radius:9999px;padding:4px 12px;margin-bottom:14px}
+
+/* ---------- sidebar ---------- */
+nav{position:sticky;top:32px;font-size:13.5px;padding-top:56px}
+nav .t{font-size:11px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted-soft);margin-bottom:14px}
+nav a{display:block;color:var(--muted);border:0;padding:5px 0 5px 12px;border-left:2px solid var(--hairline);line-height:1.4}
+nav a:hover{color:var(--ink)}
+nav a.on{color:var(--ink);border-left-color:var(--primary);font-weight:500}
+footer{border-top:1px solid var(--hairline);padding:28px 0 64px;font-size:14px;color:var(--muted-soft);max-width:72ch}
+
+@media (max-width:900px){
+  .wrap{grid-template-columns:1fr;gap:0;padding:0 22px}
+  nav{display:none}
+  header h1{font-size:38px}
+}
+@media print{
+  body{font-size:11pt}
+  nav,.code button{display:none}
+  .wrap{display:block;max-width:none;padding:0}
+  section{page-break-inside:avoid}
+  .code{background:#fff;border:1px solid #ccc}
+  .code pre{color:#000}
+  .code .label{color:#666}
+  .note.goal{background:#fff;border:2px solid var(--primary);color:var(--ink)}
+  .note.goal .t,.note.goal strong{color:var(--ink)}
+  a{color:var(--ink);border:0}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<main>
+<header><div class="kicker">Guide 2 · Day 2 · Tuesday 22 September</div><h1>The Loop</h1><div class="sub">The Carrot Wall project · the 2-hour block, at your pace</div><p class="intro">This morning you saw where the loop comes from and what each of its five steps must contain. This guide turns that into files: you write the two commands the wall does not have, make the three it ships yours, pin the model, effort, tools and invocation on each, push one real feature through your own loop, and then try to break it, because every place it bends is a line you add to a file. What you write here is what we refine together on Wednesday.</p></header>
+<section id="before">
+<h2><span class="num">Start here</span>Before you start</h2>
+<ul>
+<li>You are on your branch from yesterday. Your CLAUDE.md and the guard hooks are in place, and both apps run.</li>
+<li>Yesterday's Step 4 you read the harness in <code>.claude/</code>. Today you rewrite the part of it that is the loop, and write the two pieces it does not have.</li>
+<li>Open <code>feature-ideas.md</code>. You will pick one Tier-2 feature in Step 1 and push it through your own commands at the end.</li>
+</ul>
+<div class="note goal"><span class="t">Today's deliverable</span><p><strong>Five commands you can defend, and one feature that went through them.</strong> Write, do not generate. The file is your interpretation of each step. Wednesday we refine them together; Wednesday evening you push the fork.</p></div>
+</section>
+
+<section id="shape">
+<h2><span class="num">The target</span>What the branch looks like in two hours</h2>
+<div class="code"><div class="label">five steps, five files · the wall ships three, you write two</div><pre><code>.claude/
+├── commands/
+│   ├── migration.md · cleanup-worktree.md      ← untouched
+│   └── (spec.md · plan.md · ship.md moved below)
+└── skills/
+    ├── project-conventions/SKILL.md            ← untouched
+    ├── intent/SKILL.md      ← NEW · you write it       (Step 2)
+    ├── spec/SKILL.md        ← moved from commands, made yours  (Step 3)
+    ├── plan/SKILL.md        ← moved from commands, made yours  (Step 4)
+    ├── execute/SKILL.md     ← NEW · you write it       (Step 5)
+    └── ship/SKILL.md        ← moved from commands, pinned      (Step 6)
+
+docs/intents/NN-your-feature.md · docs/specs/NN-your-feature.md · NN-your-feature-plan.md</code></pre></div>
+<p>One sizing note first. On the tier slide, a Tier-2 feature folds intent and spec into the plan and signs off at plan and review. Today you run all five as files anyway, on purpose: you are testing five commands, and a command you never ran is a command you cannot defend. From tomorrow, size normally.</p>
+<p>One format note, said once. Master's loop lives in <code>.claude/commands/*.md</code>, the older single-file form, which still works. You will write yours as <code>.claude/skills/&lt;name&gt;/SKILL.md</code>, the form the docs now prefer, because that is where the whole <em>contract</em> (model, effort, tools, invocation) is documented. Both run as <code>/name</code>. Moving the three existing ones keeps one owner per name, so <code>/spec</code> never has two definitions.</p>
+</section>
+
+<section id="contract">
+<h2><span class="num">The contract</span>What each step must contain, and what the file pins</h2>
+<p>The body of each file is the prompt you would type. The frontmatter is the part you kept forgetting. This table is the whole morning in one place; the steps below just fill it in.</p>
+<table style="width:100%;border-collapse:collapse;font-size:14.5px;margin:0 0 18px">
+<tr>
+<th style="text-align:left;font-size:11px;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted-soft);padding:0 12px 8px 0;border-bottom:1px solid var(--hairline)">Step</th>
+<th style="text-align:left;font-size:11px;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted-soft);padding:0 12px 8px 0;border-bottom:1px solid var(--hairline)">The body must</th>
+<th style="text-align:left;font-size:11px;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted-soft);padding:0 12px 8px 0;border-bottom:1px solid var(--hairline)">Pins</th>
+<th style="text-align:left;font-size:11px;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted-soft);padding:0 0 8px;border-bottom:1px solid var(--hairline)">Writes</th>
+</tr>
+<tr><td style="padding:9px 12px 9px 0;border-bottom:1px solid var(--hairline-soft)"><code>/intent</code></td><td style="padding:9px 12px 9px 0;border-bottom:1px solid var(--hairline-soft)">Interview to the five headings; name every open question; no solution</td><td style="padding:9px 12px 9px 0;border-bottom:1px solid var(--hairline-soft)"><code>model: opus</code> · <code>effort: xhigh</code></td><td style="padding:9px 0;border-bottom:1px solid var(--hairline-soft)"><code>docs/intents/NN-slug.md</code></td></tr>
+<tr><td style="padding:9px 12px 9px 0;border-bottom:1px solid var(--hairline-soft)"><code>/spec</code></td><td style="padding:9px 12px 9px 0;border-bottom:1px solid var(--hairline-soft)">Read the intent; interview one question at a time; problem, in/out of scope, <em>checkable</em> acceptance criteria, constraints: security named explicitly</td><td style="padding:9px 12px 9px 0;border-bottom:1px solid var(--hairline-soft)"><code>model: opus</code> · <code>effort: xhigh</code></td><td style="padding:9px 0;border-bottom:1px solid var(--hairline-soft)"><code>docs/specs/NN-slug.md</code></td></tr>
+<tr><td style="padding:9px 12px 9px 0;border-bottom:1px solid var(--hairline-soft)"><code>/plan</code></td><td style="padding:9px 12px 9px 0;border-bottom:1px solid var(--hairline-soft)">Files and why, order, risks, how we verify; no code; stop for the gate</td><td style="padding:9px 12px 9px 0;border-bottom:1px solid var(--hairline-soft)"><code>model: opus</code> · <code>effort: xhigh</code></td><td style="padding:9px 0;border-bottom:1px solid var(--hairline-soft)"><code>docs/specs/NN-slug-plan.md</code></td></tr>
+<tr><td style="padding:9px 12px 9px 0;border-bottom:1px solid var(--hairline-soft)"><code>/execute</code></td><td style="padding:9px 12px 9px 0;border-bottom:1px solid var(--hairline-soft)">Work the plan in order; verify after each change; evidence, not claims; fix the code, not the test</td><td style="padding:9px 12px 9px 0;border-bottom:1px solid var(--hairline-soft)"><code>model: sonnet</code> · <code>effort: high</code></td><td style="padding:9px 0;border-bottom:1px solid var(--hairline-soft)">code + tests + the evidence</td></tr>
+<tr><td style="padding:9px 12px 9px 0"><code>/ship</code></td><td style="padding:9px 12px 9px 0">Find the predecessor slice, stack the PR, describe what changed and how it was verified</td><td style="padding:9px 12px 9px 0"><code>disable-model-invocation: true</code> · <code>allowed-tools</code> for <code>git</code> and <code>gh</code></td><td style="padding:9px 0">the PR</td></tr>
+</table>
+<div class="note"><span class="t">Where the fields come from</span><p>All from the skills reference: <code>description</code> (name the <em>situations</em>, not the topic), <code>argument-hint</code>, <code>model</code>, <code>effort</code>, <code>allowed-tools</code>, <code>disable-model-invocation</code>, plus <code>$ARGUMENTS</code> in the body and <code>!&#96;command&#96;</code> to inject live output before the prompt runs. Effort levels are <code>low · medium · high · xhigh · max</code>; the default is <code>high</code>, and <code>max</code> is documented as prone to overthinking: do not pin it.</p></div>
+</section>
+
+<section id="step1">
+<h2><span class="num">Step 1</span>Pick a feature and write its intent by hand</h2>
+<p>Open <code>feature-ideas.md</code> and take a <strong>Tier-2</strong> idea: one module, approach reasonably clear, real enough that every command below has work to do. Give it the next free number in <code>docs/intents/</code> and a slug: <code>09-emoji-reactions</code>, say, and write the intent yourself, using the wall's own <code>02-submit-a-post.md</code> as the shape:</p>
+<div class="code"><div class="label">docs/intents/NN-slug.md · five headings, no solution</div><pre><code># Intent: [what is wanted, in plain words]
+
+**Author:** you · **Date:** today · **Status:** draft
+
+## Problem
+## Proposed outcome
+## Affected users and systems
+## Constraints
+## Open questions</code></pre></div>
+<p>By hand, this once, so you know what the command in Step 2 is supposed to produce. Ten minutes. If you cannot name an open question, you have not thought about it long enough.</p>
+</section>
+
+<section id="step2">
+<h2><span class="num">Step 2</span>Write <code>/intent</code>, the one the wall does not have</h2>
+<p>Its job is to get an intent out of your head and into the five headings, and to refuse to design. Create <code>.claude/skills/intent/SKILL.md</code>:</p>
+<div class="code"><div class="label">.claude/skills/intent/SKILL.md · a starting body: make it yours</div><pre><code>---
+name: intent
+description: Capture the problem before any solution. Use when a ticket, idea or
+  request arrives and nothing has been specified yet.
+argument-hint: [the ticket, idea or problem in one or two sentences]
+model: opus
+effort: xhigh
+---
+Someone wants this: $ARGUMENTS
+
+Interview me, one question at a time, until you can fill these five headings
+honestly: Problem · Proposed outcome · Affected users and systems · Constraints ·
+Open questions. Ask about who has the problem and how often, what done would
+look like to them, and what must not change. Refuse to propose a design or name
+files: if I drift into solutions, note the idea under Open questions and steer
+back to the problem.
+
+Then write docs/intents/NN-slug.md using the next free number, in the style of
+the existing files there. List every open question you could not resolve; an
+intent with none is a guess. No code.</code></pre></div>
+<p>Run it on a second idea from the backlog and compare its output with the intent you wrote by hand. Where yours is better, the difference goes into the file.</p>
+</section>
+
+<section id="step3">
+<h2><span class="num">Step 3</span>Make <code>/spec</code> yours</h2>
+<p>Move the shipped command into the skill form, then rewrite the body in your own words and add the contract:</p>
+<div class="code"><pre><code>mkdir -p .claude/skills/spec
+git mv .claude/commands/spec.md .claude/skills/spec/SKILL.md</code></pre></div>
+<div class="code"><div class="label">.claude/skills/spec/SKILL.md · the frontmatter to add, and the body to rewrite</div><pre><code>---
+name: spec
+description: Turn an intent into a one-page spec with checkable acceptance criteria.
+  Use after /intent, before any plan or code.
+argument-hint: [path to the intent, or the feature in one sentence]
+model: opus
+effort: xhigh
+---
+Read $ARGUMENTS. Before writing any code, interview me one question at a time
+about anything unclear: scope, edge cases, what done means, and which security
+requirements apply: name them; do not leave security to be inferred.
+
+When you have enough, write docs/specs/NN-slug.md (same number and slug as the
+intent) with exactly: Problem · In scope / Out of scope · Acceptance criteria I
+can check, each one a statement that is true or false · Constraints. One page.
+No code.</code></pre></div>
+<p>The thing to defend on Wednesday is the acceptance criteria line. "Handles errors gracefully" is not checkable. "Posting with an empty message shows an error and stores nothing" is. Your body has to force the second kind.</p>
+</section>
+
+<section id="step4">
+<h2><span class="num">Step 4</span>Make <code>/plan</code> yours</h2>
+<div class="code"><pre><code>mkdir -p .claude/skills/plan
+git mv .claude/commands/plan.md .claude/skills/plan/SKILL.md</code></pre></div>
+<div class="code"><div class="label">.claude/skills/plan/SKILL.md</div><pre><code>---
+name: plan
+description: Turn an approved spec into a reviewable implementation plan.
+  Use after /spec and before any code is written.
+argument-hint: [path to the spec]
+model: opus
+effort: xhigh
+---
+Read $ARGUMENTS. Propose an implementation plan with: the files you will change
+and why each one; the order of work; risks and open questions; and how we will
+verify it works: which tests, which manual check. Do not write code.
+
+Stop and wait for my review. When I approve, write the plan to
+docs/specs/NN-slug-plan.md and stop again.</code></pre></div>
+<p>Run it inside plan mode: <strong>Shift+Tab</strong> until the status bar says so, or prefix the one prompt with <code>/plan</code>. If you want the model split from this morning, <code>/model opusplan</code> first. The mode is the enforcement: Claude can read and run read-only commands but cannot edit until you approve. The command is the shape: it decides what the plan must contain.</p>
+<p>This is the first human gate of your Tier-2 loop. Read the plan with four checks: the files it names are the right ones, the order makes sense, the risks are real, the proof is concrete. <strong>Ctrl+G</strong> opens the plan in your editor so you can change it directly before anything runs. When Claude asks, pick <em>approve and review each edit</em> the first time through; you want to watch what your <code>/execute</code> does next.</p>
+</section>
+
+<section id="step5">
+<h2><span class="num">Step 5</span>Write <code>/execute</code>, the other one the wall does not have</h2>
+<p>This is the file I most want to read on Thursday, because it is where your team's definition of <em>verified</em> lives. Create <code>.claude/skills/execute/SKILL.md</code>:</p>
+<div class="code"><div class="label">.claude/skills/execute/SKILL.md · a starting body: the verification lines are yours to sharpen</div><pre><code>---
+name: execute
+description: Implement an approved plan with verification after every change.
+  Use only after a plan has been reviewed and approved.
+argument-hint: [path to the approved plan]
+model: sonnet
+effort: high
+---
+Implement the plan in $ARGUMENTS, in the order it gives. After each meaningful
+change run the checks that apply: ./mvnw test for the API, npm test for the web
+app, and the build. For a bug, write the failing test first and make it pass.
+
+If a test fails, fix the code, not the test: never weaken or delete an
+assertion to get to green; if a test is wrong, stop and tell me why. When every
+check passes, show me the evidence: the commands you ran and what they
+returned, not a summary. Then stop; do not commit or push.</code></pre></div>
+<p>Notice the model. Execution is typing against a decided plan, so Sonnet at <code>high</code> is the right spend, and the command makes that choice for everyone who pulls the repo. Bring Opus back for a hard bug, not for the build. Underneath all of this, yesterday's migration guard and the two safety hooks keep running before every edit and every shell call, at no cost to speed. A command advises; they enforce.</p>
+</section>
+
+<section id="step6">
+<h2><span class="num">Step 6</span>Pin <code>/ship</code></h2>
+<p>The shipped <code>ship.md</code> is the most worked file in the harness: it finds the predecessor slice, decides whether to stack on it or on master, refuses to open empty PRs. Read all of it before you move it. Then move it and pin the contract; the body mostly stays:</p>
+<div class="code"><pre><code>mkdir -p .claude/skills/ship
+git mv .claude/commands/ship.md .claude/skills/ship/SKILL.md</code></pre></div>
+<div class="code"><div class="label">.claude/skills/ship/SKILL.md · frontmatter</div><pre><code>---
+name: ship
+description: Push the current branch and open a PR stacked on its predecessor slice.
+argument-hint: [optional base branch]
+disable-model-invocation: true
+allowed-tools: Bash(git status *) Bash(git branch *) Bash(git push *) Bash(gh pr *) Bash(gh repo *)
+---
+Current state:
+!&#96;git branch --show-current&#96;
+!&#96;git status --short&#96;
+
+(the shipped body continues below)</code></pre></div>
+<p>Two lines to be able to explain. <code>disable-model-invocation: true</code> means Claude can never decide to ship on its own: a command with side effects waits for a human to type the word. The <code>allowed-tools</code> list pre-approves exactly the git and gh calls the body needs, so shipping does not turn into ten permission prompts. And the <code>!&#96;…&#96;</code> lines run before the prompt is sent, so the command reads the real branch state instead of guessing.</p>
+</section>
+
+<section id="step7">
+<h2><span class="num">Step 7</span>Run the loop through your own commands</h2>
+<p>Now the feature from Step 1, end to end, using only what you wrote. Start a fresh session at the repo root for each stage: a plan on a clean window is a better plan.</p>
+<ol>
+<li><code>/spec docs/intents/NN-slug.md</code>: answer honestly, push back when it assumes. Read the criteria as a reviewer would. Commit.</li>
+<li><strong>Shift+Tab</strong>, then <code>/plan docs/specs/NN-slug.md</code>. The gate: four checks, edit directly, approve. Commit the plan file.</li>
+<li><code>/execute docs/specs/NN-slug-plan.md</code>. Watch it. Esc the moment it drifts. Read the evidence it shows you, then run one check yourself and click through the feature in the browser against your own acceptance criteria.</li>
+<li>Before shipping, a second pair of eyes that is not yours and not the session that wrote the code: <code>Use the code-reviewer agent to review the diff against docs/specs/NN-slug.md. Report gaps against the acceptance criteria, not style.</code> The repo ships that agent; a reviewer in a fresh context is not biased toward code it just wrote. Fix what it finds that is real; ignore what is taste.</li>
+<li><code>/ship</code>, or, if your permissions stop at a local commit, commit and push your branch by hand. Your GitHub, your call. The PR is the second human gate of a Tier-2 loop, and today the human is me.</li>
+</ol>
+<div class="note warn"><span class="t">The run is the test of the commands</span><p>Every place the run went wrong is a line in a file, not a note in your head. <code>/spec</code> let a vague criterion through? Tighten the body. <code>/execute</code> summarised instead of showing output? Sharpen the evidence line. Fix the file and run that stage again. That loop, run, notice, edit the command, is the whole afternoon and most of Wednesday.</p></div>
+</section>
+
+<section id="play">
+<h2><span class="num">Step 8</span>Break it on purpose</h2>
+<p>You have a working loop. Now find out where it bends, because every bend is a line you add to a file. Pick two or three, ten minutes each, and edit the command after each one.</p>
+<ul>
+<li><strong>Starve <code>/spec</code>.</strong> Give it one vague sentence with no intent file. Does it interview you, or does it guess? If it guesses, the body needs to insist on the interview.</li>
+<li><strong>Run <code>/plan</code> at <code>effort: low</code></strong> on the same spec, then at <code>xhigh</code>. Put the two plans side by side. That difference is what the effort pin buys, and it is the best argument you will have for it on Wednesday.</li>
+<li><strong>Hand <code>/execute</code> a plan with a wrong file in it.</strong> Does it follow the plan off a cliff, or stop and tell you? Decide which you want and write it down.</li>
+<li><strong>Ask for a shortcut.</strong> While a test is red, tell Claude to "just make the suite pass". Your body says fix the code, not the test. Does it hold? If it wobbles, that sentence needs to be sharper, and it goes on Wednesday's hook list.</li>
+<li><strong>Say "ship this" in words</strong>, without typing <code>/ship</code>. It must not be able to run the command itself. If it can, <code>disable-model-invocation</code> is missing.</li>
+<li><strong>Run a Tier-1 change straight</strong>, one prompt with the check in it, no commands. Notice which of the five steps you did in your head, and in what order. That is the sizing rule working.</li>
+</ul>
+<div class="note"><span class="t">What you are really doing</span><p>Every one of these is a test case for a command. You would not ship a function without one. The loop is the same: the run tells you which file to fix, you fix it, you run again. That is the job for the rest of the week.</p></div>
+</section>
+
+<section id="step9">
+<h2><span class="num">Step 9</span>One line, before you stop</h2>
+<p>Something surprised you today. A convention Claude missed, a command it needed, a wrong assumption it made twice. Put one line in CLAUDE.md before you stop. Claude can draft it; you decide whether it stays. That is how the file earns its place: one scar at a time, written by someone who was there.</p>
+</section>
+
+<section id="alive">
+<h2><span class="num">Verify</span>Prove the five are alive</h2>
+<ol>
+<li><code>/context</code> in a fresh session: five descriptions listed: intent, spec, plan, execute, ship. Not one duplicate <code>/spec</code>.</li>
+<li>Type <code>/</code> and check the argument hints read like instructions, not placeholders.</li>
+<li><code>/plan</code> outside plan mode should still refuse to write code: the body says so. If it does not, the body is the bug.</li>
+<li>Ask Claude, in words, to "ship this" without typing <code>/ship</code>. It must not be able to run the command by itself.</li>
+<li><code>git status</code>: the three old command files are gone, the five skill folders and your three docs are staged.</li>
+<li>At least one command changed <em>because of a run</em>. If all five still read exactly as you first wrote them, you did not push hard enough in Step 8.</li>
+</ol>
+</section>
+
+<section id="stuck">
+<h2><span class="num">Help</span>If you get stuck</h2>
+<div class="note"><p>Post it on the wall at <a href="https://carrot.ecrop.dev">carrot.ecrop.dev</a> or flag me down. Today's classic snags: a command that does not appear in <code>/</code>. Check the first line of the file is <code>---</code> and the folder name matches; a plan that touches fifteen files for a small feature: your spec is too broad, shrink the scope; <code>/execute</code> weakening a test: that is the exact behaviour the body forbids, so make the sentence sharper and add it to Wednesday's list for a hook.</p></div>
+</section>
+
+<section id="handoff">
+<h2><span class="num">Wednesday</span>The hand-off</h2>
+<p>Nothing to do tonight. Tomorrow morning we open with the wall again, then refine these five together: what belongs in a spec here, what <em>verified</em> means on your pipeline, which model each step deserves, and build the rest of the harness around them: skills that find you, agents with their own window, hooks for the rules that must not be argued with, one MCP server, memory.</p>
+<p><strong>Wednesday evening, push your fork.</strong> Five commands, one feature through them, and whatever Wednesday added. I read every one during the gap week, and Monday opens with what I found.</p>
+</section>
+
+<section id="stretch">
+<h2><span class="num">Extra</span>Stretch, if you finished early</h2>
+<ul>
+<li>Add a <code>Stop</code> hook that runs <code>./mvnw test</code> once when Claude tries to end its turn, and exits <code>2</code> with the failing test name on stderr while it is red. Claude cannot stop until the suite passes. Test it on a deliberately broken test, and note that Claude Code gives up after eight consecutive blocks, so it cannot loop forever.</li>
+<li>If your fork has more than one slice open, try GitHub's native stacked pull requests (<code>gh extension install github/gh-stack</code>) and compare the stack map with what <code>/ship</code> did by hand.</li>
+<li>Give <code>/spec</code> a <code>!&#96;ls docs/specs&#96;</code> line so it can see the existing numbering before it picks the next one.</li>
+<li>Read the wall's own eight intent → spec → plan trails in <code>docs/</code> and compare one with yours. Same slug end to end. That is what lets <code>/ship</code> find its predecessor.</li>
+</ul>
+</section>
+
+<footer>Work at your own speed. Steps 1 to 6 are the writing, Step 7 is the run, Step 8 is where you learn the most. The run tells you which file to go back and fix. If you get stuck, put it on the wall or flag me down.</footer>
+</main>
+<nav><div class="t">On this page</div><div id="toc"></div></nav>
+</div>
+<script>
+// copy buttons on every code block
+document.querySelectorAll('.code').forEach(function(box){
+  var pre = box.querySelector('pre');
+  var b = document.createElement('button');
+  b.textContent = 'Copy';
+  b.onclick = function(){
+    navigator.clipboard.writeText(pre.innerText).then(function(){
+      b.textContent = 'Copied'; b.classList.add('done');
+      setTimeout(function(){ b.textContent = 'Copy'; b.classList.remove('done'); }, 1400);
+    }).catch(function(){ b.textContent = 'Select it'; });
+  };
+  box.appendChild(b);
+});
+// table of contents
+var toc = document.getElementById('toc');
+var secs = [].slice.call(document.querySelectorAll('section[id]'));
+secs.forEach(function(s){
+  var h = s.querySelector('h2');
+  if (!h) return;
+  var c = h.cloneNode(true);
+  var num = c.querySelector('.num');
+  var label = num ? num.textContent.trim() : '';
+  if (num) num.remove();
+  var a = document.createElement('a');
+  a.href = '#' + s.id;
+  a.textContent = c.textContent.trim();
+  if (label) a.title = label;
+  toc.appendChild(a);
+});
+var links = [].slice.call(toc.querySelectorAll('a'));
+var io = new IntersectionObserver(function(es){
+  es.forEach(function(e){
+    if (!e.isIntersecting) return;
+    var i = secs.indexOf(e.target);
+    links.forEach(function(l,j){ l.classList.toggle('on', j === i); });
+  });
+}, { rootMargin: '-10% 0px -80% 0px' });
+secs.forEach(function(s){ io.observe(s); });
+</script>
+</body>
+</html>
