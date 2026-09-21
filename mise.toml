@@ -1,0 +1,5 @@
+[tools]
+# apps/web: Angular CLI 22 requires Node >=22.22.3 (or >=24.15.0 / >=26.0.0).
+node = "22.23.2"
+# apps/api: apps/api/pom.xml pins maven.compiler.release to 21.
+java = "temurin-21"
