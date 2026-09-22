@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guide 3 · Superpowers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#cc785c; --primary-active:#a9583e;
+  --ink:#141413; --body:#3d3d3a; --body-strong:#252523;
+  --muted:#6c6a64; --muted-soft:#8e8b82;
+  --hairline:#e6dfd8; --hairline-soft:#ebe6df;
+  --canvas:#faf9f5; --surface-soft:#f5f0e8; --surface-card:#efe9de;
+  --dark:#181715; --dark-soft:#1f1e1b; --on-dark:#faf9f5; --on-dark-soft:#a09d96;
+  --amber:#e8a55a; --warning:#d4a017;
+  --serif:"Cormorant Garamond","Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--canvas);color:var(--body);font-family:var(--sans);font-size:16.5px;line-height:1.62;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1140px;margin:0 auto;padding:0 32px;display:grid;grid-template-columns:1fr 216px;gap:56px;align-items:start}
+
+/* ---------- masthead ---------- */
+header{border-bottom:1px solid var(--hairline);margin-bottom:44px;padding:52px 0 30px}
+header .kicker{font-size:12px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:var(--primary);margin-bottom:16px;display:flex;gap:11px;align-items:center}
+header .kicker::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--primary)}
+header h1{font-family:var(--serif);font-weight:500;font-size:54px;line-height:1.05;letter-spacing:-1.4px;color:var(--ink)}
+header .sub{font-size:17px;color:var(--muted);margin-top:14px}
+header .intro{font-size:19px;line-height:1.55;color:var(--body-strong);margin-top:24px;max-width:66ch}
+
+/* ---------- flow ---------- */
+main{min-width:0;padding-bottom:96px}
+section{margin-bottom:52px;scroll-margin-top:24px}
+h2{font-family:var(--serif);font-weight:500;font-size:34px;line-height:1.15;letter-spacing:-.7px;color:var(--ink);margin:0 0 18px;display:flex;gap:16px;align-items:baseline}
+h2 .num{font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:1.4px;color:var(--primary);text-transform:uppercase;flex:none;padding-top:6px}
+h3{font-family:var(--serif);font-weight:500;font-size:24px;letter-spacing:-.4px;color:var(--ink);margin:30px 0 12px}
+p{margin:0 0 15px;max-width:72ch}
+strong{font-weight:600;color:var(--ink)}
+em{font-style:italic}
+a{color:var(--primary);text-decoration:none;border-bottom:1px solid rgba(204,120,92,.35)}
+ul,ol{margin:0 0 16px;padding-left:22px;max-width:72ch}
+li{margin-bottom:8px}
+ul{list-style:none;padding-left:20px}
+ul li{position:relative}
+ul li::before{content:"";position:absolute;left:-16px;top:11px;width:5px;height:5px;border-radius:50%;background:var(--primary)}
+ol li::marker{color:var(--primary);font-weight:600}
+code{font-family:var(--mono);font-size:.88em;background:var(--surface-card);padding:2px 6px;border-radius:5px;color:var(--ink)}
+
+/* ---------- code blocks ---------- */
+.code{position:relative;margin:0 0 20px;border-radius:12px;background:var(--dark);overflow:hidden}
+.code .label{font-size:11px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--on-dark-soft);padding:13px 20px 0}
+.code pre{margin:0;padding:18px 20px;overflow-x:auto;font-family:var(--mono);font-size:13.5px;line-height:1.72;color:var(--on-dark);white-space:pre}
+.code code{background:none;padding:0;color:inherit;font-size:inherit}
+.code button{
+  position:absolute;top:11px;right:11px;border:0;border-radius:7px;cursor:pointer;
+  background:#2b2823;color:var(--on-dark-soft);font-family:var(--sans);font-size:11.5px;font-weight:500;
+  padding:6px 11px;opacity:0;transition:opacity .12s;
+}
+.code:hover button,.code button:focus{opacity:1}
+.code button.done{color:var(--amber)}
+.code.prompt{background:var(--dark-soft);border-left:3px solid var(--primary)}
+
+/* ---------- callouts ---------- */
+.note{background:var(--surface-soft);border-radius:12px;padding:20px 24px;margin:0 0 20px}
+.note.warn{background:#faf1dd;border-left:3px solid var(--warning)}
+.note.goal{background:var(--primary);color:#fff}
+.note.goal strong,.note.goal .t{color:#fff}
+.note .t{display:block;font-size:12px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--primary);margin-bottom:8px}
+.note.warn .t{color:#8a6a0c}
+.note p:last-child,.note ul:last-child,.note ol:last-child{margin-bottom:0}
+.tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;background:var(--surface-card);color:var(--ink);border-radius:9999px;padding:4px 12px;margin-bottom:14px}
+
+/* ---------- sidebar ---------- */
+nav{position:sticky;top:32px;font-size:13.5px;padding-top:56px}
+nav .t{font-size:11px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted-soft);margin-bottom:14px}
+nav a{display:block;color:var(--muted);border:0;padding:5px 0 5px 12px;border-left:2px solid var(--hairline);line-height:1.4}
+nav a:hover{color:var(--ink)}
+nav a.on{color:var(--ink);border-left-color:var(--primary);font-weight:500}
+footer{border-top:1px solid var(--hairline);padding:28px 0 64px;font-size:14px;color:var(--muted-soft);max-width:72ch}
+
+@media (max-width:900px){
+  .wrap{grid-template-columns:1fr;gap:0;padding:0 22px}
+  nav{display:none}
+  header h1{font-size:38px}
+}
+@media print{
+  body{font-size:11pt}
+  nav,.code button{display:none}
+  .wrap{display:block;max-width:none;padding:0}
+  section{page-break-inside:avoid}
+  .code{background:#fff;border:1px solid #ccc}
+  .code pre{color:#000}
+  .code .label{color:#666}
+  .note.goal{background:#fff;border:2px solid var(--primary);color:var(--ink)}
+  .note.goal .t,.note.goal strong{color:var(--ink)}
+  a{color:var(--ink);border:0}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<main>
+<header><div class="kicker">Guide 3 · Day 3 · Wednesday 23 September</div><h1>Superpowers</h1><div class="sub">The Carrot Wall project · the 2-hour block, at your pace</div><p class="intro">This morning the loop reached outside the repo: the ticket, the design, the browser, production. This guide turns that into files on your fork. You finish yesterday's five commands and try one on Opus 5.5, give one step a door to the outside, decide what the agent may do out there without asking, lock the one rule that must always hold with a hook, and read one plugin before you trust it. Then you push the fork. That push is the only hand-off this week.</p></header>
+<section id="before">
+<h2><span class="num">Start here</span>Before you start</h2>
+<ul>
+<li>Your fork has yesterday's work on a branch, committed or not, and both apps run the way Guide 1 set them up.</li>
+<li><code>gh auth status</code> says you are logged in. Step 2 uses it.</li>
+<li>Open Claude Code in the repo and run <code>/context</code>. Write down the total and the MCP line. You compare at the end of Step 2.</li>
+<li>If you did not finish all five commands yesterday, that is fine. Step 1 starts there.</li>
+</ul>
+</section>
+
+<section id="shape">
+<h2><span class="num">The target</span>What the branch looks like in two hours</h2>
+<div class="code"><div class="label">one door out, one rulebook, one lock</div><pre><code>.claude/
+├── settings.json          ← + a permissions block            (Step 3)
+│                            + one new hook                     (Step 4)
+├── hooks/
+│   └── no-merge.sh        ← NEW · your hook's script           (Step 4)
+├── skills/
+│   ├── intent/ spec/ plan/ execute/ ship/
+│   │                      ← all five finished,
+│   │                        one of them reads the outside      (Steps 1–2)
+│   └── project-conventions/                  ← untouched
+└── agents/                ← untouched (or see Extra)
+
+CLAUDE.md                  ← + one line                         (Step 6)
+docs/plugins.md            ← NEW · one line per plugin you read (Step 5)</code></pre></div>
+<p>Where a step offers paths, pick one and do it properly. One door that works teaches more than three that half work.</p>
+</section>
+
+<section id="step1">
+<h2><span class="num">Step 1</span>Finish the five, then try Opus 5.5</h2>
+<p>If a command is missing, Guide 2 Steps 2 to 6 have a starting body for each: five files, frontmatter pinned, one run each. Do not polish them yet. The run in Step 2 tells you what to fix.</p>
+<p>Then the experiment from this morning. Opus 5.5 shipped yesterday, and Anthropic reports it at Fable level on most work for 40% less than Opus 5. Check that on your own work instead of trusting the table.</p>
+<ol>
+<li>Run <code>/model</code> and note which model the <code>opus</code> alias points to in your Claude Code today.</li>
+<li>Pick <code>/spec</code> or <code>/plan</code> and a feature from <code>feature-ideas.md</code>. Run it in a fresh session with the file as it is pinned now, and copy the output aside, for example to <code>/tmp/spec-before.md</code>.</li>
+<li>Change one line in the frontmatter, start a fresh session, and run the same command on the same input.</li>
+<li>Read the two side by side. Which one asked the question you would have asked? Which one invented something? Which one would you sign?</li>
+</ol>
+<div class="code"><div class="label">.claude/skills/spec/SKILL.md · the one line</div><pre><code>---
+name: spec
+...
+model: claude-opus-5-5      # was: opus
+effort: xhigh
+---</code></pre></div>
+<p>Keep whichever pin won, and put the reason in the commit message in one line. If you saw no difference, go back to the alias: <code>opus</code> follows the newest Opus on its own, while a full model ID stays exactly where you put it. Both are fine. The point is that you chose.</p>
+<div class="note"><span class="t">While you are in the file</span><p>The <a href="https://claude.dev/blog/getting-the-most-out-of-opus-5-5/">launch post on getting the most out of Opus 5.5</a> has three tips that apply to your five commands:</p>
+<ul>
+<li><strong>Delete "think carefully" and "think step by step".</strong> Opus 5.5 already thinks before every reply. Search your five files for those lines and remove them.</li>
+<li><strong>Name the finish line.</strong> Give the whole task in one message and say what done means, for example "the tests pass". Your <code>/execute</code> probably already does; check that <code>/spec</code> and <code>/plan</code> do too.</li>
+<li><strong>Put stopping rules in CLAUDE.md:</strong> when to carry on alone, and when to stop and ask you.</li>
+</ul></div>
+</section>
+
+<section id="step2">
+<h2><span class="num">Step 2</span>Give one step a door to the outside</h2>
+<p>Pick one path. Each one lets a step of your loop read something that lives outside the repo. When you are done, run <code>/context</code> again: the difference from your number is what the door costs, every turn. Write it in the commit message.</p>
+
+<h3>Path A · The ticket, through the CLI</h3>
+<span class="tag">Works on the wall today</span>
+<p>GitHub issues are the ticket system the wall already has, and <code>gh</code> is already installed. Forks start with issues switched off: in your fork on GitHub, open Settings, then General, then Features, and tick Issues. Then point <code>gh</code> at your fork and open one issue, written the way a colleague would write it:</p>
+<div class="code"><pre><code>gh repo set-default &lt;your-user&gt;/carrot-wall
+gh issue create --title "&lt;a feature from feature-ideas.md&gt;" \
+  --body "&lt;who wants it and why, in their words&gt;"</code></pre></div>
+<p>Now give <code>/intent</code> the door: one line in the frontmatter, one paragraph at the top of the body.</p>
+<div class="code"><div class="label">.claude/skills/intent/SKILL.md · the changes</div><pre><code>---
+name: intent
+...
+allowed-tools: Bash(gh issue view *)
+---
+If $ARGUMENTS is an issue number, run `gh issue view $ARGUMENTS --comments`
+first. Treat the issue as the originator's own words: quote them, do not
+rewrite them. Anything the issue does not say goes under Open questions.
+Never comment on the issue or change it.
+
+(your existing body continues here)</code></pre></div>
+<p><code>allowed-tools</code> pre-approves that one read while the command runs, so it does not stop to ask. It grants; it does not restrict. The limits live in Step 3. Run <code>/intent &lt;issue number&gt;</code> in a fresh session and check that the intent file quotes the issue.</p>
+<div class="note"><span class="t">Faster, once it works</span><p>A line such as <code>!&#96;gh issue list --limit 20&#96;</code> in the body runs before Claude reads the prompt, so the list arrives as text instead of a tool call. It is the same <code>!</code> you added to <code>/ship</code> yesterday.</p></div>
+
+<h3>Path B · Jira, through MCP</h3>
+<span class="tag">If your team's Jira is Cloud</span>
+<p>Atlassian ships a Rovo MCP server, and the official <code>atlassian</code> plugin bundles it:</p>
+<div class="code"><pre><code>/plugin install atlassian@claude-plugins-official
+/mcp</code></pre></div>
+<p>Sign in from <code>/mcp</code>. Then find the exact tool names, in <code>/mcp</code> or by asking Claude to list the tools it has from Atlassian. Tools that come from a plugin are named <code>mcp__plugin_atlassian_&lt;server&gt;__&lt;tool&gt;</code>, and Steps 3 and 4 point at those exact names. Then add the same paragraph as Path A to <code>/intent</code>, reading a work item instead of an issue: "If $ARGUMENTS looks like a Jira key such as ABC-123, read that work item and its comments with the Atlassian tools first."</p>
+<div class="note warn"><span class="t">Read only, or a test project</span><p>Rovo MCP can create work items, move them and comment on them. Nothing in this step should write to a board your colleagues watch. If your Jira is Data Center, there is no Rovo MCP: take Path A today.</p></div>
+
+<h3>Path C · The browser, in <code>/execute</code></h3>
+<span class="tag">The natural pick</span>
+<p>Yesterday's <code>/execute</code> ends with evidence, and for the web app the best evidence is a real browser. Microsoft ships a Playwright CLI built for coding agents, lighter on context than their MCP server:</p>
+<div class="code"><pre><code>npm install -g @playwright/cli@latest
+playwright-cli install --skills</code></pre></div>
+<p>The second line installs a skill into <code>.claude/skills/</code> that teaches Claude the commands. Then add a verify paragraph to <code>/execute</code>:</p>
+<div class="code"><div class="label">.claude/skills/execute/SKILL.md · add to the frontmatter and the body</div><pre><code>allowed-tools: Bash(playwright-cli *)
+
+When the plan touches the web app: with the app running on
+http://localhost:4200, use playwright-cli to open it, click through the
+feature the way a user would, and take a screenshot. Then run the existing
+end-to-end suite with `npm run e2e` in apps/web. Put what you saw, and what
+the suite printed, in your evidence.</code></pre></div>
+<p>The wall already has two Playwright tests in <code>apps/web/e2e/</code>, and its config starts the servers for them. The suite checks what someone thought to test; the CLI is for the part nobody has written a test for yet: looking.</p>
+<p>Prefer MCP? <code>claude mcp add playwright -- npx @playwright/mcp@latest</code> works too and costs more context. The tidy version gives the browser to one agent only; see Extra.</p>
+</section>
+
+<section id="step3">
+<h2><span class="num">Step 3</span>Decide what it may do on its own</h2>
+<p>Three lists in <code>.claude/settings.json</code>. <strong>allow</strong> runs without asking. <strong>ask</strong> stops for your yes. <strong>deny</strong> never runs. Claude Code checks deny first, then ask, then allow, and the first match wins. The file is committed, so the whole team gets the same rulebook.</p>
+<p>Add a <code>permissions</code> block next to the <code>hooks</code> block that is already there. It stays one JSON object with one pair of outer braces.</p>
+<div class="code"><div class="label">.claude/settings.json · Path A</div><pre><code>{
+  "permissions": {
+    "allow": ["Bash(gh issue view *)", "Bash(gh issue list *)"],
+    "ask":   ["Bash(gh issue comment *)", "Bash(gh issue edit *)"],
+    "deny":  ["Bash(gh issue close *)"]
+  },
+  "hooks": { ...what is already there, unchanged... }
+}</code></pre></div>
+<p>For Path B, the same three lists with the tool names you copied: the read tools in allow, moving and commenting in ask, creating in deny. For Path C: <code>Bash(playwright-cli *)</code> and <code>Bash(npm run e2e *)</code> in allow.</p>
+<p>Merging is not in any list on purpose. Step 4 guards it with a hook.</p>
+<p>Test it: from a plain session, ask Claude to comment on your issue. You should get a prompt. Say no.</p>
+</section>
+
+<section id="step4">
+<h2><span class="num">Step 4</span>One hook that is not the formatter</h2>
+<p>Your fork already runs two hooks: the formatter after every edit, and the migration guard before every edit. Read both in <code>settings.json</code> first. They show the whole shape: read the tool call from stdin, decide, and to block, print a reason to stderr and exit with code 2. Claude reads the reason.</p>
+<p>A permission prompt can be clicked through by someone tired at six in the evening. A hook cannot. So the hook gets the rule that must hold every time: <strong>Claude may open a pull request, and never merge one.</strong></p>
+<div class="code"><div class="label">.claude/hooks/no-merge.sh</div><pre><code>#!/usr/bin/env bash
+# PreToolUse on Bash: Claude may open a PR, never merge one.
+cmd=$(python3 -c 'import json,sys; print(json.load(sys.stdin).get("tool_input",{}).get("command",""))')
+case "$cmd" in
+  *"gh pr merge"*)
+    echo "Merging is a human decision. Open the PR, show me the link, and stop." &gt;&amp;2
+    exit 2 ;;
+esac
+exit 0</code></pre></div>
+<div class="code"><pre><code>chmod +x .claude/hooks/no-merge.sh</code></pre></div>
+<p>Register it as a second entry in the <code>PreToolUse</code> array that already holds the migration guard. Do not add a second <code>"PreToolUse"</code> key.</p>
+<div class="code"><div class="label">.claude/settings.json · inside "hooks"</div><pre><code>"PreToolUse": [
+  { "matcher": "Edit|Write", "hooks": [ ...the migration guard, unchanged... ] },
+  {
+    "matcher": "Bash",
+    "hooks": [
+      { "type": "command", "command": "\"${CLAUDE_PROJECT_DIR}\"/.claude/hooks/no-merge.sh" }
+    ]
+  }
+]</code></pre></div>
+<p>Test it twice: the script on its own, then through Claude.</p>
+<div class="code"><pre><code>echo '{"tool_input":{"command":"gh pr merge 3"}}' | .claude/hooks/no-merge.sh; echo "exit $?"
+echo '{"tool_input":{"command":"gh pr view 3"}}'  | .claude/hooks/no-merge.sh; echo "exit $?"</code></pre></div>
+<p>The first prints the message and <code>exit 2</code>, the second <code>exit 0</code>. Then in Claude Code, <code>/hooks</code> shows it registered. Ask "merge the PR for this branch" and watch it bounce.</p>
+<p>On Path B, the same shape guards the Atlassian write tools: match <code>mcp__plugin_atlassian_.*</code> and read <code>tool_name</code> from stdin instead of <code>tool_input.command</code>. Other rules worth a hook: yesterday's test-file guard (block edits to <code>*.spec.ts</code> and <code>src/test/</code> during a fix), or the Stop hook from Guide 2's Extra.</p>
+<div class="note warn"><span class="t">A hook that does nothing is worse than none</span><p>The usual causes: the script is not executable, <code>settings.json</code> is no longer valid JSON (a missing comma), or an MCP matcher without <code>.*</code>, which matches nothing. The stdin test catches the first, <code>/hooks</code> the second. It happened to our own harness while we built the wall.</p></div>
+</section>
+
+<section id="step5">
+<h2><span class="num">Step 5</span>Read one plugin before you trust it</h2>
+<p>Pick one: <code>security-guidance</code> if you work on the backend, <code>frontend-design</code> if you work on the frontend, <code>superpowers</code> if you want to see a whole loop that someone else packaged. Read it in the order from this morning:</p>
+<ol>
+<li><code>/plugin</code>, then Discover, then the plugin. Read <strong>Context cost</strong> and <strong>Will install</strong>. If it will not tell you, that is your answer.</li>
+<li>Every <code>SKILL.md</code> description. These are the triggers you are agreeing to. The source of each official plugin is on GitHub under <a href="https://github.com/anthropics/claude-plugins-official">anthropics/claude-plugins-official</a>.</li>
+<li><code>hooks/hooks.json</code>: what runs without asking, and on which events.</li>
+<li><code>.mcp.json</code>: which systems it can reach, and which it can write to.</li>
+<li>Decide, and write one line in <code>docs/plugins.md</code>.</li>
+</ol>
+<div class="code"><div class="label">docs/plugins.md · one line each</div><pre><code>security-guidance · install, project scope · hooks only (every edit, end of turn, commit), no MCP · the turn and commit reviews are extra model calls
+superpowers · not now · its skills overlap our five commands and would compete with /spec</code></pre></div>
+<p>If you install it, prove it does something. For <code>security-guidance</code>, ask Claude to render a user's name with <code>innerHTML</code> in the web app and watch the warning come back. For a plugin with skills: a fresh session, a task that should match, and <code>/context</code> to check the skill loaded.</p>
+</section>
+
+<section id="step6">
+<h2><span class="num">Step 6</span>One look at memory, one line in CLAUDE.md</h2>
+<ol>
+<li>Run <code>/memory</code>. Open the auto memory folder from there and read what Claude has written about this project in three days. Delete a line that is wrong or stale. You are allowed to.</li>
+<li>Add one line to CLAUDE.md from whatever fought you today. Yesterday's line, today's line: that is how the file gets good.</li>
+</ol>
+</section>
+
+<section id="alive">
+<h2><span class="num">Verify</span>Prove it works</h2>
+<ul>
+<li>The step you wired reads the outside: the intent quotes your issue or work item, or the execute evidence has a screenshot and the e2e output.</li>
+<li>The <code>/context</code> difference is in a commit message.</li>
+<li>Asking Claude to comment on the issue stops for your yes.</li>
+<li>The hook script returns 2 on a merge and 0 on a view, and Claude bounced off it.</li>
+<li><code>docs/plugins.md</code> has at least one line.</li>
+<li>CLAUDE.md has today's line.</li>
+</ul>
+</section>
+
+<section id="push">
+<h2><span class="num">Before you leave</span>Push the fork</h2>
+<div class="note goal"><span class="t">One thing</span><p><strong>Push the fork, whatever state it is in.</strong> Half-finished is information too.</p></div>
+<div class="code"><pre><code>git add .claude CLAUDE.md docs
+git commit -m "Day 3: &lt;the door you wired&gt;, permissions, no-merge hook"
+git push -u origin HEAD</code></pre></div>
+<p>What I read for during the gap week: your <code>/execute</code> and what it calls verified · the door you wired and what it may do without asking · the hook, and whether it fires · your plugin line · the lines you added to CLAUDE.md. Monday opens with what I found.</p>
+<p>No homework. Day 4 works for someone who does nothing between now and then. The wall stays open for questions, and I answer during the week.</p>
+</section>
+
+<section id="stuck">
+<h2><span class="num">Help</span>If you get stuck</h2>
+<div class="note"><p><strong>Permission rules ignored:</strong> check the file is still valid JSON with <code>python3 -m json.tool .claude/settings.json</code>, and remember deny beats ask beats allow. <strong>Hook does nothing:</strong> <code>/hooks</code>, then the stdin test, then <code>chmod +x</code>. <strong>gh says "no default repository":</strong> <code>gh repo set-default</code>. <strong>Issues missing on your fork:</strong> they are off by default; see Path A. <strong>MCP server will not connect:</strong> <code>/mcp</code> shows the error, most often a missing sign-in. <strong>playwright-cli not found:</strong> open a new terminal after the global install. <strong>A skill never triggers:</strong> rewrite its description as the situations it is for, not the topic.</p></div>
+</section>
+
+<section id="stretch">
+<h2><span class="num">Extra</span>Stretch, if you finished early</h2>
+<h3>Give the browser to one agent only</h3>
+<p>A subagent can bring its own MCP servers. They connect when the agent starts and disconnect when it finishes, so the main session never pays for the browser's tools. Add to <code>.claude/agents/test-runner.md</code>:</p>
+<div class="code"><div class="label">.claude/agents/test-runner.md · frontmatter</div><pre><code>mcpServers:
+  - playwright:
+      type: stdio
+      command: npx
+      args: ["-y", "@playwright/mcp@latest"]</code></pre></div>
+<h3>Give the reviewer a memory</h3>
+<p>Add <code>memory: project</code> to <code>.claude/agents/code-reviewer.md</code>. After two reviews, read <code>.claude/agent-memory/code-reviewer/MEMORY.md</code> to see what it kept. Turning memory on also gives that agent Read, Write and Edit, so it can manage its notes; the wall's reviewer is told to report only, so check it still does.</p>
+<h3>Write the runbook</h3>
+<p>Take the incident-triage skill from this morning's slide and point it at what you can read on the wall: <code>gh run list</code> and <code>gh run view --log-failed</code> if your fork runs GitHub Actions, or your team's Sentry or Grafana if you have read access. Keep the last two lines: never restart, scale or delete; say what you would do next, and stop. Then ask "why did the last run fail?" without naming the skill, and check whether its description made it fire.</p>
+<h3>Bundle the harness as a plugin</h3>
+<div class="code"><div class="label">a plugin and a catalog in your fork</div><pre><code>carrot-harness/
+├── .claude-plugin/plugin.json   {"name": "carrot-harness", "description": "Our loop, hooks and agents"}
+├── skills/                      ← copies of your five
+├── agents/
+└── hooks/hooks.json             ← script paths use ${CLAUDE_PLUGIN_ROOT}
+
+.claude-plugin/marketplace.json  (at the repo root)
+{
+  "name": "carrot",
+  "owner": { "name": "&lt;you&gt;" },
+  "plugins": [ { "name": "carrot-harness", "source": "./carrot-harness" } ]
+}</code></pre></div>
+<p>Test it with <code>claude --plugin-dir ./carrot-harness</code>: your skills appear as <code>/carrot-harness:spec</code> and so on. A colleague adds your catalog with <code>/plugin marketplace add &lt;your-user&gt;/carrot-wall</code> and installs from Discover.</p>
+<h3>Run a security audit</h3>
+<p><code>/plugin install claude-security@claude-plugins-official</code>, then <code>/claude-security</code> and scan only your branch's changes. It needs a paid plan and can use a lot of tokens, so scope it small. Patches land in a folder; applying one is your call.</p>
+</section>
+
+<footer>Steps 1 and 2 matter most. Step 4 is where you feel the difference between advice and enforcement. Work at your own speed, flag me down when you are stuck, and whatever state it is in at the end of the block: push the fork.</footer>
+</main>
+<nav><div class="t">On this page</div><div id="toc"></div></nav>
+</div>
+<script>
+// copy buttons on every code block
+document.querySelectorAll('.code').forEach(function(box){
+  var pre = box.querySelector('pre');
+  var b = document.createElement('button');
+  b.textContent = 'Copy';
+  b.onclick = function(){
+    navigator.clipboard.writeText(pre.innerText).then(function(){
+      b.textContent = 'Copied'; b.classList.add('done');
+      setTimeout(function(){ b.textContent = 'Copy'; b.classList.remove('done'); }, 1400);
+    }).catch(function(){ b.textContent = 'Select it'; });
+  };
+  box.appendChild(b);
+});
+// table of contents
+var toc = document.getElementById('toc');
+var secs = [].slice.call(document.querySelectorAll('section[id]'));
+secs.forEach(function(s){
+  var h = s.querySelector('h2');
+  if (!h) return;
+  var c = h.cloneNode(true);
+  var num = c.querySelector('.num');
+  var label = num ? num.textContent.trim() : '';
+  if (num) num.remove();
+  var a = document.createElement('a');
+  a.href = '#' + s.id;
+  a.textContent = c.textContent.trim();
+  if (label) a.title = label;
+  toc.appendChild(a);
+});
+var links = [].slice.call(toc.querySelectorAll('a'));
+var io = new IntersectionObserver(function(es){
+  es.forEach(function(e){
+    if (!e.isIntersecting) return;
+    var i = secs.indexOf(e.target);
+    links.forEach(function(l,j){ l.classList.toggle('on', j === i); });
+  });
+}, { rootMargin: '-10% 0px -80% 0px' });
+secs.forEach(function(s){ io.observe(s); });
+</script>
+</body>
+</html>
