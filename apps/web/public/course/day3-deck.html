@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 3 · Superpowers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#cc785c; --primary-active:#a9583e;
+  --ink:#141413; --body:#3d3d3a; --body-strong:#252523;
+  --muted:#6c6a64; --muted-soft:#8e8b82;
+  --hairline:#e6dfd8; --hairline-soft:#ebe6df;
+  --canvas:#faf9f5; --surface-soft:#f5f0e8; --surface-card:#efe9de; --cream-strong:#e8e0d2;
+  --dark:#181715; --dark-elev:#252320; --dark-soft:#1f1e1b;
+  --on-dark:#faf9f5; --on-dark-soft:#a09d96;
+  --teal:#5db8a6; --amber:#e8a55a; --success:#5db872; --warning:#d4a017; --error:#c64545;
+  --serif:"Cormorant Garamond","Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+  --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--canvas); color:var(--ink);
+  font-family:var(--sans); font-size:16px; line-height:1.55;
+  overflow:hidden;
+}
+
+/* ---------- stage ---------- */
+#stage-wrap{position:fixed;inset:0;display:grid;place-items:center;background:var(--canvas)}
+body.notes-on #stage-wrap{inset:0 380px 0 0}
+#stage{
+  width:1280px;height:720px;position:relative;
+  transform-origin:center center;
+  background:var(--canvas);
+  box-shadow:0 1px 3px rgba(20,20,19,.08);
+  overflow:hidden;
+}
+.slide{
+  position:absolute;inset:0;display:none;
+  padding:56px 64px;
+  flex-direction:column;
+}
+.slide.active{display:flex}
+.slide.dark{background:var(--dark);color:var(--on-dark)}
+.slide.dark .eyebrow{color:var(--on-dark-soft)}
+.slide.dark h1,.slide.dark h2{color:var(--on-dark)}
+.slide.dark p,.slide.dark li{color:var(--on-dark-soft)}
+.slide.coral{background:var(--primary);color:#fff}
+.slide.coral h1,.slide.coral h2,.slide.coral p{color:#fff}
+
+/* ---------- type ---------- */
+.eyebrow{
+  font-size:12px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:20px;display:flex;gap:12px;align-items:center;
+}
+.eyebrow .dot{width:5px;height:5px;border-radius:50%;background:var(--primary);flex:none}
+h1{font-family:var(--serif);font-weight:500;font-size:58px;line-height:1.05;letter-spacing:-1.4px;color:var(--ink)}
+h2{font-family:var(--serif);font-weight:500;font-size:42px;line-height:1.1;letter-spacing:-1px;color:var(--ink)}
+h3{font-family:var(--serif);font-weight:500;font-size:29px;line-height:1.15;letter-spacing:-.5px;color:var(--ink)}
+.lead{font-size:20px;line-height:1.45;color:var(--body-strong);font-weight:400}
+p{font-size:17px;color:var(--body)}
+.sm{font-size:15px}
+.xs{font-size:13.5px;color:var(--muted)}
+strong{font-weight:600;color:var(--ink)}
+.slide.dark strong{color:var(--on-dark)}
+em.q{font-style:italic;font-family:var(--serif);font-size:1.1em;letter-spacing:-.2px}
+.coralword{color:var(--primary)}
+.slide.dark .coralword{color:var(--amber)}
+
+/* ---------- layout helpers ---------- */
+.body{flex:1;display:flex;flex-direction:column;gap:18px;min-height:0;justify-content:center}
+.cols{display:grid;gap:26px;flex:1;min-height:0}
+.c2{grid-template-columns:1fr 1fr}
+.c2w{grid-template-columns:1.15fr .85fr}
+.c2n{grid-template-columns:.82fr 1.18fr}
+.c3{grid-template-columns:repeat(3,1fr)}
+.c4{grid-template-columns:repeat(4,1fr)}
+.stack{display:flex;flex-direction:column;gap:14px;justify-content:center}
+.center{justify-content:center;align-items:flex-start}
+.mid{justify-content:center}
+
+/* ---------- cards ---------- */
+.card{background:var(--surface-card);border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:8px}
+.card.plain{background:transparent;border:1px solid var(--hairline)}
+.card.darkc{background:var(--dark);color:var(--on-dark)}
+.card.darkc h3,.card.darkc .k{color:var(--on-dark)}
+.card.darkc p,.card.darkc .v{color:var(--on-dark-soft)}
+.card.darkc .v strong{color:var(--on-dark)}
+.card .k{font-size:16px;font-weight:600;color:var(--ink)}
+.card .v{font-size:15px;color:var(--body);line-height:1.5}
+.stat{font-family:var(--serif);font-size:56px;line-height:1;letter-spacing:-2px;color:var(--primary);font-weight:500}
+.slide.dark .stat{color:var(--amber)}
+
+.hrm{display:grid;grid-template-columns:104px 1fr;gap:10px 18px;align-items:baseline}
+.hrm .lbl{font-size:11px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted-soft);padding-top:4px}
+.hrm .lbl.move{color:var(--primary)}
+.hrm .txt{font-size:17px;color:var(--body);line-height:1.45}
+.hrm .txt strong{color:var(--ink)}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-family:var(--mono);font-size:13.5px;background:var(--surface-card);color:var(--ink);border-radius:9999px;padding:5px 13px}
+.slide.dark .chip{background:var(--dark-elev);color:var(--on-dark)}
+.pill{font-size:11px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;border-radius:9999px;padding:4px 11px;background:var(--surface-card);color:var(--ink)}
+.pill.coral{background:var(--primary);color:#fff}
+.pill.warn{background:#f6e6c8;color:#7a5a08}
+.pill.term{background:var(--dark);color:var(--on-dark)}
+
+blockquote{
+  border-left:2px solid var(--primary);padding-left:20px;
+  font-family:var(--serif);font-size:27px;line-height:1.28;letter-spacing:-.4px;color:var(--ink);font-weight:500;
+}
+.slide.dark blockquote{color:var(--on-dark)}
+blockquote cite{display:block;font-family:var(--sans);font-size:13px;font-style:normal;color:var(--muted);margin-top:12px;letter-spacing:0;font-weight:500}
+.slide.dark blockquote cite{color:var(--on-dark-soft)}
+
+/* ---------- assets ---------- */
+figure{margin:0;display:flex;flex-direction:column;gap:7px;min-height:0;flex:1}
+figure img{
+  width:100%;height:100%;object-fit:cover;object-position:top left;
+  border-radius:12px;border:1px solid var(--hairline);background:var(--dark);
+  display:block;min-height:0;
+}
+figure img.contain{object-fit:contain;object-position:center;background:var(--dark)}
+figure img.bottom{object-position:bottom left}
+figcaption{font-size:12px;color:var(--muted-soft);font-family:var(--mono);flex:none}
+.slide.dark figcaption{color:var(--on-dark-soft)}
+.shotgrid{display:grid;gap:12px;flex:1;min-height:0}
+figure.vid{flex:none}
+figure.vid video{height:380px}
+video{width:100%;border-radius:12px;background:#000;object-fit:contain;display:block}
+
+.missing{
+  position:absolute;top:18px;right:22px;z-index:5;
+  font-size:10.5px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;
+  background:#f6e6c8;color:#7a5a08;border-radius:9999px;padding:5px 12px;
+  display:flex;gap:7px;align-items:center;cursor:default;
+}
+.slide.dark .missing{background:#4a3c18;color:#f0dcae}
+.gapnote{
+  background:#faf1dd;border-left:2px solid var(--warning);border-radius:0 8px 8px 0;
+  padding:11px 15px;font-size:13.5px;color:#6b5410;line-height:1.45;flex:none;
+}
+.slide.dark .gapnote{background:#2a2317;color:#d8c38c;border-color:var(--amber)}
+.gapnote b{color:#4a3a06}
+.slide.dark .gapnote b{color:#f0dcae}
+
+/* ---------- chrome ---------- */
+#chrome{position:fixed;left:0;right:0;bottom:0;height:0;z-index:40}
+body.notes-on #chrome{right:380px}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:var(--primary);transition:width .22s ease;z-index:41}
+#hud{
+  position:fixed;bottom:14px;left:0;right:0;display:flex;justify-content:center;gap:14px;
+  align-items:center;pointer-events:none;z-index:42;
+}
+body.notes-on #hud{right:380px}
+#hud .grp{
+  pointer-events:auto;display:flex;gap:2px;align-items:center;
+  background:rgba(250,249,245,.94);border:1px solid var(--hairline);border-radius:9999px;padding:4px;
+  backdrop-filter:blur(8px);
+}
+#hud button{
+  border:0;background:transparent;color:var(--muted);font-family:var(--sans);font-size:12.5px;font-weight:500;
+  padding:6px 12px;border-radius:9999px;cursor:pointer;
+}
+#hud button:hover{background:var(--surface-card);color:var(--ink)}
+#hud .count{font-family:var(--mono);font-size:12px;color:var(--muted);padding:0 12px;min-width:86px;text-align:center}
+#hud .act{font-size:11px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--primary);padding:0 10px}
+
+/* ---------- notes ---------- */
+#notes{
+  position:fixed;top:0;right:0;bottom:0;width:380px;background:var(--dark);color:var(--on-dark);
+  padding:26px 24px;overflow-y:auto;display:none;z-index:45;border-left:1px solid #000;
+}
+body.notes-on #notes{display:block}
+#notes h4{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--amber);margin-bottom:12px}
+#notes .nslide{font-family:var(--serif);font-size:24px;letter-spacing:-.4px;color:var(--on-dark);margin-bottom:6px;font-weight:500}
+#notes .ntime{font-family:var(--mono);font-size:12px;color:var(--on-dark-soft);margin-bottom:20px}
+#notes .ntext{font-size:14.5px;line-height:1.62;color:#d6d2ca;white-space:pre-wrap}
+#notes .nassets{margin-top:22px;padding-top:18px;border-top:1px solid #333029;font-size:13px;color:var(--on-dark-soft);line-height:1.6}
+#notes .nassets b{color:var(--amber);font-weight:600}
+#notes .nnext{margin-top:22px;padding-top:18px;border-top:1px solid #333029;font-size:13px;color:var(--on-dark-soft)}
+#notes .nnext b{color:#fff;display:block;margin-top:4px;font-family:var(--serif);font-size:17px;letter-spacing:-.3px}
+
+/* ---------- overview ---------- */
+#overview{
+  position:fixed;inset:0;background:rgba(250,249,245,.985);z-index:60;display:none;
+  overflow-y:auto;padding:40px 44px;
+}
+#overview.on{display:block}
+#overview h3{margin-bottom:22px}
+.ovgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:14px}
+.ovcell{
+  border:1px solid var(--hairline);border-radius:10px;background:var(--surface-soft);
+  padding:12px 13px;cursor:pointer;min-height:92px;display:flex;flex-direction:column;gap:6px;
+}
+.ovcell:hover{border-color:var(--primary)}
+.ovcell.cur{border-color:var(--primary);background:var(--surface-card)}
+.ovcell .n{font-family:var(--mono);font-size:11px;color:var(--muted-soft)}
+.ovcell .t{font-size:13.5px;font-weight:500;color:var(--ink);line-height:1.3}
+.ovcell .a{font-size:10px;letter-spacing:1.1px;text-transform:uppercase;color:var(--primary);font-weight:600;margin-top:auto}
+.ovcell .flag{font-size:10px;color:#7a5a08;background:#f6e6c8;border-radius:9999px;padding:2px 7px;align-self:flex-start}
+
+/* ---------- help ---------- */
+#help{position:fixed;inset:0;background:rgba(20,20,19,.72);z-index:70;display:none;place-items:center}
+#help.on{display:grid}
+#help .box{background:var(--canvas);border-radius:16px;padding:34px 38px;max-width:460px}
+#help h3{margin-bottom:18px}
+#help dl{display:grid;grid-template-columns:auto 1fr;gap:9px 18px;font-size:14.5px}
+#help dt{font-family:var(--mono);font-size:12.5px;color:var(--ink);background:var(--surface-card);padding:2px 9px;border-radius:5px;justify-self:start}
+#help dd{color:var(--body)}
+
+/* ---------- tables ---------- */
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+th{text-align:left;font-size:11px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted-soft);padding:0 12px 9px 0;border-bottom:1px solid var(--hairline)}
+td{padding:9px 12px 9px 0;border-bottom:1px solid var(--hairline-soft);color:var(--body);vertical-align:top}
+td.mono{font-family:var(--mono);font-size:13px;color:var(--ink)}
+td.ok{color:var(--ink);font-weight:500}
+tr:last-child td{border-bottom:0}
+
+ul.clean{list-style:none;display:flex;flex-direction:column;gap:9px}
+ul.clean li{font-size:16.5px;color:var(--body);padding-left:18px;position:relative;line-height:1.45}
+ul.clean li::before{content:"";position:absolute;left:0;top:10px;width:5px;height:5px;border-radius:50%;background:var(--primary)}
+ol.steps{list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:13px}
+ol.steps li{counter-increment:s;font-size:18px;color:var(--body);padding-left:42px;position:relative;line-height:1.4}
+ol.steps li::before{
+  content:counter(s);position:absolute;left:0;top:-1px;width:28px;height:28px;border-radius:50%;
+  background:var(--primary);color:#fff;font-size:13px;font-weight:600;display:grid;place-items:center;font-family:var(--sans);
+}
+.vidhead{display:flex;justify-content:space-between;align-items:center;gap:24px;flex:none;margin-bottom:12px}
+.vidhead .eyebrow{margin-bottom:0}
+.qrinline{display:flex;gap:13px;align-items:center}
+.qrinline img{width:96px;height:96px;border-radius:8px;background:var(--canvas);padding:4px;display:block}
+.qrinline .lbl{display:block;font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--on-dark-soft);margin-bottom:4px}
+.qrinline .url{display:block;font-family:var(--mono);font-size:14px;color:var(--amber)}
+.qr{width:168px;height:168px;border-radius:12px;flex:none;background:var(--canvas);padding:6px}
+figure.noimg img,figure.noimg figcaption{display:none}
+figure.noimg::before{content:"bizpliz-hero.png";display:grid;place-items:center;flex:1;border:2px dashed var(--hairline);border-radius:12px;font-family:var(--mono);font-size:12px;color:var(--muted-soft)}
+.slide.dark .qr{border-color:#3a352d;color:var(--on-dark-soft)}
+.logorow{display:flex;gap:26px;align-items:center;margin-top:auto}
+.logoplate{
+  margin-top:auto;align-self:flex-start;display:flex;align-items:center;gap:30px;
+  background:var(--canvas);border-radius:12px;padding:18px 30px;
+}
+.logoplate img{display:block;width:auto}
+.logoplate .lsep{width:1px;align-self:stretch;background:var(--hairline)}
+.logoslot{
+  height:42px;min-width:108px;border-radius:8px;border:1px dashed #3a352d;
+  display:grid;place-items:center;font-size:10.5px;color:var(--on-dark-soft);font-family:var(--mono);padding:0 14px;
+}
+.slide:not(.dark) .logoslot{border-color:var(--hairline);color:var(--muted-soft)}
+.foot{margin-top:auto;padding-top:14px;border-top:1px solid var(--hairline);font-size:13px;color:var(--muted);flex:none}
+.slide.dark .foot{border-color:#2c2823;color:var(--on-dark-soft)}
+.weekmap{display:grid;grid-template-columns:1fr 1fr 1fr 106px 1fr 1fr;gap:11px;align-items:stretch}
+.day{background:var(--surface-card);border-radius:12px;padding:19px 17px;display:flex;flex-direction:column;gap:7px}
+.day.gap{background:transparent;border:1px dashed var(--hairline)}
+.day.dest{background:var(--primary);color:#fff}
+.day .dnum{font-size:11px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted)}
+.day.dest .dnum{color:rgba(255,255,255,.8)}
+.day .dt{font-family:var(--serif);font-size:23px;letter-spacing:-.5px;line-height:1.1;color:var(--ink);font-weight:500}
+.day.dest .dt{color:#fff}
+.gapweek{border:1px dashed var(--hairline);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:10px 8px;text-align:center}
+.gapweek .gw1{font-family:var(--serif);font-size:15px;line-height:1.15;letter-spacing:-.2px;color:var(--muted);font-style:italic}
+.gapweek .gw2{font-size:10px;font-weight:600;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted-soft)}
+.loopdiag{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.loopstep{background:var(--surface-card);border-radius:9999px;padding:10px 20px;font-size:15.5px;font-weight:500;color:var(--ink)}
+.loopar{color:var(--primary);font-size:17px}
+.gear{border:1px solid var(--hairline);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:5px}
+.gear .gn{font-size:15px;font-weight:600;color:var(--ink)}
+.gear .gd{font-size:13.5px;color:var(--muted);line-height:1.45}
+.modelrow{display:grid;grid-template-columns:104px 1fr;gap:6px 18px;align-items:baseline;padding:11px 0;border-bottom:1px solid var(--hairline-soft)}
+.modelrow:last-of-type{border-bottom:0}
+.modelrow .mn{font-family:var(--serif);font-size:24px;letter-spacing:-.5px;color:var(--ink);font-weight:500}
+.modelrow .md{font-size:15px;color:var(--body)}
+.modecycle{position:relative;flex:none;height:186px;background:var(--dark);border-radius:12px;overflow:hidden}
+.mstate{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:9px;padding:22px 26px;opacity:0;animation:mcyc 8.4s infinite}
+.mstate:nth-child(1){animation-delay:0s}
+.mstate:nth-child(2){animation-delay:2.8s}
+.mstate:nth-child(3){animation-delay:5.6s}
+@keyframes mcyc{0%,1%{opacity:0}4%,29%{opacity:1}33%,100%{opacity:0}}
+.mstate .mprompt{font-family:var(--mono);font-size:14px;color:#57534a}
+.mstate .mbar{font-family:var(--mono);font-size:16.5px;font-weight:500;display:flex;gap:10px;align-items:center}
+.mstate .mwhat{font-size:14px;color:var(--on-dark-soft)}
+.mstate .mkey{font-family:var(--mono);font-size:12px;color:#57534a}
+.mcap{flex:none;font-size:12px;color:var(--muted-soft);font-family:var(--mono);margin-top:7px}
+.hooklist{display:flex;flex-direction:column;gap:7px}
+.hookrow{display:flex;gap:12px;align-items:baseline;padding:9px 14px;background:var(--surface-card);border-radius:9px}
+.hookrow .hx{color:var(--error);font-weight:700;font-size:14px;flex:none;line-height:1.3}
+.hookrow .ht{font-size:14.5px;color:var(--ink);line-height:1.35}
+.hookrow.ok{background:var(--surface-soft)}
+.hookrow.ok .hx{color:var(--success)}
+@media print{body{overflow:visible}.slide{display:flex!important;page-break-after:always}}
+</style>
+</head>
+<body>
+
+<div id="stage-wrap"><div id="stage"></div></div>
+<div id="bar"></div>
+<div id="hud">
+  <div class="grp">
+    <button data-go="prev">←</button>
+    <span class="count" id="count">00 · 1/29</span>
+    <button data-go="next">→</button>
+  </div>
+  <div class="grp"><span class="act" id="actlbl">Act 1</span></div>
+  <div class="grp">
+    <button data-go="notes">Notes</button>
+    <button data-go="overview">All slides</button>
+    <button data-go="help">?</button>
+  </div>
+</div>
+
+<aside id="notes">
+  <h4>Speaker notes</h4>
+  <div class="nslide" id="n-title"></div>
+  <div class="ntime" id="n-time"></div>
+  <div class="ntext" id="n-text"></div>
+  <div class="nassets" id="n-assets"></div>
+  <div class="nnext" id="n-next"></div>
+</aside>
+
+<div id="overview"><h3>Day 1 · all slides</h3><div class="ovgrid" id="ovgrid"></div></div>
+
+<div id="help"><div class="box">
+  <h3>Keyboard</h3>
+  <dl>
+    <dt>→ ↓ Space</dt><dd>Next slide</dd>
+    <dt>← ↑</dt><dd>Previous slide</dd>
+    <dt>Home / End</dt><dd>First / last slide</dd>
+    <dt>N</dt><dd>Speaker notes panel</dd>
+    <dt>O</dt><dd>Overview of all slides</dd>
+    <dt>F</dt><dd>Fullscreen</dd>
+    <dt>1–9</dt><dd>Jump to act</dd>
+    <dt>Esc</dt><dd>Close overlay</dd>
+  </dl>
+</div></div>
+
+<script>
+const SHOTS = ""; // assets sit beside this file
+const D = [
+/* ============ ACT 1 ============ */
+{
+ act:"Act 1 · Reconnect", n:"00", title:"Holding slide", time:"from −10 min",
+ html:`<div class="eyebrow"><span class="dot"></span>While we wait</div>
+ <div class="body">
+  <div class="cols c2w" style="align-items:center">
+   <div class="stack">
+    <h1>Day 3. Last one this week.</h1>
+    <p class="lead" style="font-family:var(--serif);font-size:28px;letter-spacing:-.6px;color:var(--primary)">Besides your editor, which tool do you open most while you work?</p>
+    <p class="sm">Hold that. By tonight it could be part of your loop.</p>
+   </div>
+   <div class="stack" style="align-items:center">
+    <img class="qr" src="qr-carrot.svg" alt="QR code to carrot.ecrop.dev">
+    <p class="lead" style="font-family:var(--mono);font-size:19px;color:var(--primary)">carrot.ecrop.dev</p>
+   </div>
+  </div>
+ </div>`,
+ notes:"The answers are the room's shortlist for Challenge 3, step 2: wire one external tool into one step. Write them down as people say them: Jira, Figma, Grafana, Slack, whatever comes up."
+},
+{
+ act:"Act 1 · Reconnect", n:"01", title:"Questions from yesterday's loop", time:"8:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Open floor · yesterday's loop</div>
+ <div class="body">
+  <h2 style="flex:none">Any questions from<br>yesterday's loop?</h2>
+  <div class="cols c3" style="flex:none;margin-top:6px">
+   <div class="card"><span class="k">Written a command yet?</span><span class="v">Which one? Did it do what you expected the first time, or did you have to rewrite it?</span></div>
+   <div class="card"><span class="k">Run the loop?</span><span class="v">On which feature? Which step fought you: the intent, the spec, the plan, the execute, the ship?</span></div>
+   <div class="card darkc"><span class="k">Anything else</span><span class="v">Feedback, doubts, something that broke after you left. Questions on the wall count too.</span></div>
+  </div>
+  <p class="sm" style="margin-top:auto">No wrong answers. "I did not get to it" is useful too: it tells me where the block ran out of time.</p>
+ </div>`,
+ notes:"Open floor, eight minutes. Ask the three questions in order and let people talk; this room likes to.\n\nWhat you are listening for: who wrote a command and who ran a full loop. Anyone who ran one, ask them which step they would change first. Keep answers short; the fixes belong in the challenge block, not here.\n\nRead any wall posts from last night here too. Miguel's frameworks question has its own slide later (22); if he raises it, say it is coming.\n\nBridge: \"Before we take the loop outside the repo, one piece of news from yesterday.\""
+},
+{
+ act:"Act 1 · Reconnect", n:"02", title:"Opus 5.5, released yesterday", time:"5:00",
+ html:`<div class="eyebrow"><span class="dot"></span>New model · Claude Opus 5.5 · released 22 September</div>
+ <div class="body">
+  <h2 style="flex:none">Opus 5.5: Fable-level on most work,<br>40% cheaper to run than Opus 5.</h2>
+  <div class="cols c2n" style="align-items:center">
+   <table style="flex:none;font-size:16.5px">
+    <tr><th>Benchmark</th><th>Opus 5.5</th><th>Fable 5.1</th><th>Opus 5</th></tr>
+    <tr><td>Terminal-Bench 4.0</td><td class="ok"><strong>66.4%</strong></td><td>55.8%</td><td>52.3%</td></tr>
+    <tr><td>FrontierCode v1.1</td><td class="ok"><strong>54.4%</strong></td><td>50.3%</td><td>48.0%</td></tr>
+    <tr><td>CursorBench 4.0</td><td class="ok"><strong>57.8%</strong></td><td>51.8%</td><td>46.6%</td></tr>
+    <tr><td>AutomationBench</td><td class="ok"><strong>40.0%</strong></td><td>31.4%</td><td>26.9%</td></tr>
+    <tr><td>GDPval-AA v2.1 (Elo)</td><td class="ok"><strong>1846</strong></td><td>1735</td><td>1708</td></tr>
+    <tr><td>OSWorld 2.0 (partial)</td><td class="ok"><strong>81.8%</strong></td><td>80.7%</td><td>74.0%</td></tr>
+   </table>
+   <div class="stack" style="gap:8px">
+    <div class="card" style="padding:14px 18px"><span class="k">What changed vs Opus 5</span><span class="v" style="font-size:13.5px">Output more than 30% faster. $4 in, $20 out per million tokens, 20% below Opus 5. Fast mode up to 2.5x: <code>/fast</code> in Claude Code.</span></div>
+    <div class="card" style="padding:14px 18px;background:var(--surface-soft)"><span class="k">How to prompt it</span><span class="v" style="font-size:13.5px">Give the whole task in one message and name the finish line: "the tests pass". Delete "think carefully" and "think step by step" from your commands; it already thinks before every reply. Put stopping rules in CLAUDE.md: when to carry on, when to stop and ask.</span><span class="v" style="font-size:12.5px;margin-top:4px"><a href="https://claude.dev/blog/getting-the-most-out-of-opus-5-5/" target="_blank" rel="noopener" style="color:var(--primary);text-decoration:underline;text-underline-offset:3px">claude.dev/blog/getting-the-most-out-of-opus-5-5</a></span></div>
+    <div class="card darkc" style="padding:14px 18px"><span class="k">What you do this week</span><span class="v" style="font-size:13.5px">Run the same spec or plan on Opus 5.5 and on the model you used yesterday, then audit both outputs side by side. Switching is one line: <code>model</code> in the frontmatter, or <code>/model</code>.</span></div>
+   </div>
+  </div>
+  <p class="xs" style="margin-top:auto">Anthropic's own numbers, day one. Adaptive thinking at max effort unless noted; Terminal-Bench at xhigh. Your own work is the benchmark that matters.</p>
+ </div>`,
+ notes:"Announced yesterday, so nobody in the room has an opinion yet. Good. Give the numbers, give the price, and frame it as an experiment for the week, not a verdict.\n\nThe interesting row for this room is AutomationBench and Terminal-Bench: long agentic runs in a terminal, which is exactly what /execute does. The GDPval Elo is knowledge work, less relevant here.\n\nSay it plainly: vendor-reported, measured at max effort. The test that counts is their own work: the same spec or plan, once on each model, and they audit the difference. Whoever tries it, bring what you saw to Monday.\n\nThe prompting card is from the claude.dev post published with the launch. The line that matters for this room: search your five commands for \"think carefully\" or \"think step by step\" and delete it. That is a two-minute edit they can make in the block. Stopping rules in CLAUDE.md are the same idea as yesterday's gates, written for the model. The post also suggests a TASKS.md checklist for long runs and subagents per service for big audits; mention if asked.\n\nBridge into the title: \"A better model makes each step better. Today is about what the steps can reach.\"\n\nVerify before showing: which model the opus alias points to in Claude Code today, and whether Opus 5.5 is on their plan."
+},
+{
+ act:"Act 1 · Reconnect", n:"03", title:"Title", time:"2:00", dark:true,
+ html:`<div class="eyebrow"><span class="dot"></span>23 September · last day this week</div>
+ <div class="body mid">
+  <h1 style="font-size:58px">Day 3. Superpowers.</h1>
+  <p class="lead" style="color:var(--amber);font-size:23px;margin-top:8px">The loop reaches outside. Yesterday it lived in the repo; today it reads the ticket, the design and the browser, and writes back.</p>
+  <p class="sm" style="color:var(--on-dark-soft);margin-top:16px">Then the second half: someone else's harness, and what it costs to trust it.</p>
+ </div>`,
+ notes:"Spine sentence for the day, say it here and again on slide 04: a tool enters the harness one of three ways, a CLI, an MCP server, or a plugin someone else packaged, and each costs something different.\n\nThe five commands stay the centre. Every external tool today enters through a step they already own."
+},
+/* ============ ACT 2 ============ */
+{
+ act:"Act 2 · Three ways in", n:"04", title:"CLI · MCP · plugin", time:"7:00",
+ html:`<div class="eyebrow"><span class="dot"></span>The organising idea of the day</div>
+ <div class="body">
+  <h2 style="flex:none">Same tool, three doors.</h2>
+  <table style="flex:none;font-size:16.5px">
+   <tr><th></th><th>A CLI</th><th>An MCP server</th><th>A plugin</th></tr>
+   <tr><td class="mono">Costs, in the window</td><td>Nothing until called. Then only the output.</td><td>Every tool definition, up front. Tool Search defers them past a threshold.</td><td>Whatever it bundles. <code>/plugin</code> shows the estimate before you install.</td></tr>
+   <tr><td class="mono">Runs where</td><td>In bash, in a hook, in a skill's <code>!</code> injection.</td><td>In-session only, when the model decides to call it.</td><td>Skills, agents, hooks, MCP and LSP servers together.</td></tr>
+   <tr><td class="mono">You control</td><td>Flags, output format, exit codes.</td><td>Which server, which scope, which tools are allowed.</td><td>Which version. The rest is the author's.</td></tr>
+   <tr><td class="mono">Auth</td><td>Your shell's credentials.</td><td>OAuth per server. <code>claude mcp login</code> or <code>/mcp</code>.</td><td>The same as its parts.</td></tr>
+   <tr><td class="mono">Examples</td><td><code>gh</code> · <code>acli</code> · <code>playwright-cli</code></td><td>Atlassian Rovo · Figma · Sentry · Playwright MCP</td><td><code>atlassian@claude-plugins-official</code> · superpowers</td></tr>
+  </table>
+  <div class="foot">Pick the cheapest door that gives the step what it needs. Most of the time that is the left column.</div>
+ </div>`,
+ notes:"The organising idea of the day. Every tool you show from here on, name its door.\n\nThe row that matters most is 'runs where'. A CLI can be called from a hook and injected into a skill before the model sees anything. An MCP tool only exists once the session is up and the model chooses it. That single difference decides most of the choices.\n\nA plugin is not a fourth kind of tool, it is a box with the other kinds inside. Say so, because the marketplace act later depends on it."
+},
+{
+ act:"Act 2 · Three ways in", n:"05", title:"CLI first", time:"6:00",
+ html:`<div class="eyebrow"><span class="dot"></span>The cheapest door</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center">
+    <h2>If a CLI exists,<br>start there.</h2>
+    <p class="lead">The agent already has a shell. A CLI costs nothing until it runs, and its output is the only thing that enters the window.</p>
+    <ul class="clean">
+     <li><code>gh</code> is already in our <code>/ship</code>. That was this door.</li>
+     <li>Atlassian ships <code>acli</code> for Jira work items.</li>
+     <li><code>playwright-cli</code> is Microsoft's answer to its own MCP server's token bill.</li>
+    </ul>
+    <p class="sm">Reach for MCP when there is no CLI, when the service is OAuth-only, or when the tool has to hold state between calls, like a browser session.</p>
+   </div>
+   <div class="card darkc" style="font-family:var(--mono);font-size:14px;line-height:1.75;align-self:center">
+    <span class="k" style="font-family:var(--sans);font-size:12.5px;color:var(--amber)">.claude/skills/intent/SKILL.md · the injection</span>
+    <div style="color:var(--on-dark-soft)">
+     ---<br>
+     name: intent<br>
+     disable-model-invocation: true<br>
+     allowed-tools: Bash(gh issue view *)<br>
+     ---<br>
+     Open issues right now:<br>
+     !\`gh issue list --limit 20\`<br><br>
+     If $ARGUMENTS is an issue number, run<br>
+     gh issue view $ARGUMENTS --comments first.<br>
+     Quote the originator. List what the<br>
+     issue does not say. Do not invent it.
+    </div>
+   </div>
+  </div>
+  <div class="foot">The <code>!</code> line runs before the model reads the prompt, so the list arrives as text. The one read in the body is pre-approved by <code>allowed-tools</code>.</div>
+ </div>`,
+ notes:"The code card runs on the wall today: the repo is on GitHub and gh is installed. Forks start with issues switched off, so turn them on in your fork's settings before the demo. Then /intent <number>: the open-issue list arrives as text, and the one issue is read without a permission prompt.\n\nSay the allowed-tools point precisely: it pre-approves that gh read while the command runs. It grants; it does not restrict. The limits are permission rules, which is slide 12.\n\nVerify acli before the session if you mention it: check the current command shape and whether Carrot's Jira is Cloud."
+},
+{
+ act:"Act 2 · Three ways in", n:"06", title:"The price of tools", time:"8:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Live · /context before and after</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center">
+    <h2>Every tool definition<br>costs window.</h2>
+    <p class="lead">Before you use it. Whether you use it or not.</p>
+    <ul class="clean">
+     <li>Real cases of <strong>60–80k tokens</strong> burned by definitions alone</li>
+     <li>One popular server has run to roughly <strong>a quarter of a 200k window</strong></li>
+    </ul>
+    <div class="card" style="background:var(--surface-soft)"><span class="k">Plug in only what the task needs</span><span class="v"><code>/mcp</code> switches a server off for this project, and back on when you need it. Disable a plugin and its servers go with it. A subagent can bring its own servers in <code>mcpServers</code>, so the browser's tools load in its window, not yours.</span></div>
+   </div>
+   <figure>
+    <img src="07b-after-compact.png" alt="/context showing MCP tools consuming tokens">
+    <figcaption>07b · <code>/context</code>. The MCP line is the one to watch</figcaption>
+   </figure>
+  </div>
+  <div class="foot">Run <code>/context</code> live before connecting, and again after. The difference is the bill.</div>
+ </div>`,
+ notes:"Do this live and let the number be whatever it is. If it is small, say so. The number being true matters more than it being dramatic.\n\nConnect to the whole week: Monday you learned the window degrades as it fills. Tool definitions are the largest thing most people put in it without noticing.\n\nThe switches, plainest first. /mcp toggles a server per project; the choice is recorded in ~/.claude.json. /plugin disable disconnects that plugin's MCP servers. A subagent with mcpServers in its frontmatter gets tools the main session never sees: the cleanest way to give Playwright to a test-runner without paying for it everywhere. For a whole session there is --strict-mcp-config with --mcp-config.\n\nThe next slide is the automatic version."
+},
+{
+ act:"Act 2 · Three ways in", n:"07", title:"Tool Search", time:"6:00",
+ html:`<div class="eyebrow"><span class="dot"></span>What Claude Code already does about it, on its own</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center;gap:12px">
+    <h2>Tool names first.<br>Full definitions on demand.</h2>
+    <p class="lead" style="font-size:19px">Tool Search is on by default. Claude starts with a short list of what is connected. When a task needs a tool, it searches and loads only the few that match.</p>
+    <div class="card"><span class="k">What that gives you</span><span class="v">Connecting a server no longer costs its full weight up front: 170 tools connected, 0 tokens until one is used.</span></div>
+    <div class="card" style="background:var(--surface-soft)"><span class="k">What it does not fix</span><span class="v">Every server can still act for you, needs a login and can fail at startup. Connect what you use, remove what sits idle.</span></div>
+   </div>
+   <figure>
+    <img src="03-context-light.png" alt="/context showing 170 MCP tools at zero tokens, loaded on demand">
+    <figcaption>03 · <strong>170 tools · 0 tokens</strong>, loaded on demand</figcaption>
+   </figure>
+  </div>
+  <div class="foot">The same trick as a skill: the name is cheap, the body arrives when it is needed.</div>
+ </div>`,
+ notes:"The screenshot is the argument: a hundred and seventy tools connected, costing nothing until used. Point at the zero.\n\nHow it works, if asked: tool definitions are withheld; Claude gets a summary and searches when it needs a capability; up to five of the most relevant tools load and stay available for the rest of the session. With ENABLE_TOOL_SEARCH=auto it only activates once definitions pass 10% of the window; left unset, it is on. Needs a 4.5-generation model or later.\n\nThen the half that is still theirs: the fix removes the token tax, not the judgment. A server you never use is a decision you never made.\n\n⚠ Re-verify the defaults before the session. This area moves."
+},
+/* ============ ACT 3 ============ */
+{
+ act:"Act 3 · The loop, wired", n:"08", title:"Intent ← the ticket", time:"6:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Step 1 · where the work actually starts</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center">
+    <h2><code>/intent PROJ-123</code></h2>
+    <p class="lead">The ticket is already the intent, in the originator's words. The command reads it, asks what is missing, and writes the file.</p>
+    <ol class="steps" style="gap:8px">
+     <li>Read the work item, its comments and the dev panel</li>
+     <li>Write <code>docs/intents/NN-slug.md</code></li>
+     <li>Comment the file's link back on the ticket</li>
+    </ol>
+   </div>
+   <div class="stack" style="gap:10px;justify-content:center">
+    <div class="card"><span class="k">The door</span><span class="v">Atlassian's Rovo MCP server, bundled in the official <code>atlassian</code> plugin. <code>/plugin install atlassian@claude-plugins-official</code>, then <code>/mcp</code> to sign in.</span></div>
+    <div class="card"><span class="k">What it can do since July</span><span class="v">Read and create work items, transition status, comment, log work, see linked branches and PRs. Read today. Write only through <code>/ship</code>.</span></div>
+   </div>
+  </div>
+  <div class="foot">Needs Jira Cloud and an OAuth sign-in. Data Center has no Rovo MCP; there the CLI door is the one that opens.</div>
+ </div>`,
+ notes:"Tuesday's intent lesson, with the source named: the ticket. The command does not replace the originator's words, it captures them and lists the gaps.\n\nThe read/write split is deliberate and sets up slide 12: /intent reads, /ship writes. Nothing in between touches the ticket.\n\nConfirm before the session which Jira Carrot runs. Cloud: Rovo MCP. Data Center: acli or the REST API through a small script, and say so plainly."
+},
+{
+ act:"Act 3 · The loop, wired", n:"09", title:"Spec ← the design", time:"5:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Step 2 · for the three of you on the frontend</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center">
+    <h2>The design, readable<br>by the agent.</h2>
+    <p class="lead">Figma's MCP server hands <code>/spec</code> the frame: component names, tokens, states, copy. The UI section of the spec stops being a description of a screenshot.</p>
+    <p class="sm">Shown today, not installed. Seats are uncertain, and it is worth your own evaluation before anyone pays for one.</p>
+   </div>
+   <div class="stack" style="gap:10px;justify-content:center">
+    <div class="card"><span class="k">What it gives the spec</span><span class="v">Names you can grep for, tokens you can reuse, the states the designer drew.</span></div>
+    <div class="card"><span class="k">What it does not decide</span><span class="v">Behaviour, out of scope, verification. The spec still owns those, and a human still signs it.</span></div>
+   </div>
+  </div>
+ </div>`,
+ notes:"Be straight with the FE devs: shown, not installed, because seats are uncertain. Then give them the evaluation question: does the spec get better, or just longer?\n\nThe official figma plugin bundles the server. Same install shape as Atlassian."
+},
+{
+ act:"Act 3 · The loop, wired", n:"10", title:"Execute ← the browser", time:"7:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Step 4 · evidence, not claims</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center">
+    <h2>The check that opens<br>a real browser.</h2>
+    <p class="lead">Yesterday's <code>/execute</code> rule: show me. Playwright is how the agent shows you, on the app you built, in a browser you can watch.</p>
+    <p class="sm">The wall already has Playwright e2e tests. The entry point is a verify step in <code>/execute</code>: open the page, click through the feature, screenshot, assert. Not a new tool for its own sake.</p>
+   </div>
+   <div class="stack" style="gap:10px;justify-content:center">
+    <div class="card darkc"><span class="k">The CLI door</span><span class="v"><code>npm i -g @playwright/cli</code> then <code>playwright-cli install --skills</code>. Terse commands, refs instead of accessibility trees. One published run: about <strong>27k tokens</strong> against roughly <strong>114k</strong> for the same job through MCP. Directional, not gospel.</span></div>
+    <div class="card"><span class="k">The MCP door</span><span class="v">A persistent browser session and full page snapshots. For long autonomous runs, or clients with no shell. Costs what slide 06 showed.</span></div>
+   </div>
+  </div>
+  <div class="foot">Carrot asked about Playwright. This is where it goes: inside the step that decides what "done" means.</div>
+ </div>`,
+ notes:"Demo if time allows: playwright-cli open http://localhost:4200, click through yesterday's feature, screenshot. The skill it installs is what makes Claude know the commands.\n\nThe token comparison is one benchmark from one blog; say so. The direction is what matters, and the room saw the mechanism on slide 06.\n\nThe framing to hold: Playwright enters as a verify step, so it belongs in /execute's body, not as a separate command."
+},
+{
+ act:"Act 3 · The loop, wired", n:"11", title:"Ship → the ticket and the team", time:"5:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Step 5 · closing the loop it opened</div>
+ <div class="body">
+  <div class="cols c2n" style="align-items:center">
+   <div class="stack">
+    <h2><code>/ship</code> writes back.</h2>
+    <ol class="steps" style="gap:8px">
+     <li>Open the PR. <span style="color:var(--muted)">gh, already there.</span></li>
+     <li>Transition the ticket, comment the PR link. <span style="color:var(--muted)">Rovo MCP.</span></li>
+     <li>Draft the message to the channel. <span style="color:var(--muted)">slack plugin.</span></li>
+     <li>A human reads the draft and presses send.</li>
+    </ol>
+   </div>
+   <div class="card darkc" style="gap:10px">
+    <span class="k">The question this raises</span>
+    <span class="v" style="font-size:21px;font-family:var(--serif);letter-spacing:-.3px;color:#fff">Which of these may the agent do without asking?</span>
+    <span class="v">Opening a PR nobody reads yet: probably. Moving a ticket a colleague is watching: maybe. Messaging a human: no.</span>
+  </div>
+  </div>
+  <div class="foot">Every arrow out of the repo is a side effect someone else sees. Next slide: how you decide, in a file.</div>
+ </div>`,
+ notes:"Keep it short; this slide exists to ask the question the next one answers.\n\nThe three-tier answer on the card is a starting position, not a rule. Let the room argue the middle row. Whoever runs the board will have an opinion about the agent moving tickets, and that opinion belongs in settings.json, which is where we go next."
+},
+{
+ act:"Act 3 · The loop, wired", n:"12", title:"Who is allowed to press send", time:"9:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Deciding what the agent may do on its own</div>
+ <div class="body">
+  <h2 style="flex:none">May do. Must ask. Never.</h2>
+  <div class="cols c2" style="flex:none">
+   <div class="card"><span class="k">The rulebook · permissions in <code>.claude/settings.json</code></span><span class="v">Three lists: <strong>allow</strong>, <strong>ask</strong>, <strong>deny</strong>. Reading a ticket goes in allow. Moving a ticket goes in ask, so you get a prompt first. Messaging a person goes in deny. Every MCP tool has a full name, <code>mcp__atlassian__…</code>, so a rule can point at one tool or at a whole server.</span></div>
+   <div class="card darkc"><span class="k">The lock · a hook</span><span class="v">A small script that runs <strong>before</strong> the tool does. If the agent tries to move a ticket outside <code>/ship</code>, the script refuses with <code>exit 2</code> and tells the agent why. Someone tired at six in the evening can click through a permission prompt. Nobody can talk the script round.</span></div>
+  </div>
+  <h3 style="margin-top:18px">Try it: from a normal session, ask it to move a ticket.<br>The hook stops it, and the agent reads the reason.</h3>
+  <div class="foot">Yesterday a person signed at each gate. This is the same idea for everything the agent does outside the repo.</div>
+ </div>`,
+ notes:"The ownership argument made mechanical. Say it in plain words first: some things it may do, some things it must ask about, some things it may never do. Then show where each lives.\n\nPermissions are the policy. Rules use the server name as configured: mcp__atlassian matches every tool on that server, mcp__atlassian__<tool> matches one. Hooks are the guarantee: a PreToolUse hook with the matcher mcp__atlassian__.* (the .* is required, a bare server name matches nothing), exit 2, and the stderr text goes back to Claude as the reason.\n\nDo the demo: type the hook, save, ask for a ticket move from a plain session, watch it bounce. Then yesterday's Stop hook as the second example: the turn does not end until the check passes.\n\nKeep hooks fast and few. The security plugin after the break is built out of exactly these, which is the callback.\n\nA hook that silently does nothing is worse than no hook. It happened to our own harness while building the wall. Test yours."
+},
+/* ============ ACT 4 ============ */
+{
+ act:"Act 4 · Not only code", n:"13", title:"What happened at 9 a.m.?", time:"6:00",
+ html:`<div class="eyebrow"><span class="dot"></span>The same harness, pointed at production</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center">
+    <h2>"What happened to checkout<br>at 9 a.m. yesterday?"</h2>
+    <p class="lead">Asked in plain language. Answered by an agent with read access to your error tracker, your metrics and your deploy history, in a report file with links.</p>
+    <p class="sm">Sentry ships an official plugin. Grafana and Datadog have MCP servers. All three have CLIs. Same three doors.</p>
+   </div>
+   <div class="stack" style="gap:10px;justify-content:center">
+    <div class="card"><span class="k">What dashboards already do</span><span class="v">Alerts, SLOs, the scheduled report. The deterministic version exists and stays. Do not replace it with a prompt.</span></div>
+    <div class="card darkc"><span class="k">What the agent adds</span><span class="v">The question nobody planned a dashboard for. Correlation across three tools. A written timeline a colleague can read on Monday.</span></div>
+   </div>
+  </div>
+  <div class="foot">Read access only. What it may touch is decided in the runbook, and the runbook is the next slide.</div>
+ </div>`,
+ notes:"Pivot line: the loop is not a code thing. Gather, verify, report, a human decides. Point it at production instead of a repo and it is incident triage.\n\nSay the honest part first: dashboards and alerts do the deterministic version already, and better. What the agent adds is the unplanned question and the narrative.\n\nRead access only, and mean it. The next slide shows where that rule lives."
+},
+{
+ act:"Act 4 · Not only code", n:"14", title:"The runbook is a skill", time:"7:00",
+ html:`<div class="eyebrow"><span class="dot"></span>The procedure your most senior engineer follows, in a file the agent reads</div>
+ <div class="body">
+  <div class="cols c2">
+   <div class="card darkc" style="font-family:var(--mono);font-size:12.5px;line-height:1.65">
+    <span class="k" style="font-family:var(--sans);font-size:12.5px;color:var(--amber)">.claude/skills/incident-triage/SKILL.md</span>
+    <div style="color:var(--on-dark-soft)">
+     ---<br>
+     name: incident-triage<br>
+     description: Investigate a production incident or a slow<br>
+     &nbsp;&nbsp;endpoint. Use when asked what happened, why a<br>
+     &nbsp;&nbsp;service is slow, or for a status report on it.<br>
+     allowed-tools: mcp__sentry__*, mcp__grafana__query*,<br>
+     &nbsp;&nbsp;Bash(gh run list *), Read, Write<br>
+     ---<br>
+     1. Fix the window and the service. Ask if unclear.<br>
+     2. Errors (Sentry), latency and saturation (Grafana),<br>
+     &nbsp;&nbsp;&nbsp;deploys in the window (gh).<br>
+     3. Correlate: what changed first?<br>
+     4. Write reports/&lt;date&gt;-&lt;service&gt;.md: timeline,<br>
+     &nbsp;&nbsp;&nbsp;evidence links, hypotheses ranked, what you<br>
+     &nbsp;&nbsp;&nbsp;did not check.<br>
+     Never restart, scale or delete anything.<br>
+     Say what you would do next, and stop.
+    </div>
+   </div>
+   <div class="stack" style="gap:10px;justify-content:center">
+    <div class="card"><span class="k">The description is the trigger</span><span class="v">Only the name and description load. The body arrives when the task matches. "Observability notes" never fires. "Use when asked what happened, why a service is slow" does.</span></div>
+    <div class="card"><span class="k">Offered, not applied</span><span class="v">Matching is probabilistic. We measured a correctly written skill at zero self-activations in ten sessions until a hook nudged it. If it must happen every time, it is a hook.</span></div>
+    <div class="card plain"><span class="k">The last two lines</span><span class="v">That is the human gate, written into the runbook. Same as yesterday.</span></div>
+   </div>
+  </div>
+  <div class="foot">Gather, verify, report, a human decides. The loop, wearing an on-call badge.</div>
+ </div>`,
+ notes:"Read the file top to bottom. The frontmatter is the contract from Tuesday: what it may call, when it fires. The body is the procedure. The last two lines are the gate.\n\nTwo lessons folded in from the old Day 3: the description is the trigger (situations fire, topics do not), and skills are offered while hooks are applied. The zero-activations number is from our own Ponytail measurement; say where it comes from.\n\nTest for them: fresh session, ask 'why was checkout slow yesterday', check /context to see whether the skill loaded. A skill that never activates is a file."
+},
+/* ============ ACT 5 ============ */
+{
+ act:"Act 5 · Someone else's harness", n:"15", title:"Break · part two", time:"10:00", dark:true,
+ html:`<div class="eyebrow"><span class="dot"></span>Break</div>
+ <div class="body mid">
+  <h1 style="font-size:54px">Ten minutes.</h1>
+  <h1 style="font-size:54px;color:var(--amber)">Then: someone else's harness.</h1>
+  <p class="lead" style="color:var(--on-dark-soft);margin-top:18px">Plugins, where they come from, and how much to trust code you did not write.</p>
+ </div>`,
+ notes:"Hard stop. Everything so far was your own loop wired to your own tools. After the break it is other people's code.\n\nIf the morning is running long, shorten the break, not the plugin act."
+},
+{
+ act:"Act 5 · Someone else's harness", n:"16", title:"Getting a plugin, step by step", time:"6:00",
+ html:`<div class="eyebrow"><span class="dot"></span>A plugin bundles skills, agents, hooks and MCP servers into one install</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center">
+    <h2>Type <code>/plugin</code>.</h2>
+    <ol class="steps" style="gap:9px">
+     <li><strong>Discover</strong> lists every plugin in your catalogs. Anthropic's official catalog is already there.</li>
+     <li>Pick one and read its details: <strong>Context cost</strong>, the tokens it adds every turn · <strong>Last updated</strong> · <strong>Will install</strong>, the list of what goes in.</li>
+     <li>Choose who gets it. <strong>User</strong>: you, in every project. <strong>Project</strong>: everyone on this repo. <strong>Local</strong>: you, in this repo only.</li>
+     <li>Use it. Its skills carry its name: <code>/commit-commands:commit</code>.</li>
+    </ol>
+   </div>
+   <div class="stack" style="gap:10px;justify-content:center">
+    <div class="card darkc" style="gap:6px"><span class="k" style="color:var(--amber)">Or in one line</span><span class="v" style="font-family:var(--mono);font-size:13.5px;color:var(--on-dark-soft)">/plugin install security-guidance@claude-plugins-official</span></div>
+    <div class="card"><span class="k">Other ways in</span><span class="v">Desktop app: <strong>+</strong> next to the prompt, then <strong>Plugins</strong>. In a browser: <code>claude.com/plugins</code>.</span></div>
+    <div class="card"><span class="k">Later</span><span class="v">The <strong>Installed</strong> tab flags plugins you have not used in a couple of weeks. Disable or uninstall them: they still cost context.</span></div>
+   </div>
+  </div>
+  <div class="foot">Project scope records the plugin in <code>.claude/settings.json</code>, so the whole team sees the same list.</div>
+ </div>`,
+ notes:"Do it live: /plugin, Discover, open security-guidance, read the Context cost and the Will install list out loud, cancel. The point is that they know where to look before they install anything.\n\nThe namespace matters: two plugins can both ship a /spec and neither wins by accident. Theirs stays /spec; a plugin's is /name:spec.\n\n/plugin is a terminal command. In the desktop app the same browser is behind the + button."
+},
+{
+ act:"Act 5 · Someone else's harness", n:"17", title:"Three catalogs", time:"6:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Where plugins come from</div>
+ <div class="body">
+  <h2 style="flex:none">A marketplace is a catalog.<br>You start with one already added.</h2>
+  <div class="cols c3" style="flex:none">
+   <div class="card"><span class="k">Anthropic's official catalog</span><span class="v">Added the first time you run Claude Code. Anthropic chooses what goes in: GitHub, Jira, Figma, Slack, Sentry, security review, workflows.</span><span class="v" style="font-size:13px;color:var(--muted);margin-top:8px">How: <code>/plugin</code> → Discover</span></div>
+   <div class="card"><span class="k">The community catalog</span><span class="v">Plugins by other people that passed Anthropic's automated safety checks. Each entry is pinned to an exact version.</span><span class="v" style="font-size:13px;color:var(--muted);margin-top:8px">How: <code>/plugin marketplace add anthropics/claude-plugins-community</code></span></div>
+   <div class="card darkc"><span class="k">Your team's catalog</span><span class="v">A git repo that lists your plugins. Add it once to the project settings and everyone who opens the repo can install from it.</span><span class="v" style="font-size:13px;color:var(--on-dark-soft);margin-top:8px">How: <code>extraKnownMarketplaces</code> in <code>.claude/settings.json</code></span></div>
+  </div>
+  <h3 style="margin-top:22px">Your harness, as a plugin, in your team's catalog.<br>A new hire installs it in one line.</h3>
+  <div class="foot">Official for integrations. Community with your eyes open. Your own for the team.</div>
+ </div>`,
+ notes:"Keep it concrete: the first one they already have, the second is one command away, the third is where this week points.\n\nCommunity is screened automatically, not curated. Say the difference.\n\nThe team catalog in settings.json looks like this, if anyone asks: extraKnownMarketplaces, a name, and a source of type github with the repo. Once a teammate trusts the folder, Claude Code adds the catalog. Admins can go further and restrict people to approved catalogs only; mention, do not demo."
+},
+{
+ act:"Act 5 · Someone else's harness", n:"18", title:"Read before you run", time:"5:00",
+ html:`<div class="eyebrow"><span class="dot"></span>The order to read a plugin in</div>
+ <div class="body">
+  <div class="cols c2n" style="align-items:center">
+   <div class="stack">
+    <ol class="steps" style="gap:9px">
+     <li><code>/plugin</code> details: <strong>Context cost</strong> and <strong>Will install</strong>. If it will not tell you, that is your answer.</li>
+     <li>Every <code>SKILL.md</code> description. These are the triggers you are agreeing to.</li>
+     <li><code>hooks/hooks.json</code>. What runs without asking, and on which events.</li>
+     <li><code>.mcp.json</code>: which systems it can write to.</li>
+     <li>Pin the version. Prefer project scope so the team sees the same one.</li>
+    </ol>
+   </div>
+   <div class="stack" style="gap:10px">
+    <div class="card darkc"><span class="k">The docs' own words</span><span class="v">Plugins and marketplaces are "highly trusted components that can execute arbitrary code on your machine with your user privileges." Anthropic does not control what a plugin ships and cannot verify it works as intended.</span></div>
+    <div class="card"><span class="k">Afterwards</span><span class="v"><code>/plugin</code> lists what you have not used in two weeks. The Stats tab shows what each skill costs and how often it fires. Prune.</span></div>
+   </div>
+  </div>
+  <div class="foot">Popularity is not quality. A plugin you have not read is a PR from a stranger, merged without review.</div>
+ </div>`,
+ notes:"Five steps, two minutes each in the block. The Will install list is the table of contents; the SKILL.md descriptions are the part people skip and should not, because a description is a trigger they are agreeing to.\n\nThe quote is from the plugin docs, verbatim. Read it flat, no drama.\n\nThe PR-from-a-stranger line comes back on slide 22 as the position, so land it here as a fact first. Everything after this slide gets read through this list."
+},
+{
+ act:"Act 5 · Someone else's harness", n:"19", title:"The map, by discipline", time:"6:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Plugins people reach for, by discipline</div>
+ <div class="body">
+  <h2 style="flex:none">Where to look first.</h2>
+  <div class="cols c3" style="flex:none">
+   <div class="card"><span class="k">Frontend</span>
+    <ul class="clean" style="gap:7px;font-size:14px">
+     <li><code>frontend-design</code>: pushes UI away from generic templates. Anthropic's own</li>
+     <li><code>figma</code>: the design frame, readable by the agent</li>
+     <li><code>playwright</code>: a real browser to click through what it built</li>
+    </ul>
+   </div>
+   <div class="card"><span class="k">Backend</span>
+    <ul class="clean" style="gap:7px;font-size:14px">
+     <li><code>security-guidance</code>: reviews every change for vulnerabilities as it is written</li>
+     <li><code>pr-review-toolkit</code>: review agents for your pull requests</li>
+     <li><code>atlassian</code> · <code>github</code> · <code>sentry</code>: tickets, PRs and production errors, from inside the session</li>
+    </ul>
+   </div>
+   <div class="card"><span class="k">Everyone</span>
+    <ul class="clean" style="gap:7px;font-size:14px">
+     <li><code>superpowers</code>: the plan, spec and test loop, packaged</li>
+     <li><code>context7</code>: current library docs instead of invented APIs</li>
+     <li><code>skill-creator</code>: helps you write and test your own skills</li>
+    </ul>
+   </div>
+  </div>
+  <div class="cols c2" style="flex:none;margin-top:12px">
+   <div class="card darkc"><span class="k">What we run</span><span class="v">Superpowers, Pocock's grill and spec skills, Ponytail, Humanizer, frontend-design, Context7. Three to six. Not thirty.</span></div>
+   <div class="card" style="background:var(--surface-soft)"><span class="k">Stars are not fit</span><span class="v">One July ranking puts superpowers near a quarter million GitHub stars and Context7 near sixty thousand. Adoption tells you it is maintained. It tells you nothing about your codebase.</span></div>
+  </div>
+ </div>`,
+ notes:"Frame it as what we reach for, per goal. If you sound like a catalogue you have lost them.\n\nThe frontend column is for the three Angular devs; the backend column for the Quarkus side. Say which ones you have actually run and which you have only read.\n\nThe atlassian, github and sentry plugins are the MCP doors from this morning, packaged: each one bundles its server so you skip the manual setup. Hosting plugins such as vercel, supabase and firebase exist too, if that is ever your stack.\n\nThe stars card is the bridge to the security slides: a popular plugin is a popular attack surface."
+},
+{
+ act:"Act 5 · Someone else's harness", n:"20", title:"Security, three layers", time:"7:00",
+ html:`<div class="eyebrow"><span class="dot"></span>What Anthropic ships, and what it is made of</div>
+ <div class="body">
+  <h2 style="flex:none">Three layers, one mechanism.</h2>
+  <table style="flex:none;font-size:15px">
+   <tr><th>When</th><th>Tool</th><th>Type</th><th>What it does</th></tr>
+   <tr><td class="mono">While Claude writes</td><td style="white-space:nowrap"><code>security-guidance</code></td><td style="white-space:nowrap">Plugin · hooks</td><td>A pattern match on every edit, no model call. A background review of the turn's diff. A deeper review on every commit Claude makes. Never blocks; findings come back as instructions.</td></tr>
+   <tr><td class="mono">On demand, one pass</td><td style="white-space:nowrap"><code>/security-review</code></td><td style="white-space:nowrap">Built-in command</td><td>One security pass over the current branch, when you ask.</td></tr>
+   <tr><td class="mono">On demand, deep</td><td style="white-space:nowrap"><code>claude-security</code></td><td style="white-space:nowrap">Plugin · agents</td><td>Multi-agent scan of a repo or a diff. Independently reviewed findings, SARIF out, patches written to a folder and never applied for you.</td></tr>
+  </table>
+  <div class="card darkc" style="flex:none;margin-top:12px">
+   <span class="k">Look at what the first one is made of</span>
+   <span class="v"><strong>SessionStart</strong> to bootstrap. <strong>PostToolUse</strong> on Edit for the pattern match. <strong>Stop</strong> for the diff review. <strong>PostToolUse</strong> on Bash, filtered to git commit, for the deep one. Hooks, all of it. Yesterday's mechanism at production quality, and its source is readable. Add your own rules in <code>.claude/claude-security-guidance.md</code>.</span>
+  </div>
+  <div class="foot">One layer of defence in depth. Your CI scanners stay. The plugin reduces what reaches the PR; review catches what does.</div>
+ </div>`,
+ notes:"The table is reference; the dark card is the lesson. security-guidance is built entirely out of hooks, the exact events they wrote on Tuesday and this morning. Open its hooks.json live if there is time; it is the best worked example of a Stop hook running a separate model call.\n\nCost note: the per-edit check is free; the turn and commit reviews are model calls, Opus by default. Say so.\n\nclaude-security needs a paid plan and dynamic workflows. Check what Carrot's plan allows before promising a demo."
+},
+{
+ act:"Act 5 · Someone else's harness", n:"21", title:"Two security audits", time:"7:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Two security audits you can run on your own repo</div>
+ <div class="body">
+  <h2 style="flex:none">Ask for an audit. You get a folder back.</h2>
+  <table style="flex:none;font-size:15px">
+   <tr><th></th><th>Cloudflare · security-audit-skill</th><th>Anthropic · claude-security</th></tr>
+   <tr><td class="mono" style="white-space:nowrap;padding-right:18px">Where</td><td><a href="https://github.com/cloudflare/security-audit-skill" target="_blank" rel="noopener" style="color:var(--primary);text-decoration:underline;text-underline-offset:3px">github.com/cloudflare/security-audit-skill</a></td><td><a href="https://code.claude.com/docs/en/claude-security" target="_blank" rel="noopener" style="color:var(--primary);text-decoration:underline;text-underline-offset:3px">code.claude.com/docs/en/claude-security</a></td></tr>
+   <tr><td class="mono" style="white-space:nowrap;padding-right:18px">What it is</td><td>A <strong>skill</strong>: instructions Claude follows. Free, MIT, from Cloudflare's security research team.</td><td>A <strong>plugin</strong> in Anthropic's official catalog.</td></tr>
+   <tr><td class="mono" style="white-space:nowrap;padding-right:18px">How you start</td><td>Install once with <code>npx skills add</code>, then ask: "security audit this codebase".</td><td>Install from <code>/plugin</code>, then run <code>/claude-security</code> and pick a scan.</td></tr>
+   <tr><td class="mono" style="white-space:nowrap;padding-right:18px">What happens</td><td>Claude maps the app, separate agents hunt for problems, and a fresh agent tries to disprove each one.</td><td>Agents map the app, model the threats and hunt. An independent agent checks each finding before it reaches the report.</td></tr>
+   <tr><td class="mono" style="white-space:nowrap;padding-right:18px">What you get</td><td>A folder in your home directory: <code>REPORT.md</code> to read, <code>NEEDS-VALIDATION.md</code> for what a person must check, and <code>findings.json</code>, each finding marked confirmed, needs validation or rejected.</td><td>A folder in the repo: a report with impact, how it could be exploited, severity, confidence and a fix for each finding; a SARIF file GitHub shows as alerts; on request, one patch per finding.</td></tr>
+   <tr><td class="mono" style="white-space:nowrap;padding-right:18px">Watch for</td><td>To prove a finding it may want to run your code. Without a locked-down sandbox it will not, and leaves the finding as needs validation.</td><td>Patches are written, never applied for you. Needs a paid plan, and a full scan can use a lot of tokens.</td></tr>
+  </table>
+  <div class="foot">Both work like your loop: separate agents do the work, a different agent checks it, a file sits between each step, and a person decides.</div>
+ </div>`,
+ notes:"For most of the room this is the first time they have seen an AI security audit, so start with the output, not the architecture: you ask, it works for a while, you get a folder of readable reports. Open one of the example reports if you have one.\n\nThe Cloudflare one is a skill, so it sits in .claude/skills/ next to theirs and every phase is plain markdown they can read first. Its output goes to ~/security-audit-skill/<repo>/run-N unless told otherwise. It needs Node.js and a model that can run parallel subagents. The sandbox point, accurately: it wants an OS-enforced sandbox before it builds or runs target code, and without one it refuses and parks the lead as needs_validation. That is the tool keeping a human gate.\n\nThe Anthropic plugin writes CLAUDE-SECURITY-<timestamp>/ into the repo with its own .gitignore, plus a SARIF file for GitHub code scanning. It can scan just a branch's changes, which is the sensible first run. Patches land in patches/ and are applied by a person with git apply, one PR each.\n\nThe convergence is the lesson: two security teams, working apart, arrived at fresh agents per task, a verifier with no investment in the finding, a file between phases, and a person at the end. That is Tuesday's loop with a security label on it."
+},
+{
+ act:"Act 5 · Someone else's harness", n:"22", title:"The question I parked on Monday", time:"10:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Yesterday's wall · kept for the room</div>
+ <div class="body">
+  <div class="cols c2n" style="flex:none;align-items:center">
+   <div class="card" style="gap:8px">
+    <span class="k" style="font-size:18px">"Qual a tua opinião sobre frameworks como bmad e hero.ai?"</span>
+    <span class="v" style="font-size:12.5px;color:var(--muted)">Miguel · Pergunta</span>
+   </div>
+   <div class="stack" style="gap:8px">
+    <p class="sm"><strong>BMAD</strong>: Breakthrough Method for Agile AI-Driven Development. Agent roles and a document pipeline, installed as a package.</p>
+    <p class="sm"><strong>Hero</strong>: a <code>.hero/</code> memory folder in the repo, plus <code>spec</code>, <code>deliver</code> and <code>verify</code> steps.</p>
+    <p class="sm">Both are commands, skills, agents and files in a folder. You wrote five of those yesterday.</p>
+   </div>
+  </div>
+  <div class="card darkc" style="flex:none">
+   <span class="k">Our position</span>
+   <span class="v">The biggest win of this week is <strong>ownership and control</strong> over what the agents in your team are doing. A framework installs someone else's judgment in one line: a faster start, less fit, and you still own every outcome it produces. A framework you have not read is a PR from a stranger, merged without review.</span>
+  </div>
+  <div class="cols c3" style="flex:none">
+   <div class="card plain"><span class="k">What the docs say</span><span class="v" style="font-size:13px">Plugins are "highly trusted components that can execute arbitrary code". Anthropic does not control or verify what a marketplace ships.</span></div>
+   <div class="card plain"><span class="k">Before you install</span><span class="v" style="font-size:13px"><code>/plugin</code> shows the context cost and what will be installed. <code>claude plugin eval</code> runs it against your own cases.</span></div>
+   <div class="card plain"><span class="k">The documented path</span><span class="v" style="font-size:13px">Start with a standalone <code>.claude/</code>. Turn it into a plugin when it is ready to share. You are on that path.</span></div>
+  </div>
+ </div>`,
+ notes:"Answer it live and in your own words. An opinion read off a slide is not an opinion.\n\nScaffold: they are opinionated orchestration layers on the same primitives this week teaches. The trade is real and worth naming both ways: faster start and a shared vocabulary, against fit and legibility. This course bets on the opposite order: primitives first, then adopt or build deliberately.\n\nThe line to land: ownership and control. When something goes wrong in a pipeline you did not write, you cannot fix it and you cannot explain it to the reviewer. That is the same argument as yesterday's human gates.\n\nAsk Miguel what drew him before you answer. Then open it: who would install one today, and what would you read first? Reading order for any plugin: the SKILL.md descriptions, then the hooks, then what /plugin says it will install.\n\nDo not oversell the position. Some teams adopt a framework and do well. The claim is only that you should be able to read what you run."
+},
+/* ============ ACT 6 ============ */
+{
+ act:"Act 6 · Memory", n:"23", title:"The memory stack", time:"10:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Live · /memory</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center;gap:10px">
+    <ol class="steps" style="gap:10px;font-size:15px">
+     <li><strong>CLAUDE.md</strong>: what you teach it on day one. <code>/init</code> drafts one; <code>/memory</code> opens it.</li>
+     <li><strong>Auto memory</strong>: notes Claude writes for itself between sessions. On by default; switch it in <code>/memory</code>, which also opens the folder. The first 200 lines of its <code>MEMORY.md</code> load every session.</li>
+     <li><strong>Lessons</strong>: the decisions worth keeping, written by you. Keep them in a file like <code>docs/lessons.md</code> and add one line to CLAUDE.md: <code>@docs/lessons.md</code>. It loads with CLAUDE.md.</li>
+     <li><strong>Subagent memory</strong>: add <code>memory: project</code> to an agent's frontmatter. It keeps its own notes in <code>.claude/agent-memory/&lt;name&gt;/MEMORY.md</code>. Open that file to see what it learned.</li>
+    </ol>
+    <p class="xs">Turning on subagent memory also gives that agent Read, Write and Edit, so it can manage its notes. Know that before you turn it on.</p>
+   </div>
+   <figure>
+    <img src="07b-after-compact.png" alt="/context showing memory files surviving a compaction">
+    <figcaption>07b · messages fell 98.6k → 19.4k through a compaction. <strong>Memory files: untouched.</strong></figcaption>
+   </figure>
+  </div>
+  <div class="foot">CLAUDE.md is what you teach it on day one. Memory is what it learns working with you.</div>
+ </div>`,
+ notes:"Run /memory live. Show the list of CLAUDE.md files, the auto memory toggle, and open the auto memory folder. Read what is in there and prune something on screen: seeing you delete a line gives them permission to curate rather than hoard.\n\nThe details, if asked. Auto memory lives in ~/.claude/projects/<project>/memory/, one per repo, shared across worktrees. MEMORY.md is the index: the first 200 lines or 25KB load at session start; topic files are read on demand. Off switch: the /memory toggle (writes autoMemoryEnabled to ~/.claude/settings.json) or CLAUDE_CODE_DISABLE_AUTO_MEMORY=1.\n\nLessons are a practice, not a feature: a file you write, pulled in with an @ import. Imports resolve relative to the file that contains them and can nest four deep.\n\nSubagent memory: memory: user, project or local. Project writes to .claude/agent-memory/<name>/, which you can commit, so the reviewer's learnings travel with the repo. Local goes to .claude/agent-memory-local/<name>/, user to ~/.claude/agent-memory/<name>/. The agent gets the first 200 lines of its own MEMORY.md; it does not see the main one. The wall's code-reviewer is the natural first candidate.\n\nThe screenshot is Monday's argument paying off: four fifths of the conversation vanished at compaction and the memory files did not move.\n\nThis is the segment Carrot asked for: their product knowledge, written where agents read it. The bigger version, knowledge bases and graphs, is next week."
+},
+/* ============ ACT 7 ============ */
+{
+ act:"Act 7 · Go build", n:"24", title:"Challenge 3 briefing", time:"5:00 → 2h block",
+ html:`<div class="eyebrow"><span class="dot"></span>Challenge 3 · Wire the loop to the outside</div>
+ <div class="body">
+  <div class="cols c2">
+   <div class="stack" style="justify-content:center">
+    <ol class="steps">
+     <li>Finish your five. Try one of them on Opus 5.5 and audit the output</li>
+     <li>Wire one external tool into one step: <code>gh</code> or Jira into <code>/intent</code>, Playwright into <code>/execute</code>. <code>/context</code> before and after</li>
+     <li>One hook that is not the formatter. Watch it bounce</li>
+     <li>One plugin, read in the order from slide 18. Write one line: install or not, and why. If yes, test that one of its skills triggers</li>
+     <li>One line into CLAUDE.md from whatever fought you</li>
+    </ol>
+   </div>
+   <div class="stack" style="justify-content:center">
+    <div class="card"><span class="k">Goal</span><span class="v">A harness you can explain file by file, with one arrow that leaves the repo. Keep building your wall feature through it.</span></div>
+    <div class="card darkc"><span class="k">The hand-off</span><span class="v"><strong>Before you leave tonight, push the fork.</strong> I read every one during the gap week. Monday opens with what I found.</span></div>
+    <div class="card plain"><span class="k">Stretch</span><span class="v">Bundle <code>.claude/</code> as a plugin with a <code>marketplace.json</code>, so a colleague installs it in one line.</span></div>
+    <p class="xs">Guide 3 walks through every step on the wall, with three paths for step 2.</p>
+   </div>
+  </div>
+  <div class="foot">Playwright against your Day 2 feature is the natural pick for step 2. It drives the app you already built.</div>
+ </div>`,
+ notes:"\"Two hours. No take-home. What is not done by the end of the block is what I will see in the fork, and that is fine.\"\n\nThe two verification steps are the ones people skip: watch the hook bounce, test that the skill triggers. A hook that silently passes and a skill that never fires both feel like success.\n\nCirculate with two questions: show me your hook bouncing, and show me the one line you wrote about the plugin. That line is the ownership lesson in their own words.\n\nGuide 3 gives three paths for step 2: gh into /intent (works on the wall today), Jira through the atlassian plugin (only if their Jira is Cloud), Playwright CLI into /execute. The hook in the guide is a no-merge guard: Claude may open a PR, never merge one."
+},
+/* ============ ACT 8 ============ */
+{
+ act:"Act 8 · Close the week", n:"25", title:"Tonight", time:"5:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Before you leave</div>
+ <div class="body">
+  <div class="cols c2">
+   <div class="stack" style="justify-content:center">
+    <div class="card callout" style="background:var(--primary);color:#fff"><span class="k" style="color:#fff">One thing</span><span class="v" style="color:#fff;font-size:24px;font-family:var(--serif);letter-spacing:-.3px">Push the fork.</span></div>
+    <p class="sm">Whatever state it is in. Half-finished is information too.</p>
+   </div>
+   <div class="stack" style="justify-content:center">
+    <h3>What I read for</h3>
+    <ul class="clean">
+     <li>Your <code>/execute</code>, and what it calls verified</li>
+     <li>The hook you wrote, and whether it fires</li>
+     <li>The tool you wired in, and what it may do without asking</li>
+     <li>The lines you added to CLAUDE.md</li>
+    </ul>
+    <p class="xs">No homework. The wall stays open for questions and I answer async. Monday opens with what I found.</p>
+   </div>
+  </div>
+ </div>`,
+ notes:"No homework and no shaming. Say plainly that Day 4 works for the person who does nothing between now and Monday.\n\nThe read-back is the only hand-off of the week. Tell them what you will look at so they know the push is not a formality: /execute, the hook, the tool they wired in and its permission rules, the CLAUDE.md lines.\n\nIf someone wants to keep building, the wall is there and the loop applies to one real ticket at work as well as it does here. Optional, and say so."
+},
+{
+ act:"Act 8 · Close the week", n:"26", title:"Next week", time:"4:00", dark:true,
+ html:`<div class="eyebrow"><span class="dot"></span>Monday 28 and Tuesday 29</div>
+ <div class="body mid">
+  <h1 style="font-size:50px">Next week: scaling,<br>parallel worktrees and factories.</h1>
+  <p class="lead" style="color:var(--on-dark-soft);margin-top:16px;font-size:21px;max-width:920px">Many agents at once, each in its own worktree, with gates between them. Then the knowledge they share: code graphs, knowledge bases in OKF and knowledge graphs, versioned with the branch or with the project.</p>
+  <h1 style="font-size:40px;color:var(--amber);margin-top:26px">And we finally decode<br>Monday's video.</h1>
+ </div>
+ <div class="foot">Minute cards on the wall, then push the fork.</div>`,
+ notes:"Name next week's topics so the gap week has a direction: scaling from one agent to many, parallel worktrees so they do not trip over each other, factories (one production line, gates between the stations), code graphs, knowledge bases in Google's Open Knowledge Format, knowledge graphs, and the design question of whether that knowledge is versioned per branch or per project.\n\nThe brownfield answer from Monday gets its full treatment there: a compiled knowledge base plus a code graph before the agent touches legacy code.\n\nClose the loop from day one: they watched three and a half minutes of something they could not read. Next week they narrate it.\n\nMinute cards, then the push."
+},
+];
+
+/* ---------- render ---------- */
+const stage=document.getElementById('stage');
+D.forEach((s,i)=>{
+  const el=document.createElement('section');
+  el.className='slide'+(s.dark?' dark':'')+(s.coral?' coral':'');
+  el.dataset.i=i;
+  el.innerHTML=s.html;
+  stage.appendChild(el);
+});
+const slides=[...document.querySelectorAll('.slide')];
+let cur=0;
+
+function fit(){
+  const w=window.innerWidth-(document.body.classList.contains('notes-on')?380:0);
+  const h=window.innerHeight;
+  const k=Math.min((w-48)/1280,(h-72)/720);
+  stage.style.transform='scale('+k+')';
+}
+function show(i){
+  cur=Math.max(0,Math.min(D.length-1,i));
+  slides.forEach((s,j)=>s.classList.toggle('active',j===cur));
+  const s=D[cur];
+  document.getElementById('count').textContent=s.n+'  ·  '+(cur+1)+'/'+D.length;
+  document.getElementById('actlbl').textContent=s.act.split(' · ')[0];
+  document.getElementById('bar').style.width=((cur+1)/D.length*100)+'%';
+  document.getElementById('n-title').textContent=s.n+' · '+s.title;
+  document.getElementById('n-time').textContent=s.act+'  ·  '+s.time;
+  document.getElementById('n-text').textContent=s.notes||'';
+  document.getElementById('n-assets').innerHTML=s.gap?'<b>Gap:</b> '+s.gap:'<b>Assets:</b> complete';
+  const nx=D[cur+1];
+  document.getElementById('n-next').innerHTML=nx?'Next<b>'+nx.n+' · '+nx.title+'</b>':'Next<b>— end —</b>';
+  [...document.querySelectorAll('.ovcell')].forEach((c,j)=>c.classList.toggle('cur',j===cur));
+  location.hash=s.n;
+}
+/* overview */
+const og=document.getElementById('ovgrid');
+D.forEach((s,i)=>{
+  const c=document.createElement('div');
+  c.className='ovcell';
+  c.innerHTML='<span class="n">'+s.n+'</span><span class="t">'+s.title+'</span>'+
+    (s.gap?'<span class="flag">gap</span>':'')+'<span class="a">'+s.act.split(' · ')[0]+'</span>';
+  c.onclick=()=>{show(i);toggle('overview',false)};
+  og.appendChild(c);
+});
+function toggle(id,on){
+  const el=document.getElementById(id);
+  el.classList.toggle('on',on===undefined?!el.classList.contains('on'):on);
+}
+function notes(){document.body.classList.toggle('notes-on');fit()}
+
+document.addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  const k=e.key;
+  if(k==='Escape'){toggle('overview',false);toggle('help',false);return}
+  if(k==='ArrowRight'||k==='ArrowDown'||k===' '||k==='PageDown'){e.preventDefault();show(cur+1)}
+  else if(k==='ArrowLeft'||k==='ArrowUp'||k==='PageUp'){e.preventDefault();show(cur-1)}
+  else if(k==='Home'){show(0)} else if(k==='End'){show(D.length-1)}
+  else if(k==='n'||k==='N'){notes()}
+  else if(k==='o'||k==='O'){toggle('overview')}
+  else if(k==='?'){toggle('help')}
+  else if(k==='f'||k==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  else if(/^[1-7]$/.test(k)){
+    const t=D.findIndex(s=>s.act.startsWith('Act '+k));
+    if(t>=0)show(t);
+  }
+});
+document.querySelectorAll('#hud button').forEach(b=>{
+  b.onclick=()=>{const g=b.dataset.go;
+    if(g==='next')show(cur+1); else if(g==='prev')show(cur-1);
+    else if(g==='notes')notes(); else if(g==='overview')toggle('overview'); else toggle('help');
+  };
+});
+window.addEventListener('resize',fit);
+const start=D.findIndex(s=>s.n===location.hash.replace('#',''));
+fit();show(start>=0?start:0);
+</script>
+</body>
+</html>

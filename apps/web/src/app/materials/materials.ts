@@ -28,6 +28,16 @@ const MATERIALS: readonly MaterialLink[] = [
     subtitle: 'Escrever os cinco comandos e correr uma feature por eles',
     href: '/course/guide-2-the-loop.html',
   },
+  {
+    title: 'Dia 3 · Superpoderes: MCP, permissões, hooks e plugins',
+    subtitle: 'Slides da sessão',
+    href: '/course/day3-deck.html',
+  },
+  {
+    title: 'Guia 3 · Superpoderes',
+    subtitle: 'Dar ao loop uma porta para o exterior, um hook e um plugin lido antes de confiar',
+    href: '/course/guide-3-superpowers.html',
+  },
 ];
 
 /** Static list of course materials — plain files under public/course/, opened in a new tab. */
