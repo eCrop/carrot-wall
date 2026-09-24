@@ -5,7 +5,20 @@ your phone; the instructor answers, pins, and reads it back. No accounts.
 
 ## Run it
 
-Two terminals, two commands. Requires **Java 21** and **Node 20+**.
+Two terminals, two commands. Requires **Java 21** (matches `apps/api/pom.xml`) and
+**Node ≥22.22.3/24.15.0/26.0.0** (Angular CLI 22's floor).
+
+`mise.toml` at the repo root pins both. With [mise](https://mise.jdx.dev/) installed:
+
+```bash
+mise install          # once, or whenever mise.toml changes
+mise trust             # if this repo hasn't been trusted yet
+```
+
+Then either activate mise in your shell (`eval "$(mise activate bash)"` / `zsh`, usually
+in your shell rc file) so `java`/`node` on `PATH` resolve to the pinned versions, or prefix
+individual commands with `mise exec --`, e.g. `mise exec -- npm start`. Without mise, just
+make sure your own Java/Node on `PATH` meet the versions above.
 
 ```bash
 cd apps/api && ./mvnw quarkus:dev    # API  → http://localhost:8080
