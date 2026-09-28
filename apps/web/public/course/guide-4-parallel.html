@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guide 4 · Loops and graphs, in parallel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#cc785c; --primary-active:#a9583e;
+  --ink:#141413; --body:#3d3d3a; --body-strong:#252523;
+  --muted:#6c6a64; --muted-soft:#8e8b82;
+  --hairline:#e6dfd8; --hairline-soft:#ebe6df;
+  --canvas:#faf9f5; --surface-soft:#f5f0e8; --surface-card:#efe9de;
+  --dark:#181715; --dark-soft:#1f1e1b; --on-dark:#faf9f5; --on-dark-soft:#a09d96;
+  --amber:#e8a55a; --warning:#d4a017;
+  --serif:"Cormorant Garamond","Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--canvas);color:var(--body);font-family:var(--sans);font-size:16.5px;line-height:1.62;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1140px;margin:0 auto;padding:0 32px;display:grid;grid-template-columns:1fr 216px;gap:56px;align-items:start}
+
+/* ---------- masthead ---------- */
+header{border-bottom:1px solid var(--hairline);margin-bottom:44px;padding:52px 0 30px}
+header .kicker{font-size:12px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:var(--primary);margin-bottom:16px;display:flex;gap:11px;align-items:center}
+header .kicker::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--primary)}
+header h1{font-family:var(--serif);font-weight:500;font-size:54px;line-height:1.05;letter-spacing:-1.4px;color:var(--ink)}
+header .sub{font-size:17px;color:var(--muted);margin-top:14px}
+header .intro{font-size:19px;line-height:1.55;color:var(--body-strong);margin-top:24px;max-width:66ch}
+
+/* ---------- flow ---------- */
+main{min-width:0;padding-bottom:96px}
+section{margin-bottom:52px;scroll-margin-top:24px}
+h2{font-family:var(--serif);font-weight:500;font-size:34px;line-height:1.15;letter-spacing:-.7px;color:var(--ink);margin:0 0 18px;display:flex;gap:16px;align-items:baseline}
+h2 .num{font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:1.4px;color:var(--primary);text-transform:uppercase;flex:none;padding-top:6px}
+h3{font-family:var(--serif);font-weight:500;font-size:24px;letter-spacing:-.4px;color:var(--ink);margin:30px 0 12px}
+p{margin:0 0 15px;max-width:72ch}
+strong{font-weight:600;color:var(--ink)}
+em{font-style:italic}
+a{color:var(--primary);text-decoration:none;border-bottom:1px solid rgba(204,120,92,.35)}
+ul,ol{margin:0 0 16px;padding-left:22px;max-width:72ch}
+li{margin-bottom:8px}
+ul{list-style:none;padding-left:20px}
+ul li{position:relative}
+ul li::before{content:"";position:absolute;left:-16px;top:11px;width:5px;height:5px;border-radius:50%;background:var(--primary)}
+ol li::marker{color:var(--primary);font-weight:600}
+code{font-family:var(--mono);font-size:.88em;background:var(--surface-card);padding:2px 6px;border-radius:5px;color:var(--ink)}
+
+/* ---------- code blocks ---------- */
+.code{position:relative;margin:0 0 20px;border-radius:12px;background:var(--dark);overflow:hidden}
+.code .label{font-size:11px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--on-dark-soft);padding:13px 20px 0}
+.code pre{margin:0;padding:18px 20px;overflow-x:auto;font-family:var(--mono);font-size:13.5px;line-height:1.72;color:var(--on-dark);white-space:pre}
+.code code{background:none;padding:0;color:inherit;font-size:inherit}
+.code button{
+  position:absolute;top:11px;right:11px;border:0;border-radius:7px;cursor:pointer;
+  background:#2b2823;color:var(--on-dark-soft);font-family:var(--sans);font-size:11.5px;font-weight:500;
+  padding:6px 11px;opacity:0;transition:opacity .12s;
+}
+.code:hover button,.code button:focus{opacity:1}
+.code button.done{color:var(--amber)}
+.code.prompt{background:var(--dark-soft);border-left:3px solid var(--primary)}
+
+/* ---------- callouts ---------- */
+.note{background:var(--surface-soft);border-radius:12px;padding:20px 24px;margin:0 0 20px}
+.note.warn{background:#faf1dd;border-left:3px solid var(--warning)}
+.note.goal{background:var(--primary);color:#fff}
+.note.goal strong,.note.goal .t{color:#fff}
+.note .t{display:block;font-size:12px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--primary);margin-bottom:8px}
+.note.warn .t{color:#8a6a0c}
+.note p:last-child,.note ul:last-child,.note ol:last-child{margin-bottom:0}
+.tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;background:var(--surface-card);color:var(--ink);border-radius:9999px;padding:4px 12px;margin-bottom:14px}
+
+/* ---------- sidebar ---------- */
+nav{position:sticky;top:32px;font-size:13.5px;padding-top:56px}
+nav .t{font-size:11px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted-soft);margin-bottom:14px}
+nav a{display:block;color:var(--muted);border:0;padding:5px 0 5px 12px;border-left:2px solid var(--hairline);line-height:1.4}
+nav a:hover{color:var(--ink)}
+nav a.on{color:var(--ink);border-left-color:var(--primary);font-weight:500}
+footer{border-top:1px solid var(--hairline);padding:28px 0 64px;font-size:14px;color:var(--muted-soft);max-width:72ch}
+
+@media (max-width:900px){
+  .wrap{grid-template-columns:1fr;gap:0;padding:0 22px}
+  nav{display:none}
+  header h1{font-size:38px}
+}
+@media print{
+  body{font-size:11pt}
+  nav,.code button{display:none}
+  .wrap{display:block;max-width:none;padding:0}
+  section{page-break-inside:avoid}
+  .code{background:#fff;border:1px solid #ccc}
+  .code pre{color:#000}
+  .code .label{color:#666}
+  .note.goal{background:#fff;border:2px solid var(--primary);color:var(--ink)}
+  .note.goal .t,.note.goal strong{color:var(--ink)}
+  a{color:var(--ink);border:0}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<main>
+<header><div class="kicker">Guide 4 · Day 4 · Monday 28 September</div><h1>Loops and graphs, in parallel</h1><div class="sub">The Carrot Wall project · the 2-hour block, at your pace</div><p class="intro">This morning: what a graph is, how it levels up your loop, and how to run work in parallel without the agents, the ports or the bill getting away from you. This guide is the experiment. You make the wall safe for two worktrees, deliver two changes at the same time as two loops, then let a graph take one change and slice it into pieces that run in parallel. Along the way you write down where parallel work paid off and where it fought you. Then you fix one thing and push the branch. The log matters more than the feature.</p></header>
+<style>
+.tbl{overflow-x:auto;margin:0 0 20px}
+.tbl table{border-collapse:collapse;width:100%;font-size:14.5px;line-height:1.5}
+.tbl th{text-align:left;font-size:11px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted-soft);padding:0 14px 9px 0;border-bottom:1px solid var(--hairline)}
+.tbl td{padding:10px 14px 10px 0;border-bottom:1px solid var(--hairline-soft);vertical-align:top}
+.tbl td:first-child{color:var(--ink);font-weight:500;min-width:180px}
+</style>
+<section id="before">
+<h2><span class="num">Start here</span>Before you start</h2>
+<ul>
+<li>Your fork is pushed from last week. Start a branch for today from it: <code>git switch -c day4-parallel</code>.</li>
+<li>Claude Code is recent: <code>claude --version</code>. Sessions messaging each other needs v2.1.224 or later.</li>
+<li>You have run <code>claude</code> once in the repo root and accepted the trust prompt. <code>claude -w</code> refuses to start in a folder you have not trusted.</li>
+<li>Docker is running if you use Compose. The scripts also use <code>lsof</code>, which comes with macOS.</li>
+<li>Optional, from this morning: <code>/statusline show the worktree, context used and session cost</code>, and <code>/doctor</code> once before you copy your setup into two worktrees.</li>
+</ul>
+<div class="note "><span class="t">What this block is for</span><p>This is an experiment, not a feature sprint. You run the same feature three ways and write down what happened. The log you leave with matters more than the code.</p><p>In class you automate to learn where it breaks. At work, the rule from this morning holds: let a graph drive, and scale it, only once you trust the process. Not while you are still learning it.</p></div>
+</section>
+
+<section id="shape">
+<h2><span class="num">The target</span>What the branch looks like in two hours</h2>
+<div class="code"><div class="label">the setup that makes two worktrees safe, and the log</div><pre><code>.gitignore                     ← + .claude/worktrees/                (Step 1)
+docker-compose.yml             ← ports read from .env                (Step 1)
+apps/api/src/main/resources/application.properties
+                               ← + a random port for tests           (Step 1)
+apps/web/proxy.conf.js         ← NEW · replaces proxy.conf.json      (Step 1)
+apps/web/angular.json          ← proxyConfig → proxy.conf.js         (Step 1)
+apps/web/playwright.config.ts  ← ports from the environment          (Step 1)
+scripts/wt-up.sh               ← NEW · give a worktree its ports     (Step 2)
+scripts/wt-down.sh             ← NEW · stop it and remove it         (Step 2)
+scripts/dev.sh                 ← NEW · run api, web or e2e on them   (Step 2)
+docs/specs/NN-slug.md          ← the graph change's spec + contract  (Step 5)
+docs/parallel-log.md           ← NEW · three runs, one fix           (Steps 3 to 7)
++ one fix in a file            ← CLAUDE.md, a script, a setting      (Step 7)</code></pre></div>
+<p>Three runs: two changes delivered at the same time as two loops (Step 4), one change built by a graph that slices itself (Step 5), and the part you fixed, run again (Step 7).</p>
+</section>
+
+<section id="step1">
+<h2><span class="num">Step 1</span>Make the wall safe for two worktrees</h2>
+<p>This morning's table of what breaks, fixed at the source. You can ask Claude to make these changes: start it at the repo root, in plan mode, paste this step, and check its plan against the list before you approve. That is rung 2 of this afternoon's ladder.</p>
+<h3>Keep worktrees out of git</h3>
+<div class="code"><div class="label">.gitignore · add one line</div><pre><code>.claude/worktrees/</code></pre></div>
+<h3>Compose ports come from the environment</h3>
+<div class="code"><div class="label">docker-compose.yml · the two ports lines</div><pre><code>  api:
+    ports:
+      - "${API_PORT:-8010}:8080"
+  web:
+    ports:
+      - "${WEB_PORT:-3010}:4200"</code></pre></div>
+<p>Without a <code>.env</code> nothing changes: master still gets 8010 and 3010.</p>
+<h3>Tests pick a free port</h3>
+<div class="code"><div class="label">apps/api/src/main/resources/application.properties · add</div><pre><code># Tests take any free port, so two test runs never collide
+quarkus.http.test-port=0</code></pre></div>
+<p>Quarkus already reads <code>QUARKUS_HTTP_PORT</code> from the environment for dev mode, so the API itself needs no other change.</p>
+<h3>The frontend proxy follows the API port</h3>
+<div class="code"><div class="label">apps/web/proxy.conf.js · NEW, then delete proxy.conf.json</div><pre><code>// Each worktree's frontend talks to its own API
+module.exports = {
+  '/api': {
+    target: `http://localhost:${process.env.API_PORT || 8080}`,
+    secure: false,
+  },
+};</code></pre></div>
+<div class="code"><div class="label">apps/web/angular.json · in the serve options</div><pre><code>"proxyConfig": "proxy.conf.js"</code></pre></div>
+<h3>Playwright starts servers on this worktree's ports</h3>
+<div class="code"><div class="label">apps/web/playwright.config.ts</div><pre><code>import { defineConfig, devices } from '@playwright/test';
+
+const api = process.env.API_PORT ?? '8080';
+const web = process.env.WEB_PORT ?? '4200';
+
+export default defineConfig({
+  testDir: './e2e',
+  fullyParallel: true,
+  reporter: 'list',
+  use: { baseURL: `http://localhost:${web}` },
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  webServer: [
+    {
+      command: `cd ../api &amp;&amp; ./mvnw quarkus:dev -Dquarkus.http.port=${api} -Ddebug=false`,
+      url: `http://localhost:${api}/api/wall`,
+      reuseExistingServer: false,
+      timeout: 120_000,
+    },
+    {
+      command: `npm start -- --port ${web}`,
+      url: `http://localhost:${web}`,
+      reuseExistingServer: false,
+      timeout: 60_000,
+    },
+  ],
+});</code></pre></div>
+<div class="note warn"><span class="t">Why reuse is off</span><p>With reuse on, a second e2e run finds a server already on 4200, uses it, and tests the other worktree's code. Everything passes, which is why nobody notices. Off means Playwright starts its own servers on this worktree's ports, or fails loudly if something is already there. Step 7 has a gentler version once your ports are per worktree.</p></div>
+<p>Run the wall once from the main checkout, the way you always do, to check nothing broke: both apps start on 8080 and 4200, and <code>cd apps/web &amp;&amp; npx playwright test</code> passes with nothing else running.</p>
+</section>
+
+<section id="step2">
+<h2><span class="num">Step 2</span>Three scripts, and two worktrees up at once</h2>
+<div class="code"><div class="label">scripts/wt-up.sh · run once, inside a new worktree</div><pre><code>#!/usr/bin/env bash
+set -euo pipefail
+slot=${1:?usage: scripts/wt-up.sh &lt;slot 1-9&gt;}
+api=$((8080 + slot*10)); web=$((4200 + slot*10))
+cat &gt; .env &lt;&lt;EOF
+COMPOSE_PROJECT_NAME=wall-$(basename "$PWD")
+QUARKUS_HTTP_PORT=$api
+API_PORT=$api
+WEB_PORT=$web
+DEBUG_PORT=$((5005 + slot))
+EOF
+(cd apps/web &amp;&amp; npm ci --prefer-offline)
+echo "api :$api  web :$web"</code></pre></div>
+<div class="code"><div class="label">scripts/wt-down.sh · stop the slot and remove the worktree</div><pre><code>#!/usr/bin/env bash
+set -euo pipefail
+set -a; [ -f .env ] &amp;&amp; . ./.env; set +a
+for p in ${API_PORT:-} ${WEB_PORT:-}; do
+  pids=$(lsof -ti tcp:$p || true)
+  if [ -n "$pids" ]; then kill $pids; fi
+done
+docker compose down -v --remove-orphans || true
+wt=$PWD
+cd "$(git rev-parse --git-common-dir)/.."
+git worktree remove "$wt"
+git worktree prune</code></pre></div>
+<div class="code"><div class="label">scripts/dev.sh · run the api, the web app or the e2e suite on this worktree's ports</div><pre><code>#!/usr/bin/env bash
+set -euo pipefail
+set -a; [ -f .env ] &amp;&amp; . ./.env; set +a
+case "${1:-}" in
+  api) cd apps/api &amp;&amp; exec ./mvnw quarkus:dev -Ddebug="${DEBUG_PORT:-5005}" ;;
+  web) cd apps/web &amp;&amp; exec npm start -- --port "${WEB_PORT:-4200}" ;;
+  e2e) cd apps/web &amp;&amp; exec npx playwright test ;;
+  *)   echo "usage: scripts/dev.sh api|web|e2e" &gt;&amp;2; exit 2 ;;
+esac</code></pre></div>
+<div class="code"><pre><code>chmod +x scripts/*.sh
+git add -A &amp;&amp; git commit -m "Parallel-safe wall: ports per worktree, three scripts"</code></pre></div>
+<p>Every new worktree must start from this commit, not from master. By default Claude Code branches a new worktree from the default branch on the remote. Tell it to branch from where you are instead, in your personal settings in the main checkout:</p>
+<div class="code"><div class="label">.claude/settings.local.json</div><pre><code>{
+  "worktree": { "baseRef": "head" }
+}</code></pre></div>
+<h3>Try it with two throwaway worktrees</h3>
+<ol>
+<li>Terminal 1, in the main checkout: <code>claude -w try-1</code>. In the session: <code>/rename try-1</code>, then <code>! scripts/wt-up.sh 1</code>.</li>
+<li>Terminal 2: <code>cd .claude/worktrees/try-1 &amp;&amp; scripts/dev.sh api</code>. Terminal 3, same folder: <code>scripts/dev.sh web</code>.</li>
+<li>Do the same with <code>try-2</code> and slot 2.</li>
+<li>Open <code>http://localhost:4210</code> and <code>http://localhost:4220</code>. Post on one: it must not appear on the other. Each worktree has its own database.</li>
+<li>Check who is listening: <code>lsof -nP -iTCP -sTCP:LISTEN | grep -E ':(8090|8100|4210|4220|5006|5007)'</code>.</li>
+</ol>
+<h3>Tear down in this order</h3>
+<ol>
+<li>Stop the servers with Ctrl+C.</li>
+<li>Exit the Claude session. Because you named it, Claude asks whether to keep the worktree: choose Keep.</li>
+<li>From a terminal in the worktree folder: <code>scripts/wt-down.sh</code>.</li>
+</ol>
+<div class="note "><span class="t">Why the order matters</span><p>While a session runs, Claude Code can hold a lock on its worktree, so <code>git worktree remove</code> refuses. And an unnamed session with no changes removes its worktree on exit by itself, taking <code>.env</code> with it, while the slot's servers keep running. Naming the session gets you the keep-or-remove question.</p></div>
+</section>
+
+<section id="step3">
+<h2><span class="num">Step 3</span>Pick two changes that can run at the same time</h2>
+<p>Two changes you could deliver this week, from <code>feature-ideas.md</code> or your own backlog. Start with a pair that barely overlaps. Try a pair that overlaps on purpose once you have seen the easy case: it teaches more, and it goes in the log too.</p>
+<div class="tbl"><table><tr><th></th><th>A pair that barely overlaps</th><th>A pair that overlaps on purpose</th></tr><tr><td>Example</td><td><strong>12</strong>, the search box (web), and <strong>20</strong>, the pin cap (API)</td><td><strong>11</strong>, the filter chips, and <strong>12</strong>, the search box: both change the wall view</td></tr><tr><td>What you learn</td><td>How much two loops at once really save you</td><td>Where two agents collide, and how to land one on top of the other</td></tr></table></div>
+<ol>
+<li>In the main checkout, on your branch, ask Claude in plan mode which files each change would touch. Change nothing yet.</li>
+<li>Write both lists in the log. Where they overlap is where the two runs will collide.</li>
+<li>If they overlap, decide now which one lands first. The other rebases on it before it ships.</li>
+<li>Commit. Both worktrees start from this commit.</li>
+</ol>
+<p>Then start the log. Fill it in as you go, not at the end.</p>
+<div class="code"><div class="label">docs/parallel-log.md</div><pre><code># Parallel log · Day 4
+
+Change A: #NN &lt;name&gt; · files it touches:
+Change B: #NN &lt;name&gt; · files it touches:
+Overlap:
+
+| Run | How | Wall time | Usage | Times I stepped in | Collisions | What review found |
+|-----|-----|-----------|-------|--------------------|------------|-------------------|
+| 1   | Two loops at once: A and B |  |  |  |  |  |
+| 2   | Graph: one change, sliced  |  |  |  |  |  |
+| 3   | After my fix               |  |  |  |  |  |
+
+## Worked well
+-
+
+## Fought me
+-
+
+## The one fix
+- Before:
+- After:</code></pre></div>
+</section>
+
+<section id="step4">
+<h2><span class="num">Step 4</span>Run two loops at once</h2>
+<p>Two sessions, two worktrees, two slots, two changes. Each runs your own loop from plan to pull request, and their work overlaps in time. That overlap is the point: while one waits for you, the other keeps going.</p>
+<div class="tbl"><table><tr><th></th><th>Change A</th><th>Change B</th></tr><tr><td>Session</td><td><code>claude -w change-a</code>, then <code>/rename change-a</code> and <code>/color blue</code></td><td><code>claude -w change-b</code>, then <code>/rename change-b</code> and <code>/color green</code></td></tr><tr><td>Ports</td><td><code>! scripts/wt-up.sh 1</code>: API 8090, web 4210</td><td><code>! scripts/wt-up.sh 2</code>: API 8100, web 4220</td></tr><tr><td>Servers</td><td>Another terminal in the worktree: <code>scripts/dev.sh api</code> and <code>scripts/dev.sh web</code></td><td>The same, in its own worktree</td></tr><tr><td>The loop</td><td>Your loop for A: <code>/plan</code>, you sign, <code>/execute</code> until green</td><td>Your loop for B, the same way</td></tr></table></div>
+<p>Suggested setup for both: Sonnet as the main model and <code>/advisor opus</code>. If your <code>/execute</code> is heavy, try a <code>/goal</code> instead: <em>the tests pass, no test file was changed, stop after 15 turns</em>. Every time one of them waits for you, write it down.</p>
+<h3>When the first one lands</h3>
+<ol>
+<li>Commit A in its worktree, then check the other session is reachable with <code>/list-agents</code>.</li>
+<li>Send the message:</li>
+</ol>
+<div class="code prompt"><div class="label">in the change-a session</div><pre><code>Let @change-b know change A is committed on worktree-change-a.
+Rebase on it and run the tests before you ship.</code></pre></div>
+<ol start="3">
+<li>In B, the rebase is where overlapping files meet: <code>git rebase worktree-change-a</code>, fix what conflicts, and run the tests again.</li>
+<li>Run the end-to-end suite on B's slot: <code>scripts/dev.sh e2e</code>. Stop B's own servers first; Playwright starts them itself.</li>
+</ol>
+<div class="note "><span class="t">Why the rebase needs no push</span><p>Both worktrees share one <code>.git</code>, so A's branch is visible from B's folder the moment it is committed. There is nothing to push or fetch between them.</p></div>
+<h3>Ship, then log</h3>
+<p>Two pull requests. If B needed A, stack B on <code>worktree-change-a</code>; if your <code>/ship</code> works out the base from <code>slice-NN</code> names, pass it the base branch instead. Before you exit each session, copy <code>/usage</code> into the log with the start and end times, every time you had to step in, and every collision.</p>
+</section>
+
+<section id="step5">
+<h2><span class="num">Step 5</span>Now the graph: one change that slices itself</h2>
+<p>Two changes at once was the first kind of parallel: you split the work by ticket. Now the second kind. One change goes into a graph, and the graph splits it into slices that run at the same time inside it, each in its own worktree, each reviewed. Pick a Tier-3 change with an API side and a web side: <strong>29</strong>, the upvote leaderboard, or <strong>32</strong>, the presence counter.</p>
+<h3>First, the contract</h3>
+<ol>
+<li>In the main checkout, on your branch, run your loop up to the plan: <code>/intent</code>, then <code>/spec</code>.</li>
+<li>Write the contract into the spec: the endpoint's path, the request, the response with one example, and the error cases. Add one <code>@QuarkusTest</code> that calls it and fails today.</li>
+<li>Commit. The contract is what lets the API slice and the web slice run at once without waiting for each other.</li>
+</ol>
+<h3>Then let the graph build it</h3>
+<div class="code prompt"><div class="label">the prompt</div><pre><code>use a workflow to build #NN from docs/specs/NN-&lt;slug&gt;-plan.md.
+First split it into slices that can run at the same time against the contract,
+for example api and web. If it does not split cleanly, keep it as one slice.
+Each slice gets one builder in its own worktree, on Sonnet. It implements the slice,
+runs the unit tests only (./mvnw test in apps/api, npm test in apps/web) and returns
+the files it changed and the test output.
+Then one reviewer per slice, on Opus, with fresh eyes: try to fail it against the spec
+and the contract, and return a verdict with evidence.</code></pre></div>
+<ol>
+<li>When Claude asks to run it, choose <strong>View raw script</strong> first. Find the split, the worktrees, the models and the reviewers from this morning's slide.</li>
+<li>Watch it in <code>/workflows</code>: phases, agents, tokens.</li>
+<li>When it finishes and you like the shape, select the run and press <code>s</code> to save it as <code>build-slices</code> in <code>.claude/workflows/</code>.</li>
+<li>The builders' worktrees stay on disk with their changes: <code>git worktree list</code>. Keep what you want and remove the rest with <code>git worktree remove</code>.</li>
+</ol>
+<div class="note "><span class="t">Why unit tests only</span><p>A workflow's worktrees do not run your <code>wt-up.sh</code>. They have no slot ports and no <code>node_modules</code> until someone runs <code>npm ci</code> there. End-to-end tests belong in a slot you set up. That difference is one of the things to write down.</p></div>
+<p>Log it as run 2: the tokens and time from <code>/workflows</code>, whether it split the change the way you would have, what the reviewers found, and how often you stepped in. A workflow takes no input once it starts, so the honest answer may be zero, and that is a finding too.</p>
+</section>
+
+<section id="step6">
+<h2><span class="num">Step 6</span>Read the log: where it worked, where it didn't</h2>
+<p>Ten minutes, with the log open. Answer in the file, one line each.</p>
+<ul>
+<li>Did the two changes really overlap in time, or did one wait on the other most of the block?</li>
+<li>Where did they collide? Was the rebase worth it, or should one simply have gone first?</li>
+<li>Did the graph split the change the way you would have, and did the slices really run at once?</li>
+<li>Which found more real problems in review: your loops or the graph's reviewers?</li>
+<li>How far did each run move your <code>/usage</code> bars, per change, and was it worth it?</li>
+<li>Every time you stepped in: could a gate, a rule or a script have done it for you?</li>
+<li>Which kinds of tickets would you run this way again, and which would you keep as one loop, or plain plan mode?</li>
+</ul>
+<div class="note "><span class="t">Say it straight</span><p>"Parallel was slower here" is a good result. Most coding work splits less than it looks. The point is to know where your line is, on your code, with numbers.</p></div>
+</section>
+
+<section id="step7">
+<h2><span class="num">Step 7</span>Improve the experience: fix one thing</h2>
+<p>Pick the row that fought you most. Fix it in a file, not as a habit you have to remember. Then run the part it affected again, and write before and after in the log.</p>
+<div class="tbl"><table><tr><th>If this happened</th><th>Try this</th></tr><tr><td>Claude ran the servers or e2e on 8080 and 4200</td><td>Claude's shell does not keep environment variables between commands, so it never saw your <code>.env</code>. Add to CLAUDE.md: <em>In a worktree, start servers and e2e only with <code>scripts/dev.sh</code>.</em> Or launch the session with <code>CLAUDE_ENV_FILE</code> pointing at a file of <code>export</code> lines: Claude sources it before every command.</td></tr><tr><td>e2e refused to start because your servers were up</td><td>Reuse only your own slot's servers: <code>reuseExistingServer: Boolean(process.env.WEB_PORT)</code>. Safe once every worktree has its own ports.</td></tr><tr><td><code>/cleanup-worktree</code> stopped master's servers</td><td>It kills whatever is on 8080 and 4200. Rewrite it to run <code>scripts/wt-down.sh</code>, which reads the slot's own ports.</td></tr><tr><td>A worktree didn't have your setup or the contract</td><td>Commit before you create it, and check <code>worktree.baseRef</code> is <code>"head"</code>.</td></tr><tr><td>Permission prompts in every session</td><td><code>/fewer-permission-prompts</code> in the main checkout. An approval you give in any worktree is saved in the main checkout's <code>settings.local.json</code> and applies to all of them.</td></tr><tr><td>You lost track of which window was which</td><td><code>/rename</code>, <code>/color</code>, and a status line showing the worktree and the cost.</td></tr><tr><td>The two changes collided</td><td>They touched the same files. Pick pairs with less overlap, land one first and rebase the other, or run them one after the other: that is a result too.</td></tr><tr><td>The web slice sat waiting</td><td>The contract was too thin. Add examples and error cases, build the web side against a stub, or run the two as a stack instead of in parallel.</td></tr><tr><td>The reviewer agreed with everything</td><td>A different model from the builder, a "try to fail it" prompt, and a verdict that must cite evidence.</td></tr><tr><td>The workflow used more of your plan than it gave back</td><td>A model per step, a smaller size guideline in <code>/config</code>, and one slice first.</td></tr><tr><td>Two Maven builds at once misbehaved</td><td>Both worktrees share <code>~/.m2</code>. Run the builds one after the other, or give one slot its own with <code>-Dmaven.repo.local</code>, at the price of a full download.</td></tr><tr><td>Leftover worktrees, servers or containers</td><td><code>git worktree list</code> and <code>git worktree prune</code>; <code>docker compose -p wall-&lt;name&gt; down -v</code> from anywhere.</td></tr></table></div>
+</section>
+
+<section id="verify">
+<h2><span class="num">Verify</span>Prove it is clean</h2>
+<ul>
+<li><code>git worktree list</code> shows only your main checkout, and nothing marked prunable.</li>
+<li><code>lsof -nP -iTCP -sTCP:LISTEN | grep -E ':(8090|8100|4210|4220)'</code> prints nothing.</li>
+<li><code>docker ps</code> shows no containers from your slots.</li>
+<li><code>docs/parallel-log.md</code> has three runs, the answers from Step 6, and one before and after.</li>
+<li>Your fix lives in a file: CLAUDE.md, a script, a setting or a command.</li>
+</ul>
+</section>
+
+<section id="push">
+<h2><span class="num">Before you leave</span>Push the branch</h2>
+<div class="note goal"><span class="t">One thing</span><p><strong>Push the branch, whatever state it is in.</strong> The log is what I read.</p></div>
+<div class="code"><pre><code>git add .gitignore docker-compose.yml apps scripts .claude CLAUDE.md docs
+git commit -m "Day 4: parallel-safe wall, two loops and a graph, one fix"
+git push -u origin HEAD</code></pre></div>
+<p>Push the slice branches too if you want them read: <code>git push origin worktree-change-a worktree-change-b</code>.</p>
+<p>No homework. Tomorrow opens with your logs: what paid off, what fought you, and the fixes. Then knowledge bases, graphs of your code, and a factory that runs your graph while you are away.</p>
+</section>
+
+<section id="stuck">
+<h2><span class="num">Help</span>If you get stuck</h2>
+<div class="note "><p><strong><code>claude -w</code> exits with a trust error:</strong> run <code>claude</code> once in the repo root and accept. <strong>Port is already allocated:</strong> another slot or a leftover, so find it with <code>lsof -nP -iTCP:&lt;port&gt; -sTCP:LISTEN</code> and <code>docker ps</code>. <strong>e2e is green but the feature is missing:</strong> check which ports it used; <code>.env</code> was not loaded or reuse is on. <strong>The frontend shows another worktree's posts:</strong> <code>API_PORT</code> in that worktree's <code>.env</code> points at the wrong slot. <strong><code>git worktree remove</code> refuses:</strong> commit or stash what is in it, or run <code>git worktree unlock &lt;path&gt;</code> if it says locked. <strong>A worktree is marked prunable:</strong> its folder was deleted by hand; <code>git worktree prune</code>. <strong>The message never arrives:</strong> <code>/list-agents</code> in both sessions; check neither runs inside a container, and that <code>crossSessionInbound</code> is not set to hold or refuse. <strong>The workflow will not start:</strong> approve the prompt; on Pro, turn on Dynamic workflows in <code>/config</code>. <strong>Quarkus complains about the debug port:</strong> start it with <code>scripts/dev.sh api</code>, which gives each slot its own.</p></div>
+</section>
+
+<section id="stretch">
+<h2><span class="num">Extra</span>Stretch, if you finished early</h2>
+<h3>Run it as an agent team</h3>
+<p>Set <code>CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1</code> and ask for a team of two for the Step 5 change, one owning <code>apps/api</code> and one owning <code>apps/web</code>. Teammates share one checkout, so the split by folder is not optional. Log it as run 4.</p>
+<h3>A mechanical change with /batch</h3>
+<p>Pick something repetitive, such as one error format for every endpoint. <code>/batch</code> splits it into units, you approve the plan, and each unit comes back as its own pull request from its own worktree. Read two of them before you trust the rest.</p>
+<h3>Your whole loop as three workflows</h3>
+<p>Understand, build, review and ship: three saved workflows, with your signature on the spec between the first and the second, and the merge after the third.</p>
+<h3>Let the graph pick the tier and drive</h3>
+<p>The whole loop from one command. The session holds the gates; the workflow you saved in Step 5 does the build. Point it at real tickets only once your five commands have stopped surprising you.</p>
+<div class="code"><div class="label">.claude/skills/ticket/SKILL.md</div><pre><code>---
+name: ticket
+description: Take one ticket from triage to a pull request, stopping at each gate.
+argument-hint: [issue number or URL]
+disable-model-invocation: true
+---
+Ticket: $ARGUMENTS
+
+1. Read the ticket. Ask the Day 2 questions in order, one line of reasoning each:
+   - Could the diff be described in one sentence? Then Tier 1.
+   - Does it cross modules, touch fragile code or carry security surface?
+     Then Tier 3.
+   - Will someone review it cold? Then Tier 3.
+   - Otherwise Tier 2.
+   When unsure, choose the higher tier. Propose the tier and stop.
+   I confirm or override.
+2. Tier 1: make the change here, run the checks, show me the output. Stop.
+3. Tier 2: plan it in plan mode and stop for my yes.
+   Then /execute until the checks pass. Stop.
+4. Tier 3: run /intent and /spec. Show me five lines and the open questions, and stop.
+   On my yes, run the build-slices workflow with the slices from the plan.
+   When it returns, show each slice's verdict in five lines and stop.
+5. Never merge and never skip a stop. When it is ready, tell me to type /ship.</code></pre></div>
+<p>Two details carry the design. Every stop shows five lines and the open questions, not the whole spec, so a signature stays a decision and not a click. And <code>/ship</code> keeps <code>disable-model-invocation</code> from Day 2, so the driver can take you right up to the pull request but cannot open it for you. When Claude Code asks to run <code>build-slices</code>, <strong>Yes, and don't ask again</strong> saves you that prompt next time.</p>
+<h3>A third slice in the background</h3>
+<p><code>claude --bg "implement the digest view for #29"</code>, then watch it in <code>claude agents</code>. Step in only when its row asks for you.</p>
+</section>
+
+<footer>Steps 1 and 2 are the setup; do not skip them. Steps 4 and 5 are the experiment. Step 6 is the point. Work at your own speed, flag me down when you are stuck, and push the branch at the end, whatever state it is in.</footer>
+</main>
+<nav><div class="t">On this page</div><div id="toc"></div></nav>
+</div>
+<script>
+// copy buttons on every code block
+document.querySelectorAll('.code').forEach(function(box){
+  var pre = box.querySelector('pre');
+  var b = document.createElement('button');
+  b.textContent = 'Copy';
+  b.onclick = function(){
+    navigator.clipboard.writeText(pre.innerText).then(function(){
+      b.textContent = 'Copied'; b.classList.add('done');
+      setTimeout(function(){ b.textContent = 'Copy'; b.classList.remove('done'); }, 1400);
+    }).catch(function(){ b.textContent = 'Select it'; });
+  };
+  box.appendChild(b);
+});
+// table of contents
+var toc = document.getElementById('toc');
+var secs = [].slice.call(document.querySelectorAll('section[id]'));
+secs.forEach(function(s){
+  var h = s.querySelector('h2');
+  if (!h) return;
+  var c = h.cloneNode(true);
+  var num = c.querySelector('.num');
+  var label = num ? num.textContent.trim() : '';
+  if (num) num.remove();
+  var a = document.createElement('a');
+  a.href = '#' + s.id;
+  a.textContent = c.textContent.trim();
+  if (label) a.title = label;
+  toc.appendChild(a);
+});
+var links = [].slice.call(toc.querySelectorAll('a'));
+var io = new IntersectionObserver(function(es){
+  es.forEach(function(e){
+    if (!e.isIntersecting) return;
+    var i = secs.indexOf(e.target);
+    links.forEach(function(l,j){ l.classList.toggle('on', j === i); });
+  });
+}, { rootMargin: '-10% 0px -80% 0px' });
+secs.forEach(function(s){ io.observe(s); });
+</script>
+</body>
+</html>

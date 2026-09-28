@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 4 · Scale it with confidence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#cc785c; --primary-active:#a9583e;
+  --ink:#141413; --body:#3d3d3a; --body-strong:#252523;
+  --muted:#6c6a64; --muted-soft:#8e8b82;
+  --hairline:#e6dfd8; --hairline-soft:#ebe6df;
+  --canvas:#faf9f5; --surface-soft:#f5f0e8; --surface-card:#efe9de; --cream-strong:#e8e0d2;
+  --dark:#181715; --dark-elev:#252320; --dark-soft:#1f1e1b;
+  --on-dark:#faf9f5; --on-dark-soft:#a09d96;
+  --teal:#5db8a6; --amber:#e8a55a; --success:#5db872; --warning:#d4a017; --error:#c64545;
+  --serif:"Cormorant Garamond","Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+  --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--canvas); color:var(--ink);
+  font-family:var(--sans); font-size:16px; line-height:1.55;
+  overflow:hidden;
+}
+
+/* ---------- stage ---------- */
+#stage-wrap{position:fixed;inset:0;display:grid;place-items:center;background:var(--canvas)}
+body.notes-on #stage-wrap{inset:0 380px 0 0}
+#stage{
+  width:1280px;height:720px;position:relative;
+  transform-origin:center center;
+  background:var(--canvas);
+  box-shadow:0 1px 3px rgba(20,20,19,.08);
+  overflow:hidden;
+}
+.slide{
+  position:absolute;inset:0;display:none;
+  padding:56px 64px;
+  flex-direction:column;
+}
+.slide.active{display:flex}
+.slide.dark{background:var(--dark);color:var(--on-dark)}
+.slide.dark .eyebrow{color:var(--on-dark-soft)}
+.slide.dark h1,.slide.dark h2{color:var(--on-dark)}
+.slide.dark p,.slide.dark li{color:var(--on-dark-soft)}
+.slide.coral{background:var(--primary);color:#fff}
+.slide.coral h1,.slide.coral h2,.slide.coral p{color:#fff}
+
+/* ---------- type ---------- */
+.eyebrow{
+  font-size:12px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:20px;display:flex;gap:12px;align-items:center;
+}
+.eyebrow .dot{width:5px;height:5px;border-radius:50%;background:var(--primary);flex:none}
+h1{font-family:var(--serif);font-weight:500;font-size:58px;line-height:1.05;letter-spacing:-1.4px;color:var(--ink)}
+h2{font-family:var(--serif);font-weight:500;font-size:42px;line-height:1.1;letter-spacing:-1px;color:var(--ink)}
+h3{font-family:var(--serif);font-weight:500;font-size:29px;line-height:1.15;letter-spacing:-.5px;color:var(--ink)}
+.lead{font-size:20px;line-height:1.45;color:var(--body-strong);font-weight:400}
+p{font-size:17px;color:var(--body)}
+.sm{font-size:15px}
+.xs{font-size:13.5px;color:var(--muted)}
+strong{font-weight:600;color:var(--ink)}
+.slide.dark strong{color:var(--on-dark)}
+em.q{font-style:italic;font-family:var(--serif);font-size:1.1em;letter-spacing:-.2px}
+.coralword{color:var(--primary)}
+.slide.dark .coralword{color:var(--amber)}
+
+/* ---------- layout helpers ---------- */
+.body{flex:1;display:flex;flex-direction:column;gap:18px;min-height:0;justify-content:center}
+.cols{display:grid;gap:26px;flex:1;min-height:0}
+.c2{grid-template-columns:1fr 1fr}
+.c2w{grid-template-columns:1.15fr .85fr}
+.c2n{grid-template-columns:.82fr 1.18fr}
+.c3{grid-template-columns:repeat(3,1fr)}
+.c4{grid-template-columns:repeat(4,1fr)}
+.stack{display:flex;flex-direction:column;gap:14px;justify-content:center}
+.center{justify-content:center;align-items:flex-start}
+.mid{justify-content:center}
+
+/* ---------- cards ---------- */
+.card{background:var(--surface-card);border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:8px}
+.card.plain{background:transparent;border:1px solid var(--hairline)}
+.card.darkc{background:var(--dark);color:var(--on-dark)}
+.card.darkc h3,.card.darkc .k{color:var(--on-dark)}
+.card.darkc p,.card.darkc .v{color:var(--on-dark-soft)}
+.card.darkc .v strong{color:var(--on-dark)}
+.card .k{font-size:16px;font-weight:600;color:var(--ink)}
+.card .v{font-size:15px;color:var(--body);line-height:1.5}
+.stat{font-family:var(--serif);font-size:56px;line-height:1;letter-spacing:-2px;color:var(--primary);font-weight:500}
+.slide.dark .stat{color:var(--amber)}
+
+.hrm{display:grid;grid-template-columns:104px 1fr;gap:10px 18px;align-items:baseline}
+.hrm .lbl{font-size:11px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted-soft);padding-top:4px}
+.hrm .lbl.move{color:var(--primary)}
+.hrm .txt{font-size:17px;color:var(--body);line-height:1.45}
+.hrm .txt strong{color:var(--ink)}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-family:var(--mono);font-size:13.5px;background:var(--surface-card);color:var(--ink);border-radius:9999px;padding:5px 13px}
+.slide.dark .chip{background:var(--dark-elev);color:var(--on-dark)}
+.pill{font-size:11px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;border-radius:9999px;padding:4px 11px;background:var(--surface-card);color:var(--ink)}
+.pill.coral{background:var(--primary);color:#fff}
+.pill.warn{background:#f6e6c8;color:#7a5a08}
+.pill.term{background:var(--dark);color:var(--on-dark)}
+
+blockquote{
+  border-left:2px solid var(--primary);padding-left:20px;
+  font-family:var(--serif);font-size:27px;line-height:1.28;letter-spacing:-.4px;color:var(--ink);font-weight:500;
+}
+.slide.dark blockquote{color:var(--on-dark)}
+blockquote cite{display:block;font-family:var(--sans);font-size:13px;font-style:normal;color:var(--muted);margin-top:12px;letter-spacing:0;font-weight:500}
+.slide.dark blockquote cite{color:var(--on-dark-soft)}
+
+/* ---------- assets ---------- */
+figure{margin:0;display:flex;flex-direction:column;gap:7px;min-height:0;flex:1}
+figure img{
+  width:100%;height:100%;object-fit:cover;object-position:top left;
+  border-radius:12px;border:1px solid var(--hairline);background:var(--dark);
+  display:block;min-height:0;
+}
+figure img.contain{object-fit:contain;object-position:center;background:var(--dark)}
+figure img.bottom{object-position:bottom left}
+figcaption{font-size:12px;color:var(--muted-soft);font-family:var(--mono);flex:none}
+.slide.dark figcaption{color:var(--on-dark-soft)}
+.shotgrid{display:grid;gap:12px;flex:1;min-height:0}
+figure.vid{flex:none}
+figure.vid video{height:380px}
+video{width:100%;border-radius:12px;background:#000;object-fit:contain;display:block}
+
+.missing{
+  position:absolute;top:18px;right:22px;z-index:5;
+  font-size:10.5px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;
+  background:#f6e6c8;color:#7a5a08;border-radius:9999px;padding:5px 12px;
+  display:flex;gap:7px;align-items:center;cursor:default;
+}
+.slide.dark .missing{background:#4a3c18;color:#f0dcae}
+.gapnote{
+  background:#faf1dd;border-left:2px solid var(--warning);border-radius:0 8px 8px 0;
+  padding:11px 15px;font-size:13.5px;color:#6b5410;line-height:1.45;flex:none;
+}
+.slide.dark .gapnote{background:#2a2317;color:#d8c38c;border-color:var(--amber)}
+.gapnote b{color:#4a3a06}
+.slide.dark .gapnote b{color:#f0dcae}
+
+/* ---------- chrome ---------- */
+#chrome{position:fixed;left:0;right:0;bottom:0;height:0;z-index:40}
+body.notes-on #chrome{right:380px}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:var(--primary);transition:width .22s ease;z-index:41}
+#hud{
+  position:fixed;bottom:14px;left:0;right:0;display:flex;justify-content:center;gap:14px;
+  align-items:center;pointer-events:none;z-index:42;
+}
+body.notes-on #hud{right:380px}
+#hud .grp{
+  pointer-events:auto;display:flex;gap:2px;align-items:center;
+  background:rgba(250,249,245,.94);border:1px solid var(--hairline);border-radius:9999px;padding:4px;
+  backdrop-filter:blur(8px);
+}
+#hud button{
+  border:0;background:transparent;color:var(--muted);font-family:var(--sans);font-size:12.5px;font-weight:500;
+  padding:6px 12px;border-radius:9999px;cursor:pointer;
+}
+#hud button:hover{background:var(--surface-card);color:var(--ink)}
+#hud .count{font-family:var(--mono);font-size:12px;color:var(--muted);padding:0 12px;min-width:86px;text-align:center}
+#hud .act{font-size:11px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--primary);padding:0 10px}
+
+/* ---------- notes ---------- */
+#notes{
+  position:fixed;top:0;right:0;bottom:0;width:380px;background:var(--dark);color:var(--on-dark);
+  padding:26px 24px;overflow-y:auto;display:none;z-index:45;border-left:1px solid #000;
+}
+body.notes-on #notes{display:block}
+#notes h4{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--amber);margin-bottom:12px}
+#notes .nslide{font-family:var(--serif);font-size:24px;letter-spacing:-.4px;color:var(--on-dark);margin-bottom:6px;font-weight:500}
+#notes .ntime{font-family:var(--mono);font-size:12px;color:var(--on-dark-soft);margin-bottom:20px}
+#notes .ntext{font-size:14.5px;line-height:1.62;color:#d6d2ca;white-space:pre-wrap}
+#notes .nassets{margin-top:22px;padding-top:18px;border-top:1px solid #333029;font-size:13px;color:var(--on-dark-soft);line-height:1.6}
+#notes .nassets b{color:var(--amber);font-weight:600}
+#notes .nnext{margin-top:22px;padding-top:18px;border-top:1px solid #333029;font-size:13px;color:var(--on-dark-soft)}
+#notes .nnext b{color:#fff;display:block;margin-top:4px;font-family:var(--serif);font-size:17px;letter-spacing:-.3px}
+
+/* ---------- overview ---------- */
+#overview{
+  position:fixed;inset:0;background:rgba(250,249,245,.985);z-index:60;display:none;
+  overflow-y:auto;padding:40px 44px;
+}
+#overview.on{display:block}
+#overview h3{margin-bottom:22px}
+.ovgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:14px}
+.ovcell{
+  border:1px solid var(--hairline);border-radius:10px;background:var(--surface-soft);
+  padding:12px 13px;cursor:pointer;min-height:92px;display:flex;flex-direction:column;gap:6px;
+}
+.ovcell:hover{border-color:var(--primary)}
+.ovcell.cur{border-color:var(--primary);background:var(--surface-card)}
+.ovcell .n{font-family:var(--mono);font-size:11px;color:var(--muted-soft)}
+.ovcell .t{font-size:13.5px;font-weight:500;color:var(--ink);line-height:1.3}
+.ovcell .a{font-size:10px;letter-spacing:1.1px;text-transform:uppercase;color:var(--primary);font-weight:600;margin-top:auto}
+.ovcell .flag{font-size:10px;color:#7a5a08;background:#f6e6c8;border-radius:9999px;padding:2px 7px;align-self:flex-start}
+
+/* ---------- help ---------- */
+#help{position:fixed;inset:0;background:rgba(20,20,19,.72);z-index:70;display:none;place-items:center}
+#help.on{display:grid}
+#help .box{background:var(--canvas);border-radius:16px;padding:34px 38px;max-width:460px}
+#help h3{margin-bottom:18px}
+#help dl{display:grid;grid-template-columns:auto 1fr;gap:9px 18px;font-size:14.5px}
+#help dt{font-family:var(--mono);font-size:12.5px;color:var(--ink);background:var(--surface-card);padding:2px 9px;border-radius:5px;justify-self:start}
+#help dd{color:var(--body)}
+
+/* ---------- tables ---------- */
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+th{text-align:left;font-size:11px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted-soft);padding:0 12px 9px 0;border-bottom:1px solid var(--hairline)}
+td{padding:9px 12px 9px 0;border-bottom:1px solid var(--hairline-soft);color:var(--body);vertical-align:top}
+td.mono{font-family:var(--mono);font-size:13px;color:var(--ink)}
+td.ok{color:var(--ink);font-weight:500}
+tr:last-child td{border-bottom:0}
+
+ul.clean{list-style:none;display:flex;flex-direction:column;gap:9px}
+ul.clean li{font-size:16.5px;color:var(--body);padding-left:18px;position:relative;line-height:1.45}
+ul.clean li::before{content:"";position:absolute;left:0;top:10px;width:5px;height:5px;border-radius:50%;background:var(--primary)}
+ol.steps{list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:13px}
+ol.steps li{counter-increment:s;font-size:18px;color:var(--body);padding-left:42px;position:relative;line-height:1.4}
+ol.steps li::before{
+  content:counter(s);position:absolute;left:0;top:-1px;width:28px;height:28px;border-radius:50%;
+  background:var(--primary);color:#fff;font-size:13px;font-weight:600;display:grid;place-items:center;font-family:var(--sans);
+}
+.vidhead{display:flex;justify-content:space-between;align-items:center;gap:24px;flex:none;margin-bottom:12px}
+.vidhead .eyebrow{margin-bottom:0}
+.qrinline{display:flex;gap:13px;align-items:center}
+.qrinline img{width:96px;height:96px;border-radius:8px;background:var(--canvas);padding:4px;display:block}
+.qrinline .lbl{display:block;font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--on-dark-soft);margin-bottom:4px}
+.qrinline .url{display:block;font-family:var(--mono);font-size:14px;color:var(--amber)}
+.qr{width:168px;height:168px;border-radius:12px;flex:none;background:var(--canvas);padding:6px}
+figure.noimg img,figure.noimg figcaption{display:none}
+figure.noimg::before{content:"bizpliz-hero.png";display:grid;place-items:center;flex:1;border:2px dashed var(--hairline);border-radius:12px;font-family:var(--mono);font-size:12px;color:var(--muted-soft)}
+.slide.dark .qr{border-color:#3a352d;color:var(--on-dark-soft)}
+.logorow{display:flex;gap:26px;align-items:center;margin-top:auto}
+.logoplate{
+  margin-top:auto;align-self:flex-start;display:flex;align-items:center;gap:30px;
+  background:var(--canvas);border-radius:12px;padding:18px 30px;
+}
+.logoplate img{display:block;width:auto}
+.logoplate .lsep{width:1px;align-self:stretch;background:var(--hairline)}
+.logoslot{
+  height:42px;min-width:108px;border-radius:8px;border:1px dashed #3a352d;
+  display:grid;place-items:center;font-size:10.5px;color:var(--on-dark-soft);font-family:var(--mono);padding:0 14px;
+}
+.slide:not(.dark) .logoslot{border-color:var(--hairline);color:var(--muted-soft)}
+.foot{margin-top:auto;padding-top:14px;border-top:1px solid var(--hairline);font-size:13px;color:var(--muted);flex:none}
+.slide.dark .foot{border-color:#2c2823;color:var(--on-dark-soft)}
+.weekmap{display:grid;grid-template-columns:1fr 1fr 1fr 106px 1fr 1fr;gap:11px;align-items:stretch}
+.day{background:var(--surface-card);border-radius:12px;padding:19px 17px;display:flex;flex-direction:column;gap:7px}
+.day.gap{background:transparent;border:1px dashed var(--hairline)}
+.day.dest{background:var(--primary);color:#fff}
+.day .dnum{font-size:11px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted)}
+.day.dest .dnum{color:rgba(255,255,255,.8)}
+.day .dt{font-family:var(--serif);font-size:23px;letter-spacing:-.5px;line-height:1.1;color:var(--ink);font-weight:500}
+.day.dest .dt{color:#fff}
+.gapweek{border:1px dashed var(--hairline);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:10px 8px;text-align:center}
+.gapweek .gw1{font-family:var(--serif);font-size:15px;line-height:1.15;letter-spacing:-.2px;color:var(--muted);font-style:italic}
+.gapweek .gw2{font-size:10px;font-weight:600;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted-soft)}
+.loopdiag{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.loopstep{background:var(--surface-card);border-radius:9999px;padding:10px 20px;font-size:15.5px;font-weight:500;color:var(--ink)}
+.loopar{color:var(--primary);font-size:17px}
+.gear{border:1px solid var(--hairline);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:5px}
+.gear .gn{font-size:15px;font-weight:600;color:var(--ink)}
+.gear .gd{font-size:13.5px;color:var(--muted);line-height:1.45}
+.modelrow{display:grid;grid-template-columns:104px 1fr;gap:6px 18px;align-items:baseline;padding:11px 0;border-bottom:1px solid var(--hairline-soft)}
+.modelrow:last-of-type{border-bottom:0}
+.modelrow .mn{font-family:var(--serif);font-size:24px;letter-spacing:-.5px;color:var(--ink);font-weight:500}
+.modelrow .md{font-size:15px;color:var(--body)}
+.modecycle{position:relative;flex:none;height:186px;background:var(--dark);border-radius:12px;overflow:hidden}
+.mstate{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:9px;padding:22px 26px;opacity:0;animation:mcyc 8.4s infinite}
+.mstate:nth-child(1){animation-delay:0s}
+.mstate:nth-child(2){animation-delay:2.8s}
+.mstate:nth-child(3){animation-delay:5.6s}
+@keyframes mcyc{0%,1%{opacity:0}4%,29%{opacity:1}33%,100%{opacity:0}}
+.mstate .mprompt{font-family:var(--mono);font-size:14px;color:#57534a}
+.mstate .mbar{font-family:var(--mono);font-size:16.5px;font-weight:500;display:flex;gap:10px;align-items:center}
+.mstate .mwhat{font-size:14px;color:var(--on-dark-soft)}
+.mstate .mkey{font-family:var(--mono);font-size:12px;color:#57534a}
+.mcap{flex:none;font-size:12px;color:var(--muted-soft);font-family:var(--mono);margin-top:7px}
+.hooklist{display:flex;flex-direction:column;gap:7px}
+.hookrow{display:flex;gap:12px;align-items:baseline;padding:9px 14px;background:var(--surface-card);border-radius:9px}
+.hookrow .hx{color:var(--error);font-weight:700;font-size:14px;flex:none;line-height:1.3}
+.hookrow .ht{font-size:14.5px;color:var(--ink);line-height:1.35}
+.hookrow.ok{background:var(--surface-soft)}
+.hookrow.ok .hx{color:var(--success)}
+@media print{body{overflow:visible}.slide{display:flex!important;page-break-after:always}}
+</style>
+</head>
+<body>
+
+<div id="stage-wrap"><div id="stage"></div></div>
+<div id="bar"></div>
+<div id="hud">
+  <div class="grp">
+    <button data-go="prev">←</button>
+    <span class="count" id="count">00 · 1/29</span>
+    <button data-go="next">→</button>
+  </div>
+  <div class="grp"><span class="act" id="actlbl">Act 1</span></div>
+  <div class="grp">
+    <button data-go="notes">Notes</button>
+    <button data-go="overview">All slides</button>
+    <button data-go="help">?</button>
+  </div>
+</div>
+
+<aside id="notes">
+  <h4>Speaker notes</h4>
+  <div class="nslide" id="n-title"></div>
+  <div class="ntime" id="n-time"></div>
+  <div class="ntext" id="n-text"></div>
+  <div class="nassets" id="n-assets"></div>
+  <div class="nnext" id="n-next"></div>
+</aside>
+
+<div id="overview"><h3>Day 1 · all slides</h3><div class="ovgrid" id="ovgrid"></div></div>
+
+<div id="help"><div class="box">
+  <h3>Keyboard</h3>
+  <dl>
+    <dt>→ ↓ Space</dt><dd>Next slide</dd>
+    <dt>← ↑</dt><dd>Previous slide</dd>
+    <dt>Home / End</dt><dd>First / last slide</dd>
+    <dt>N</dt><dd>Speaker notes panel</dd>
+    <dt>O</dt><dd>Overview of all slides</dd>
+    <dt>F</dt><dd>Fullscreen</dd>
+    <dt>1–9</dt><dd>Jump to act</dd>
+    <dt>Esc</dt><dd>Close overlay</dd>
+  </dl>
+</div></div>
+
+<script>
+const SHOTS = ""; // assets sit beside this file
+const D = [
+/* ============ ACT 1 ============ */
+{
+ act:"Act 1 · Reconnect", n:"00", title:"Holding slide", time:"from −10 min",
+ html:`<div class="eyebrow"><span class="dot"></span>While we wait</div>
+ <div class="body">
+  <div class="cols c2w" style="align-items:center">
+   <div class="stack">
+    <h1>Day 4. Week two.</h1>
+    <p class="lead" style="font-family:var(--serif);font-size:28px;letter-spacing:-.6px;color:var(--primary)">If it were safe, what would you run in parallel?</p>
+    <p class="sm">Hold that. By the end of today you will know how to make it safe.</p>
+   </div>
+   <div class="stack" style="align-items:center">
+    <img class="qr" src="qr-carrot.svg" alt="QR code to carrot.ecrop.dev">
+    <p class="lead" style="font-family:var(--mono);font-size:19px;color:var(--primary)">carrot.ecrop.dev</p>
+   </div>
+  </div>
+ </div>`,
+ notes:"The answers are raw material for the challenge: whatever someone wants to run in parallel is a candidate for the two slices this afternoon. Write them down as people say them."
+},
+{
+ act:"Act 1 · Reconnect", n:"01", title:"Your questions", time:"12:00",
+ html:`<div class="eyebrow"><span class="dot"></span>First, your questions</div>
+ <div class="body mid">
+  <h1 style="font-size:52px">What is still on your mind<br>from last week?</h1>
+  <p class="lead" style="margin-top:12px;max-width:900px">About what we learned, or about what you tried on your own since Wednesday.</p>
+  <div class="chips" style="margin-top:20px"><span class="chip">something that didn't click</span><span class="chip">something you tried and it fought you</span><span class="chip">something you want to see again</span><span class="chip">something you used at work</span></div>
+ </div>`,
+ notes:"Open the day with this, before anything else. Nothing is prepared on the slide: take what the room brings.\n\nIf it is quiet, start with a direct one: who opened Claude Code on their own code since Wednesday, and what happened?\n\nWrite the questions down as they come. If one belongs later today, such as worktrees, graphs or usage, say so and park it, then come back to it when you get there."
+},
+{
+ act:"Act 1 · Reconnect", n:"02", title:"Things I found in your forks", time:"10:00",
+ html:`<div class="eyebrow"><span class="dot"></span>From the gap week</div>
+ <div class="body">
+  <h2 style="flex:none">Things I found in your forks.</h2>
+  <div class="cols c3" style="flex:none">
+   <div class="card"><span class="k">Manuel Cruz</span><span class="xs" style="margin-top:-4px">manuelmcruz · day1-setup · 3 commits</span><ul class="clean" style="gap:8px;margin-top:6px"><li style="font-size:14px">Dark mode on every screen, the TV view included</li><li style="font-size:14px">Caught a flash of the light theme that only shows in a production build, and fixed it</li><li style="font-size:14px">Verified with 109 web tests, 19 end-to-end tests, 60 API tests and a production build</li></ul></div>
+   <div class="card"><span class="k">Ricardo Toscanelli</span><span class="xs" style="margin-top:-4px">rtoscanelli · two branches · 3 commits</span><ul class="clean" style="gap:8px;margin-top:6px"><li style="font-size:14px">The same dark mode, built separately through intent and spec, with four known gaps written down</li><li style="font-size:14px">Commands moved to skills, <code>/execute</code> and <code>/intent</code> added, two safety hooks with 15 self-tests</li><li style="font-size:14px">Caught that the hooks were never registered, so they had never run</li></ul></div>
+   <div class="card"><span class="k">Filipe Gananca</span><span class="xs" style="margin-top:-4px">filipe-gananca-carrot · day1-setup · 8 commits</span><ul class="clean" style="gap:8px;margin-top:6px"><li style="font-size:14px">A hook that enforces "validation is manual", skipping comments and strings, with 39 tests</li><li style="font-size:14px">The code reviewer made read-only: it had quietly inherited Edit and Write</li><li style="font-size:14px">Playwright running in Docker, and CLAUDE.md rewritten against the real code</li></ul></div>
+  </div>
+  <div class="card darkc" style="flex:none"><span class="k">The pattern</span><span class="v">The best catches were things that looked fine: a theme that only broke in a production build, hooks that passed their tests but never ran, a reviewer that could edit the code it reviewed. Check that it runs, not only that it exists.</span></div>
+ </div>`,
+ notes:"Keep it short and credit people by name. Read one detail from each aloud.\n\nManuel (manuelmcruz, day1-setup, 3 commits): a personal CLAUDE.md rewrite with the original kept as .reference, the Day 1 exercise, then dark mode across every surface. Device preference on first visit, the toggle wins after; the value is checked against light and dark before it touches the page; stored in localStorage, not a cookie, so it never rides along on /api requests next to admin_session. /tv gets its own palette through :host-context() because tv.scss redeclares every token. The catch: Angular inlines the light :root block into index.html as critical CSS while the dark block loads later, so a dark-preference browser flashed light first. It only shows in a production build. Fix: optimization.styles.inlineCritical false. Verified: 109 web unit tests, 19 e2e, 60 API tests, production build.\n\nRicardo (rtoscanelli, two branches): slice-09-dark-mode built the same feature separately, through intent 09 and spec 09: a ThemeService on one localStorage key, guarded with try/catch so private browsing falls back to memory, one shared toggle above the router outlet, /tv left out. 106 unit and 12 e2e including a new dark-mode.spec.ts, and four known gaps written down instead of claiming perfection. The second branch moves the commands to skills, adds execute and intents, a TESTING.md rule scoped to test paths, and two PreToolUse hooks (destructive bash, secrets access) with 15 self-tests. The catch: the hooks were described as active but were never registered in settings.json, so Claude Code never ran them. The commit wires them in.\n\nFilipe (filipe-gananca-carrot, day1-setup, 8 commits, no feature, all harness): Compose in dev mode so Docker alone is a Java and Node free environment; a hook that enforces 'validation in apps/api is manual, not Bean Validation', with a scanner that strips comments and strings first so javadoc mentioning @NotBlank does not trip it, 39 test cases and a replay of all 25 Java files; Playwright inside Docker on Microsoft's image with its own node_modules and a shared network namespace; CLAUDE.md rewritten against the real code (it claimed no REST resources, three migrations instead of six, and Bean Validation); the code-reviewer made read-only because it had inherited Edit and Write; the same two safety hooks as Ricardo, arrived at separately; a spec for the sort toggle.\n\nWorth saying: two of you built dark mode without knowing, and two of you wrote the same safety hooks. That is a sign the material landed, and a sign the team would gain from one shared harness.\n\nCheck Filipe's surname spelling before the session."
+},
+/* ============ ACT 2 ============ */
+{
+ act:"Act 2 · Last week", n:"03", title:"Day 1 · The tool", time:"3:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Last week · Day 1 · Monday 21</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center">
+    <h2>Day 1.<br>The tool.</h2>
+    <p class="lead">An Anthropic side project that became an agent with hands in your repo. You stop being the clipboard and start steering.</p>
+    <div class="card darkc" style="padding:16px 20px"><span class="k">Challenge 1 asked for</span><span class="v">A first CLAUDE.md of your own, and answers about the wall that cite real files.</span></div>
+   </div>
+   <div class="card" style="align-self:center">
+    <ul class="clean" style="gap:12px">
+     <li style="font-size:15.5px"><strong>Start in the right folder.</strong> The one that holds every part the task touches. One level too deep and it can't see the API its form calls.</li>
+     <li style="font-size:15.5px"><strong>Steer, don't argue.</strong> Esc to stop, <code>/rewind</code> to go back, <code>/resume</code> to pick a session up again.</li>
+     <li style="font-size:15.5px"><strong>The window is not storage.</strong> <code>/context</code> to look, <code>/clear</code> between tasks. What must survive goes in files, not in chat.</li>
+     <li style="font-size:15.5px"><strong>Give it a way to check its work.</strong> The build, test and lint commands, so "should work" becomes evidence.</li>
+     <li style="font-size:15.5px"><strong>The harness is one folder.</strong> <code>.claude/</code>, with six surfaces: rules, skills, agents, workflows, hooks and settings.</li>
+    </ul>
+   </div>
+  </div>
+  <div class="foot">Hold on to the first line. The day ends on it.</div>
+ </div>`,
+ notes:"One slide per day, three minutes each. Ask before you show it: what do you remember from Monday? Then reveal and fill the gaps.\n\nThe first line comes back at the end of today. Starting Claude Code in the folder that holds the whole project, in plan mode, is the first big step up from a one-line prompt on a single repo.\n\nIf someone kept only one habit from Day 1, it should be /clear between tasks."
+},
+{
+ act:"Act 2 · Last week", n:"04", title:"Day 2 · The loop", time:"3:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Last week · Day 2 · Tuesday 22</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center">
+    <h2>Day 2.<br>The loop.</h2>
+    <p class="lead">Five steps, each leaving a file the next one reads.</p>
+    <div class="card darkc" style="padding:16px 20px"><span class="k">Challenge 2 asked for</span><span class="v">Your five commands, each with a contract, and one feature run through them.</span></div>
+   </div>
+   <div class="card" style="align-self:center">
+    <ul class="clean" style="gap:12px">
+     <li style="font-size:15.5px"><strong>intent → spec → plan → execute → ship.</strong> Each step writes a file: the intent, the spec, the plan, the evidence, the pull request.</li>
+     <li style="font-size:15.5px"><strong>The loop grows with the risk.</strong> Tier 1 prompts directly. Tier 2 plans first. Tier 3 writes a spec, plans on Opus, tests first and ships stacked.</li>
+     <li style="font-size:15.5px"><strong>Two dials.</strong> The model is how well it thinks. The effort is how long it thinks.</li>
+     <li style="font-size:15.5px"><strong>A command is a step with a contract.</strong> The file pins the model, the effort, the tools and who may run it.</li>
+     <li style="font-size:15.5px"><strong>A person signs at the gates.</strong> The plan is where you catch a wrong direction, while it is still a document edit.</li>
+    </ul>
+   </div>
+  </div>
+  <div class="foot">Today the loop gets rewired into a graph, and runs in parallel.</div>
+ </div>`,
+ notes:"Ask: which of your five commands did you actually use during the gap week? The honest answers show where the loop is too heavy for daily work.\n\nThe last line is the idea today builds on most: a graph adds gates, and the gates are where people sign."
+},
+{
+ act:"Act 2 · Last week", n:"05", title:"Day 3 · Superpowers", time:"3:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Last week · Day 3 · Wednesday 23</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center">
+    <h2>Day 3.<br>Superpowers.</h2>
+    <p class="lead">The loop reached outside the repo.</p>
+    <div class="card darkc" style="padding:16px 20px"><span class="k">Challenge 3 asked for</span><span class="v">One step wired to an outside tool, a hook that bounces, and one plugin read before you trust it.</span></div>
+   </div>
+   <div class="card" style="align-self:center">
+    <ul class="clean" style="gap:12px">
+     <li style="font-size:15.5px"><strong>Same tool, three doors.</strong> A CLI first, then an MCP server, then a plugin. Every tool definition costs window; Tool Search loads them on demand.</li>
+     <li style="font-size:15.5px"><strong>The loop reads the world.</strong> The ticket into <code>/intent</code>, the design into <code>/spec</code>, the browser into <code>/execute</code>, the team from <code>/ship</code>.</li>
+     <li style="font-size:15.5px"><strong>May do, must ask, never.</strong> Permissions in settings, and a hook as the lock nobody can talk round.</li>
+     <li style="font-size:15.5px"><strong>Plugins, read before you run.</strong> <code>/plugin</code>, three catalogs, and security in three layers.</li>
+     <li style="font-size:15.5px"><strong>Memory that lasts.</strong> CLAUDE.md, auto memory, your lessons file, and subagent memory.</li>
+    </ul>
+   </div>
+  </div>
+  <div class="foot">Today: more than one of these loops at a time, without losing control.</div>
+ </div>`,
+ notes:"If anyone ran the Opus 5.5 experiment from Guide 3, ask which pin they kept and why.\n\nThe third line matters today: more agents means more things acting at once, and Wednesday's permissions and hooks are what keep them inside the lines."
+},
+/* ============ ACT 3 ============ */
+{
+ act:"Act 3 · New commands", n:"06", title:"The advisor", time:"7:00",
+ html:`<div class="eyebrow"><span class="dot"></span>New to you · a second opinion, built in</div>
+ <div class="body">
+  <h2 style="flex:none">Sonnet works. Opus checks the big calls.</h2>
+  <div class="cols c2" style="flex:none">
+   <div class="card"><span class="k">Turn it on</span>
+    <div style="font-family:var(--mono);font-size:14px;line-height:1.75;margin-top:2px">/advisor opus<br>claude --advisor opus<br>"advisorModel": "opus"<span style="color:var(--muted-soft)">  · in settings</span><br>/advisor off</div>
+    <span class="v" style="font-size:14px;margin-top:6px">Claude decides when to ask: before it commits to an approach, when the same error keeps coming back, and before it says it is done. You can also just say "consult the advisor before you continue".</span>
+   </div>
+   <div class="card"><span class="k">Four ways to bring in a stronger model</span>
+    <table style="font-size:14px;margin-top:4px">
+     <tr><th>Approach</th><th>When the stronger model runs</th></tr>
+     <tr><td class="mono">/advisor</td><td>At decision points, when Claude asks</td></tr>
+     <tr><td class="mono">opusplan</td><td>In plan mode, then Sonnet builds</td></tr>
+     <tr><td class="mono">subagent · model</td><td>For the whole subtask</td></tr>
+     <tr><td class="mono">/model</td><td>From the next request on</td></tr>
+    </table>
+   </div>
+  </div>
+  <div class="cols c2" style="flex:none">
+   <div class="card plain"><span class="k">What it costs</span><span class="v">Each call reads the whole conversation again at the advisor's price, with no cache. It only runs at decision points, so it usually costs less than the strong model on every turn. It shows in <code>/usage</code>.</span></div>
+   <div class="card plain"><span class="k">Know first</span><span class="v">Experimental. Works with a Claude subscription or an API key, but not through Bedrock, Google Cloud or Foundry. The advisor must be at least as strong as the main model, and Haiku can't advise.</span></div>
+  </div>
+  <div class="foot">Why it matters today: many Sonnet workers, one Opus on call.</div>
+ </div>`,
+ notes:"The smallest change on this list with the biggest effect on a parallel day. Sonnet does the routine turns. At the moments that decide the outcome, Claude sends the whole conversation, every tool call and result, to the advisor and gets advice back. The advisor only advises: Claude applies it, and if the files contradict the advice, Claude says so instead of following it blindly.\n\nThey met opusplan on Day 1: Opus plans, Sonnet builds. The table is the docs' own comparison, and the difference is timing. opusplan uses the strong model at the start; the advisor uses it whenever a decision comes up, including at the end, before 'done'.\n\nDemo: in a Sonnet session run /advisor opus, give it a task with a real decision in it, and wait for the 'Advising' line in the transcript. Ctrl+O shows what the advisor said.\n\nPairings from the docs: Sonnet main with an Opus advisor is the common one. An Opus 5.5 main accepts only Fable or Opus 5 and later as advisor; Opus with Opus is the high-stakes independent check.\n\nCost: on API billing you pay the advisor's rates; on a subscription it counts toward plan limits. Turning it on or off mid-session does not break the main prompt cache.\n\nIt works on a Team subscription as well as an API key: the docs say it is available to both subscription and API-billed accounts. It is not available through Bedrock, Google Cloud or Foundry. Subagents inherit it. It is switched on by a feature flag, so if DISABLE_TELEMETRY is set it stays off. CLAUDE_CODE_DISABLE_ADVISOR_TOOL=1 turns it off entirely, for admins who want that.\n\nSource: code.claude.com/docs/en/advisor. Verify the experimental label the week of."
+},
+{
+ act:"Act 3 · New commands", n:"07", title:"/goal", time:"6:00",
+ html:`<div class="eyebrow"><span class="dot"></span>New to you · a finish line</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center">
+    <h2>Keep going<br>until it's true.</h2>
+    <p class="lead">You set a finish line. After every turn a small, fast model reads the conversation and answers: not yet, done, or impossible. Not yet means Claude starts the next turn on its own.</p>
+    <div class="card darkc" style="padding:14px 18px"><span class="v" style="font-family:var(--mono);font-size:14px;color:#fff">/goal the tests in apps/api pass and no test file was changed. Stop after 15 turns.</span></div>
+    <ul class="clean">
+     <li><code>/goal</code> on its own shows the turns, the tokens and the judge's last reason</li>
+     <li><code>/goal clear</code> stops it early</li>
+    </ul>
+   </div>
+   <div class="stack" style="gap:12px">
+    <div class="card"><span class="k">Write it so the transcript proves it</span><span class="v">The judge doesn't run anything or open files. It only reads what Claude showed. "npm test exits 0" works. "The code is clean" doesn't.</span></div>
+    <div class="card"><span class="k">It doesn't change permissions</span><span class="v">In manual mode it still stops to ask. Auto mode removes the approval before each tool. <code>/goal</code> removes the wait for you between turns.</span></div>
+    <div class="card plain"><span class="k">You have seen this before</span><span class="v">It is Day 2's Stop hook, typed as one line and kept for one session. Put it in settings when you want it every time.</span></div>
+   </div>
+  </div>
+  <div class="foot">A loop with a finish line and a judge. Keep that picture for the graphs this afternoon.</div>
+ </div>`,
+ notes:"The second small tool, and the bridge to this afternoon. /goal is the shortest loop you can write: a condition, a worker, and a judge that is not the worker. The docs make the point directly: completion is decided by a fresh model, not the one doing the work.\n\nDemo: in the wall, a /goal with a real test target and a turn cap. Show the verdict line after each turn, and Ctrl+O for the reason behind it.\n\nA good condition has one measurable end state, a stated check, and the things that must not change on the way. Up to 4,000 characters. The turn cap goes inside the condition; there is no separate flag.\n\nIt clears on its own when the judge says done or impossible, and on errors you have to fix: sign-in, no credit left, a context overflow that compaction couldn't clear, a model that isn't available. The judge runs on Haiku by default and costs little next to the main turns.\n\nIt also runs headless: claude -p \"/goal ...\" runs to the end in one call. That is tomorrow's factory in one line.\n\nNext to /loop: /loop repeats on a timer, /goal works toward a condition.\n\nSource: code.claude.com/docs/en/goal."
+},
+{
+ act:"Act 3 · New commands", n:"08", title:"Fix the one before you run five", time:"8:00",
+ html:`<div class="eyebrow"><span class="dot"></span>New to you · the rest of the drawer</div>
+ <div class="body">
+  <h2 style="flex:none">Fix the one before you run five.</h2>
+  <div class="cols c2" style="flex:none">
+   <div class="card"><span class="k">Inside one session</span>
+    <ul class="clean" style="gap:9px;margin-top:4px">
+     <li style="font-size:14.5px"><code>/btw</code>: a side question. It answers from what the session already knows, uses no tools and stays out of the history. Works while Claude is busy</li>
+     <li style="font-size:14.5px"><code>/branch</code>: try another direction and keep the original in <code>/resume</code>. <code>/fork</code> sends the copy to a background session instead</li>
+     <li style="font-size:14.5px"><code>/diff</code>: every uncommitted change, Claude's and yours, without leaving the session</li>
+     <li style="font-size:14.5px"><code>/code-review</code>: a background review of your branch for bugs. <code>--fix</code> applies what it finds. <code>/simplify</code> only tidies</li>
+    </ul>
+   </div>
+   <div class="card"><span class="k">Your setup, before every worktree copies it</span>
+    <ul class="clean" style="gap:9px;margin-top:4px">
+     <li style="font-size:14.5px"><code>/doctor</code>: finds skills, MCP servers and plugins you don't use and what they cost in context, flags slow hooks, trims a long CLAUDE.md. Asks before it changes anything</li>
+     <li style="font-size:14.5px"><code>/fewer-permission-prompts</code>: reads your past sessions and adds the read-only commands you keep approving to <code>.claude/settings.json</code></li>
+     <li style="font-size:14.5px"><code>/statusline</code>: describe the bar in words and Claude writes it. Worktree, context and cost, in every session</li>
+     <li style="font-size:14.5px"><code>/insights</code>: a report on how you have been working, where it went wrong, and what to try</li>
+    </ul>
+   </div>
+  </div>
+  <div class="card darkc" style="flex:none"><span class="k">Do it now, on the wall</span><span class="v">Run <code>/doctor</code> and read what it found before you say yes. Then <code>/statusline show the worktree, context used and session cost</code>.</span></div>
+  <div class="foot">Every parallel session inherits your setup, waste included. <code>/rename</code> and <code>/color</code> tell the windows apart.</div>
+ </div>`,
+ notes:"Ten minutes, mostly live. Pick two from each column rather than all eight.\n\nLeft column, one session. /btw is the one people end up using every day: ask 'what was that config file again?' while Claude is mid-task, and nothing lands in the conversation. It has no tools; for a question that needs them, press f to fork it into a background subagent. /branch switches you into the copy; /fork leaves a copy working in the background and tells it to make its own worktree before it edits. /code-review runs as a background subagent, so its --fix edits sit outside your checkpoints and /rewind won't undo them. Use git.\n\nRight column, the setup. The point of the title: five worktrees means five copies of every unused MCP server, every slow hook and every permission prompt. Run /doctor on the wall now; it reports first and asks before it touches anything. /fewer-permission-prompts writes to the project settings file, which gets committed, so read the diff first. /statusline can show workspace.git_worktree, context_window.used_percentage and cost.total_cost_usd, and on Pro and Max the five-hour limit. /insights writes ~/.claude/usage-data/report.html from up to 200 new sessions on this machine; its tokens count against your plan, and it isn't available in cloud sessions.\n\n/rename and /color: name each worktree session and give it a prompt-bar colour, so five terminals are not five identical windows. /rename also makes cross-session messages easier to address later.\n\nAlready covered last week and still true: /context, /rewind, /effort, /usage.\n\nSources: code.claude.com/docs/en commands, interactive-mode, code-review, statusline and costs pages."
+},
+/* ============ ACT 4 ============ */
+{
+ act:"Act 4 · Scale it with confidence", n:"09", title:"Day 4. Scale it with confidence.", time:"4:00", dark:true,
+ html:`<div class="eyebrow"><span class="dot"></span>Day 4 · 28 September</div>
+ <div class="body mid">
+  <h1 style="font-size:54px">Day 4. Scale it with confidence.</h1>
+  <p class="lead" style="color:var(--amber);font-size:22px;margin-top:4px;max-width:1010px">Every day this week we found the next bottleneck and moved it into a file. Today the bottleneck is you, typing the next command.</p>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:18px">
+   <div style="background:var(--dark-elev);border-radius:12px;padding:14px 16px;font-size:14px;line-height:1.45;color:var(--on-dark-soft);"><span style="display:block;font-size:11px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--amber);margin-bottom:6px">Day 1</span>Memory kept in chat<br><strong style="color:#fff;font-weight:600">→ CLAUDE.md and files</strong></div>
+   <div style="background:var(--dark-elev);border-radius:12px;padding:14px 16px;font-size:14px;line-height:1.45;color:var(--on-dark-soft);"><span style="display:block;font-size:11px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--amber);margin-bottom:6px">Day 2</span>Retyping the same prompts<br><strong style="color:#fff;font-weight:600">→ Commands with contracts</strong></div>
+   <div style="background:var(--dark-elev);border-radius:12px;padding:14px 16px;font-size:14px;line-height:1.45;color:var(--on-dark-soft);"><span style="display:block;font-size:11px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--amber);margin-bottom:6px">Day 3</span>Copying from tickets and browsers<br><strong style="color:#fff;font-weight:600">→ CLIs, MCP, rules and hooks</strong></div>
+   <div style="background:var(--primary);border-radius:12px;padding:14px 16px;font-size:14px;line-height:1.45;color:#fff"><span style="display:block;font-size:11px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:#fff;margin-bottom:6px">Day 4 · today</span>You, typing the next command<br><strong style="color:#fff;font-weight:600">→ The graph drives, you approve</strong></div>
+   <div style="background:var(--dark-elev);border-radius:12px;padding:14px 16px;font-size:14px;line-height:1.45;color:var(--on-dark-soft);background:transparent;border:1px dashed #4a4640"><span style="display:block;font-size:11px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--amber);margin-bottom:6px">Day 5</span>You, having to be there<br><strong style="color:#fff;font-weight:600">→ Triggers and the factory</strong></div>
+  </div>
+  <p class="sm" style="color:var(--on-dark-soft);margin-top:18px;max-width:1010px">With confidence means: let a graph drive, and scale it, only when you trust the process. Not while you are still learning it.</p>
+ </div>`,
+ notes:"The theme of the day: the tool is as configurable and as deep as you want to take it, and every layer is optional.\n\nThe row is the week's pattern. Each day we did something by hand, felt where it hurt, and moved that into a file: memory into CLAUDE.md, repeated prompts into commands, copy and paste from outside into CLIs, MCP, rules and hooks. Today the thing that hurts is you, typing /intent, then /spec, then /plan, then /execute, then /ship. So today the graph drives and you approve. Tomorrow the bottleneck is that you have to be there at all.\n\nSay the last line slowly, because it is what 'with confidence' means: automation and scale multiply whatever your process already does. If the process is still being learned, they multiply the mistakes. Automate and scale only what you already trust.\n\nThe day ends on a ladder of four ways to use Claude Code, from a single prompt to a graph that drives itself. Their job is to pick the rung for each piece of work."
+},
+/* ============ ACT 5 ============ */
+{
+ act:"Act 5 · Graphs", n:"10", title:"Same map, different driver", time:"8:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Loop, graph, and who drives</div>
+ <div class="body">
+  <h2 style="flex:none">Same map. Different driver.</h2>
+  <div class="card plain" style="flex:none;gap:6px;padding:20px 24px">
+   <span class="k" style="font-size:14px">Last week · your Tier 3, driven by hand</span>
+   <svg viewBox="0 0 1000 76" style="width:100%;height:auto;display:block" role="img" aria-label="Your Tier 3 loop driven by hand: you start every step"><defs><marker id="ah11a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--primary)"/></marker></defs><g style="font:500 13.5px var(--sans)"><rect x="50" y="36" width="120" height="34" rx="17" style="fill:var(--surface-card)"/><text x="110" y="58" text-anchor="middle" style="fill:var(--ink)">intent</text><line x1="173" y1="53" x2="236" y2="53" style="stroke:var(--primary);stroke-width:1.6;fill:none" marker-end="url(#ah11a)"/><circle cx="205" cy="18" r="13" style="fill:var(--primary)"/><text x="205" y="22" text-anchor="middle" style="fill:#fff;font-size:10.5px;font-weight:600">you</text><rect x="240" y="36" width="120" height="34" rx="17" style="fill:var(--surface-card)"/><text x="300" y="58" text-anchor="middle" style="fill:var(--ink)">spec</text><line x1="363" y1="53" x2="426" y2="53" style="stroke:var(--primary);stroke-width:1.6;fill:none" marker-end="url(#ah11a)"/><circle cx="395" cy="18" r="13" style="fill:var(--primary)"/><text x="395" y="22" text-anchor="middle" style="fill:#fff;font-size:10.5px;font-weight:600">you</text><rect x="430" y="36" width="120" height="34" rx="17" style="fill:var(--surface-card)"/><text x="490" y="58" text-anchor="middle" style="fill:var(--ink)">plan</text><line x1="553" y1="53" x2="616" y2="53" style="stroke:var(--primary);stroke-width:1.6;fill:none" marker-end="url(#ah11a)"/><circle cx="585" cy="18" r="13" style="fill:var(--primary)"/><text x="585" y="22" text-anchor="middle" style="fill:#fff;font-size:10.5px;font-weight:600">you</text><rect x="620" y="36" width="150" height="34" rx="17" style="fill:var(--surface-card)"/><text x="695" y="58" text-anchor="middle" style="fill:var(--ink)">execute ↺</text><line x1="773" y1="53" x2="836" y2="53" style="stroke:var(--primary);stroke-width:1.6;fill:none" marker-end="url(#ah11a)"/><circle cx="805" cy="18" r="13" style="fill:var(--primary)"/><text x="805" y="22" text-anchor="middle" style="fill:#fff;font-size:10.5px;font-weight:600">you</text><rect x="840" y="36" width="120" height="34" rx="17" style="fill:var(--surface-card)"/><text x="900" y="58" text-anchor="middle" style="fill:var(--ink)">ship</text><circle cx="22" cy="53" r="13" style="fill:var(--primary)"/><text x="22" y="57" text-anchor="middle" style="fill:#fff;font-size:10.5px;font-weight:600">you</text></g></svg>
+   <span class="k" style="font-size:14px;margin-top:10px">Today · the same map, driving itself</span>
+   <svg viewBox="0 0 1000 82" style="width:100%;height:auto;display:block" role="img" aria-label="The same map driving itself: it proposes a tier, runs the steps, splits and reviews the work, and stops only where you sign and merge"><defs><marker id="ah11b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--primary)"/></marker></defs><g style="font:500 13.5px var(--sans)"><rect x="5" y="24" width="80" height="34" rx="17" style="fill:var(--surface-card)"/><text x="45" y="46" text-anchor="middle" style="fill:var(--ink)">tier?</text><line x1="87" y1="41" x2="105" y2="41" style="stroke:var(--primary);stroke-width:1.6;fill:none" marker-end="url(#ah11b)"/><rect x="108" y="24" width="90" height="34" rx="17" style="fill:var(--surface-card)"/><text x="153" y="46" text-anchor="middle" style="fill:var(--ink)">intent</text><line x1="200" y1="41" x2="218" y2="41" style="stroke:var(--primary);stroke-width:1.6;fill:none" marker-end="url(#ah11b)"/><rect x="221" y="24" width="80" height="34" rx="17" style="fill:var(--surface-card)"/><text x="261" y="46" text-anchor="middle" style="fill:var(--ink)">spec</text><line x1="303" y1="41" x2="321" y2="41" style="stroke:var(--primary);stroke-width:1.6;fill:none" marker-end="url(#ah11b)"/><rect x="324" y="24" width="96" height="34" rx="17" style="fill:var(--primary)"/><text x="372" y="46" text-anchor="middle" style="fill:#fff">you sign</text><line x1="422" y1="41" x2="440" y2="41" style="stroke:var(--primary);stroke-width:1.6;fill:none" marker-end="url(#ah11b)"/><rect x="443" y="24" width="80" height="34" rx="17" style="fill:var(--surface-card)"/><text x="483" y="46" text-anchor="middle" style="fill:var(--ink)">plan</text><line x1="525" y1="41" x2="543" y2="41" style="stroke:var(--primary);stroke-width:1.6;fill:none" marker-end="url(#ah11b)"/><rect x="546" y="24" width="110" height="34" rx="17" style="fill:var(--surface-card)"/><text x="601" y="46" text-anchor="middle" style="fill:var(--ink)">execute ↺</text><line x1="658" y1="41" x2="676" y2="41" style="stroke:var(--primary);stroke-width:1.6;fill:none" marker-end="url(#ah11b)"/><rect x="679" y="24" width="90" height="34" rx="17" style="fill:var(--surface-card)"/><text x="724" y="46" text-anchor="middle" style="fill:var(--ink)">review</text><line x1="771" y1="41" x2="789" y2="41" style="stroke:var(--primary);stroke-width:1.6;fill:none" marker-end="url(#ah11b)"/><rect x="792" y="24" width="80" height="34" rx="17" style="fill:var(--surface-card)"/><text x="832" y="46" text-anchor="middle" style="fill:var(--ink)">ship</text><line x1="874" y1="41" x2="892" y2="41" style="stroke:var(--primary);stroke-width:1.6;fill:none" marker-end="url(#ah11b)"/><rect x="895" y="24" width="100" height="34" rx="17" style="fill:var(--primary)"/><text x="945" y="46" text-anchor="middle" style="fill:#fff">you merge</text><text x="45" y="76" text-anchor="middle" style="fill:var(--muted);font-size:11px">confirm or override</text><text x="601" y="76" text-anchor="middle" style="fill:var(--muted);font-size:11px">slices in worktrees</text><text x="724" y="76" text-anchor="middle" style="fill:var(--muted);font-size:11px">fresh eyes</text></g></svg>
+  </div>
+  <div class="cols c3" style="flex:none">
+   <div class="card"><span class="k">A loop · one step, repeated</span><span class="v">One worker and one check, round again until it passes. <code>/execute</code> until green, or a <code>/goal</code>.</span></div>
+   <div class="card"><span class="k">A graph · the map</span><span class="v">The steps, the rules between them, what runs at once, and where a person signs. Your Tier 3 already is one.</span></div>
+   <div class="card"><span class="k">The driver · who follows the arrows</span><span class="v">Last week, you, one command at a time. From today, the graph, stopping only at your gates.</span></div>
+  </div>
+ </div>`,
+ notes:"Start with the honest point: their Tier 3 loop is already a graph. It has separate steps, a file passed from each step to the next, a check inside execute, and people signing at the gates. So the difference we care about today is not the shape. It is who follows the arrows.\n\nTop row: last week. Every arrow has a 'you' on it, because nothing moves until you type the next command. Bottom row: the same map. It asks your Day 2 questions and proposes a tier, you confirm or override, and from then on it moves by itself. It splits the build into slices in their own worktrees, reviews them with fresh eyes, and stops at two places: the signed spec and the merge.\n\nThe three words at the bottom are all the vocabulary they need. A loop is one step that repeats until a check passes; it lives inside the graph, in execute. A graph is the map. The driver is who follows it.\n\nIf someone wants the formal words: steps are nodes, arrows are edges, and the files that travel between them are state. In Anthropic's 'Building effective agents' (December 2024), Tier 3 is prompt chaining with gates, with routing in front of it: two of their workflow patterns, run by hand."
+},
+{
+ act:"Act 5 · Graphs", n:"11", title:"What a graph adds to a loop", time:"7:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Loop or graph</div>
+ <div class="body">
+  <h2 style="flex:none">What a graph adds, and what it costs.</h2>
+  <table style="flex:none;font-size:14.5px">
+   <tr><th></th><th>Your loop, by hand</th><th>The graph, driving itself</th></tr>
+   <tr><td class="ok">Who drives</td><td>You, typing each command</td><td>The graph follows the arrows and stops at your gates</td></tr>
+   <tr><td class="ok">Picking the path</td><td>You pick the tier and walk it</td><td>It proposes the tier from your Day 2 questions; you confirm or override</td></tr>
+   <tr><td class="ok">Speed</td><td>One slice at a time, unless you open more sessions yourself</td><td>Slices that don't depend on each other run at once</td></tr>
+   <tr><td class="ok">When something fails</td><td>You spot it and decide what to redo</td><td>Only the failing slice goes back, with the reviewer's notes, up to a limit</td></tr>
+   <tr><td class="ok">Checking</td><td>Review runs when you remember to call it</td><td>Reviewers run every time, before anything reaches you</td></tr>
+   <tr><td class="ok">Cost</td><td>Nothing to set up</td><td>A script to write and keep up to date, and more of your plan per run</td></tr>
+  </table>
+  <div class="cols c2" style="flex:none">
+   <div class="card darkc"><span class="k">Keep driving by hand when</span><span class="v">It is one job with one clear check, or the process is still new to you. Anthropic's advice: "find the simplest solution possible, and only increase complexity when needed."</span></div>
+   <div class="card"><span class="k">Let the graph drive when</span><span class="v">Your steps are boring and reliable, the work splits into pieces, and you want the checking done by someone other than the worker.</span></div>
+  </div>
+ </div>`,
+ notes:"This is the 'is it better' slide, and the honest answer is: better for some work, worse for other work.\n\nWhat does not change: both already pin a model and a contract for each step. That was Day 2. The difference is who moves between the steps, and what happens between them.\n\nGo row by row with this afternoon's example. Who drives: two signatures instead of typing every command. Picking the path: it proposes the tier with their own Day 2 questions, they confirm. Speed: slices that share nothing run at once. Failure: the web slice fails review and only the web slice goes back, with the notes, up to a limit. Checking: review runs every time, not when someone remembers. Cost: someone writes and maintains the script, and every run uses more of the plan.\n\nThe dark card is the brake, and its second half matters as much as the first: while the process is still new, drive it by hand. The quote is from Anthropic's 'Building effective agents', 19 December 2024.\n\nAsk the room: think of the last ticket that took you a full day. Which row would have helped?"
+},
+{
+ act:"Act 5 · Graphs", n:"12", title:"Six ways to change your loop", time:"8:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Fit the loop to the job, then scale it</div>
+ <div class="body">
+  <h2 style="flex:none">Six changes, one at a time.</h2>
+  <div class="cols c3" style="flex:none">
+   <div class="card"><span class="k">1 · Let it pick the tier</span><span class="v">A first step asks your Day 2 questions of the ticket and proposes Tier 1, 2 or 3 with its reasons. You confirm or override. Unsure means the higher tier.</span></div>
+   <div class="card"><span class="k">2 · Split into slices</span><span class="v">One worker per slice, each in its own worktree, all at once. Only for slices that touch different files and don't wait on each other.</span></div>
+   <div class="card"><span class="k">3 · Review from several angles</span><span class="v">Two or three reviewers read the same change at once: correctness, security, the Angular side. One step merges what they found and drops duplicates.</span></div>
+   <div class="card"><span class="k">4 · Retry only what failed</span><span class="v">A failed review sends that one slice back with the reviewer's notes. It stops after two rounds that make no progress.</span></div>
+   <div class="card"><span class="k">5 · Put a person at the gates</span><span class="v">The flow stops where a mistake is expensive: the signed spec and the merge. Everything in between runs on its own.</span></div>
+   <div class="card"><span class="k">6 · A model for each new step</span><span class="v">Your commands already pin theirs. Give the new steps one too: Haiku to pick the tier, Opus or the advisor to review.</span></div>
+  </div>
+  <div class="foot">1 fits the loop to the job. 2, 3 and 4 scale it. 5 and 6 keep it under control.</div>
+ </div>`,
+ notes:"This is how you change the loop for the job and then scale it. Each change fixes one specific pain, so add them one at a time and only where the loop hurts.\n\n1, pick the tier, is the change for specifics: different kinds of work take different paths, and the rules for choosing are the Sized Loop questions they already wrote on Day 2. The step only proposes; the person confirms or overrides. Two rules: when unsure, pick the higher tier, because calling a Tier 3 task Tier 1 skips the spec, the most expensive mistake it can make. And a Tier 1 answer means do it on the spot: a one-line change should not pay for a graph.\n\n2 to 4 are how it scales. 2 runs independent pieces at once. The rule for independent is GitHub Spec Kit's rule for its parallel marker: different files, and no dependency on unfinished work. 3 has several reviewers look at the same change from different angles, and a merge step reconciles them. 4 is Day 2's loop applied to one piece instead of the whole run; the stop rule matters more than the retry.\n\n5 and 6 keep it under control. Gate where a mistake is expensive; gate everything and the graph is slower than doing it yourself. 6: their commands already pin a model each, from Day 2. The graph adds new steps, the tier picker and the reviewers, and each of those needs one too.\n\nThe names come from Anthropic's 'Building effective agents' (19 December 2024): routing (1), parallelization by sectioning (2) and by voting (3), evaluator-optimizer (4), prompt chaining with gates (5). Their fifth pattern, orchestrator-workers, is what /plan does when it decides the slices at run time.\n\nAsk the room: which one would you add to your loop first?"
+},
+{
+ act:"Act 5 · Graphs", n:"13", title:"In Claude Code, a graph is a workflow", time:"8:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Graphs on your machine · one workflow, line by line</div>
+ <div class="body">
+  <h2 style="flex:none">In Claude Code, a graph is a workflow.</h2>
+  <div class="cols" style="grid-template-columns:1.05fr .95fr;flex:none;align-items:center">
+   <div class="card darkc" style="padding:18px 20px">
+    <span class="k" style="font-size:12.5px;color:var(--amber)">.claude/workflows/build-slices.js</span>
+    <pre style="margin:0;font-family:var(--mono);font-size:13.5px;line-height:1.65;color:var(--on-dark);white-space:pre"><span style="color:#5db8a6">export const</span> meta = {                           <span style="display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;background:var(--primary);color:#fff;font:600 10.5px var(--sans);vertical-align:1px">1</span>
+  name: <span style="color:var(--amber)">'build-slices'</span>,
+  description: <span style="color:var(--amber)">'Build each slice, then review it'</span>,
+}
+
+<span style="color:#5db8a6">const</span> done = <span style="color:#5db8a6">await</span> pipeline(args.slices,        <span style="display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;background:var(--primary);color:#fff;font:600 10.5px var(--sans);vertical-align:1px">2</span>
+  (slice) =&gt; agent(                             <span style="display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;background:var(--primary);color:#fff;font:600 10.5px var(--sans);vertical-align:1px">3</span>
+    <span style="color:var(--amber)">&#96;Implement \${slice} from its plan.</span>
+     <span style="color:var(--amber)">Run the tests. Return the evidence.&#96;</span>,
+    { isolation: <span style="color:var(--amber)">'worktree'</span>, model: <span style="color:var(--amber)">'sonnet'</span>,
+      schema: EVIDENCE }),                      <span style="display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;background:var(--primary);color:#fff;font:600 10.5px var(--sans);vertical-align:1px">4</span>
+  (built, slice) =&gt; agent(                      <span style="display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;background:var(--primary);color:#fff;font:600 10.5px var(--sans);vertical-align:1px">5</span>
+    <span style="color:var(--amber)">&#96;Review \${slice} with fresh eyes.</span>
+     <span style="color:var(--amber)">Try to fail it: \${JSON.stringify(built)}&#96;</span>,
+    { model: <span style="color:var(--amber)">'opus'</span>, schema: VERDICT }))
+
+<span style="color:#5db8a6">return</span> done.filter(Boolean)                     <span style="display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;background:var(--primary);color:#fff;font:600 10.5px var(--sans);vertical-align:1px">6</span></pre>
+   </div>
+   <div class="stack" style="gap:11px">
+    <div style="display:grid;grid-template-columns:24px 1fr;gap:8px;align-items:start"><span style="display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;background:var(--primary);color:#fff;font:600 10.5px var(--sans);vertical-align:1px">1</span><div style="font-size:15px;line-height:1.5;color:var(--body)"><strong style="color:var(--ink)">meta.</strong> Its name and one line on what it does. Saved in <code>.claude/workflows/</code>, it runs as <code>/build-slices</code>.</div></div>
+    <div style="display:grid;grid-template-columns:24px 1fr;gap:8px;align-items:start"><span style="display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;background:var(--primary);color:#fff;font:600 10.5px var(--sans);vertical-align:1px">2</span><div style="font-size:15px;line-height:1.5;color:var(--body)"><strong style="color:var(--ink)">pipeline(list, steps).</strong> Takes the slices you pass in and sends each one through the steps below, without waiting for the other slices.</div></div>
+    <div style="display:grid;grid-template-columns:24px 1fr;gap:8px;align-items:start"><span style="display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;background:var(--primary);color:#fff;font:600 10.5px var(--sans);vertical-align:1px">3</span><div style="font-size:15px;line-height:1.5;color:var(--body)"><strong style="color:var(--ink)">agent(prompt, options).</strong> Starts one subagent with that prompt. <code>isolation: 'worktree'</code> gives it its own checkout; <code>model</code> says who does the work.</div></div>
+    <div style="display:grid;grid-template-columns:24px 1fr;gap:8px;align-items:start"><span style="display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;background:var(--primary);color:#fff;font:600 10.5px var(--sans);vertical-align:1px">4</span><div style="font-size:15px;line-height:1.5;color:var(--body)"><strong style="color:var(--ink)">schema.</strong> It must answer with data in a fixed shape: files changed, tests run, evidence. That answer is what travels to the next step.</div></div>
+    <div style="display:grid;grid-template-columns:24px 1fr;gap:8px;align-items:start"><span style="display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;background:var(--primary);color:#fff;font:600 10.5px var(--sans);vertical-align:1px">5</span><div style="font-size:15px;line-height:1.5;color:var(--body)"><strong style="color:var(--ink)">The second step.</strong> Gets the builder's answer and the slice name. A different model tries to fail it, with fresh eyes.</div></div>
+    <div style="display:grid;grid-template-columns:24px 1fr;gap:8px;align-items:start"><span style="display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;background:var(--primary);color:#fff;font:600 10.5px var(--sans);vertical-align:1px">6</span><div style="font-size:15px;line-height:1.5;color:var(--body)"><strong style="color:var(--ink)">return.</strong> The only thing that comes back to your session. Everything in between stays out of your context.</div></div>
+   </div>
+  </div>
+  <div class="foot">You do not write this by hand. Ask "use a workflow to…", read it with View raw script before it runs, watch it in <code>/workflows</code>, and press <code>s</code> to keep it.</div>
+ </div>`,
+ notes:"Read it top to bottom with them, one number at a time. It is plain JavaScript, and Claude writes it; what they need is to be able to read it before they approve a run.\n\nThe docs' own line: a workflow moves the plan into code. With subagents, Claude decides turn by turn what runs next. With a workflow, the script decides, and Claude's context only holds the final answer.\n\nHow the six changes from the last slide show up in a script: the tier is a first agent with a schema and a plain if; the split is pipeline() with isolation: 'worktree'; several angles are reviewers in parallel() and one agent to merge; a retry is a for loop with a round cap; a gate is the end of a workflow, where it asks and a yes starts the next one; a model per step is model: on each agent().\n\nFacts to have ready: all paid plans (Pro turns it on in /config); up to 16 agents at once by default, fewer on fewer CPUs; at most 1,000 agents per run; resumable within the session; /workflow-authoring loads the full script reference; /deep-research is the built-in example. The Large workflow warning appears past 25 agents or 1.5M projected tokens. Run it on one slice first.\n\nThey have seen one before: the Day 1 starter harness shipped workflows/spec.js.\n\nSource: code.claude.com/docs/en/workflows."
+},
+{
+ act:"Act 5 · Graphs", n:"14", title:"One ticket, start to finish", time:"8:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Where to use it · one ticket, start to finish</div>
+ <div class="body">
+  <h2 style="flex:none">You type <code style="font-size:.8em">/ticket 123</code>.<br>After that, you only answer.</h2>
+  <table style="flex:none;font-size:16px">
+   <tr><th style="width:56%">What it does</th><th>What you do</th></tr>
+   <tr><td>Reads the ticket and asks your Day 2 questions. "Tier 3: it touches the API and the web app, and someone will review it cold."</td><td>Say yes, or "make it Tier 2".</td></tr>
+   <tr><td>Writes the intent and the spec, has two reviewers read the spec, and shows you five lines and two open questions.</td><td>Answer the two questions. <strong>Sign the spec.</strong></td></tr>
+   <tr><td>Plans the slices, builds each one in its own worktree, reviews each with fresh eyes, and sends back what fails.</td><td>Nothing. Review a colleague's pull request, or get a coffee.</td></tr>
+   <tr><td>Shows each slice's verdict in five lines and says it is ready.</td><td>Type <code>/ship</code>. <strong>Merge</strong> when you are happy.</td></tr>
+  </table>
+  <p class="sm" style="flex:none;margin-top:4px">A Tier 1 ticket ends after the first row: it just makes the change. A Tier 2 ticket stops once, at the plan.</p>
+  <div class="foot">Only for a process you already trust. While you are still learning it, drive it by hand.</div>
+ </div>`,
+ notes:"Tell it as a story: this is what a Tier 3 ticket looks like when the graph drives. Read the left column as 'it', the right as 'you'. The right column is short on purpose.\n\nHow it asks: a single workflow takes no input once it starts ('for sign-off between stages, run each stage as its own workflow', in the docs). So each stage is its own workflow. When one ends, the session shows what it produced and asks, and a yes starts the next one straight away. /ship keeps disable-model-invocation from Day 2, so the last step stays a human one.\n\nThe five lines matter. A gate that shows a whole spec after twenty unwatched minutes turns into a click. Five lines and the open questions keep it a decision.\n\nThe same shape pays off elsewhere: reviewers from several angles on every pull request, an upgrade with one worker per module where only failures retry, and a feature across both apps with the contract first. Guide 4's stretch has a starting /ticket skill.\n\nThe footer is the rule for all of it. The forks from the gap week will show whose commands are ready."
+},
+/* ============ ACT 6 ============ */
+{
+ act:"Act 6 · Parallel work", n:"15", title:"Scale when the work splits", time:"6:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Why scale, and when not to</div>
+ <div class="body">
+  <h2 style="flex:none">Scale when the work splits.</h2>
+  <div class="cols c2" style="flex:none">
+   <div class="card"><span class="k">What Anthropic measured</span><span class="v">A lead agent with parallel subagents beat a single agent by 90.2% on their internal research eval. It used about 15 times the tokens of a chat.</span><span class="v" style="font-size:12.5px;color:var(--muted)">Anthropic's own numbers, June 2025</span></div>
+   <div class="card darkc"><span class="k">The line to remember</span><span class="v" style="font-family:var(--serif);font-size:22px;letter-spacing:-.3px;color:#fff">"Most coding tasks involve fewer truly parallelizable tasks than research."</span></div>
+  </div>
+  <div class="cols c2" style="flex:none">
+   <div class="card plain"><span class="k">Parallel pays when</span><span class="v">Slices are independent · the work is mostly reading: reviews, audits, research · you want several angles on one plan.</span></div>
+   <div class="card plain"><span class="k">It costs more than it gives when</span><span class="v">Agents edit the same files · each step waits on the last · there is one hard bug everyone would chase.</span></div>
+  </div>
+  <div class="foot">Start with one agent done well. Add a second when the work splits on its own.</div>
+ </div>`,
+ notes:"Open the scaling day with the brake, not the accelerator. The 90% is real and self-reported, and it came with a 15x token bill on research, which is the best case for parallel work.\n\nThe quote is from the same post: coding has fewer truly parallel pieces than research. That sentence protects them from the most expensive mistake of the week.\n\nSource: anthropic.com/engineering/multi-agent-research-system.\n\nIf you want one story to go with it: Anthropic\'s C compiler (February 2026). 16 agents, about 2,000 sessions, about $20,000 in API costs, a 100,000-line Rust compiler that builds Linux 6.9, all self-reported. Coordination was plain git and a lock file per task. It stalled when every agent hit the same kernel bug, and recovered once the work was split so each agent had a different failure to fix. Source: anthropic.com/engineering/building-c-compiler."
+},
+{
+ act:"Act 6 · Parallel work", n:"16", title:"What a git worktree is", time:"4:00",
+ html:`<div class="eyebrow"><span class="dot"></span>A refresher · git worktree</div>
+ <div class="body">
+  <h2 style="flex:none">One repository. Several folders.<br>Each on its own branch.</h2>
+  <div class="cols c2w" style="flex:none;align-items:center">
+   <div class="card darkc" style="padding:20px 22px">
+    <span class="k" style="font-size:12.5px;color:var(--amber)">on disk</span>
+    <pre style="margin:0;font-family:var(--mono);font-size:14px;line-height:1.8;color:var(--on-dark-soft);white-space:pre">carrot-wall/            <span style="color:var(--amber)">← master, where you work</span>
+├── .git/               <span style="color:var(--amber)">← one history, shared</span>
+└── .claude/worktrees/
+    ├── change-a/       <span style="color:var(--amber)">← branch worktree-change-a</span>
+    └── change-b/       <span style="color:var(--amber)">← branch worktree-change-b</span></pre>
+   </div>
+   <div class="stack" style="gap:12px">
+    <div class="card"><span class="k">Not a clone</span><span class="v">One history and one set of objects. A commit in one folder is visible from the others straight away, with nothing to push between them.</span></div>
+    <div class="card"><span class="k">Not a branch switch</span><span class="v">Both folders exist at the same time, so two agents can edit at once without touching each other's files.</span></div>
+    <div class="card plain" style="font-family:var(--mono);font-size:13.5px;line-height:1.75;padding:16px 20px">git worktree add ../wall-b -b feature-b<br>git worktree list<br>git worktree remove ../wall-b</div>
+   </div>
+  </div>
+  <div class="foot">Git lets a branch be checked out in only one worktree at a time. That rule is what keeps two agents off the same branch.</div>
+ </div>`,
+ notes:"Two minutes. Most of them use branches every day; fewer have used worktrees.\n\nThe picture to leave them with: one .git, several working folders, each on its own branch. A branch switch changes the files in your one folder; a worktree gives you a second folder, so both versions exist at once.\n\nTwo consequences worth saying. A commit made in one worktree can be used from another straight away, because the history is shared: that is how change B rebases on change A in Guide 4 without pushing anything. And if git ever says a branch is 'already checked out', that is the one-worktree-per-branch rule doing its job.\n\nThe commands on the card are plain git. Claude Code's own shortcut is on the next slide."
+},
+{
+ act:"Act 6 · Parallel work", n:"17", title:"One checkout per agent", time:"6:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Parallel worktrees</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center">
+    <h2>One checkout<br>per agent.</h2>
+    <p class="lead">Same repository, separate folders and branches. No agent edits a file another agent has open.</p>
+    <ul class="clean">
+     <li><strong>Shared:</strong> the git history and objects</li>
+     <li><strong>Not shared:</strong> <code>node_modules</code>, build output, the database file in the folder, running servers</li>
+     <li><strong>Or just ask:</strong> "work in a worktree", and Claude creates one itself. "Use worktrees for your agents" does it for subagents</li>
+    </ul>
+   </div>
+   <div class="card darkc" style="font-family:var(--mono);font-size:14px;line-height:1.8;align-self:center">
+    <span class="k" style="font-family:var(--sans);font-size:12.5px;color:var(--amber)">one command</span>
+    <div style="color:var(--on-dark-soft)">
+     $ claude -w slice-02<br>
+     &nbsp;&nbsp;→ .claude/worktrees/slice-02/<br>
+     &nbsp;&nbsp;→ branch worktree-slice-02<br><br>
+     # .worktreeinclude<br>
+     # gitignored files to copy into each new worktree<br>
+     .env.local
+    </div>
+   </div>
+  </div>
+  <div class="foot"><code>.worktreeinclude</code> copies only files that match and are gitignored, so tracked files are never duplicated.</div>
+ </div>`,
+ notes:"Do it live: claude -w slice-02, then ls .claude/worktrees and git worktree list.\n\nThe third bullet is native: asked to work in a worktree, Claude creates one with its EnterWorktree tool; asked to use worktrees for its agents, it gives each subagent its own. Both are in the worktrees docs. Moving to a path outside .claude/worktrees/ asks for approval first.\n\nThe 'not shared' line is the setup for the laptop slides coming up. Everything in that line is something two worktrees will fight over or duplicate.\n\nOn the wall: the H2 database lives in apps/api/data, which is gitignored, so each worktree gets its own database. That is good for isolation and means a new worktree starts empty.\n\nTwo things from the worktrees docs to say out loud: add .claude/worktrees/ to .gitignore, and a new worktree branches from the default branch on the remote, not from where you are. worktree.baseRef set to head changes that.\n\nA subagent can get the same thing with isolation: worktree in its frontmatter: a fresh checkout, removed when it finishes without changes."
+},
+{
+ act:"Act 6 · Parallel work", n:"18", title:"Start it, leave it, come back", time:"6:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Background sessions</div>
+ <div class="body">
+  <h2 style="flex:none">Start it, leave it, come back.</h2>
+  <div class="cols c2" style="flex:none">
+   <div class="stack" style="gap:12px">
+    <div class="card darkc" style="font-family:var(--mono);font-size:14px;line-height:1.8">
+     <span class="k" style="font-family:var(--sans);font-size:12.5px;color:var(--amber)">from your shell</span>
+     <div style="color:var(--on-dark-soft)">$ claude --bg "implement slice 06, upvotes"<br>$ claude --bg "implement slice 08, TV mode"<br>$ claude agents</div>
+    </div>
+    <p class="sm">Inside a session, <code>/bg</code> sends it to the background. Each background session moves into its own worktree before it edits anything.</p>
+   </div>
+   <table style="font-size:14.5px">
+    <tr><th>In agent view</th><th>Means</th></tr>
+    <tr><td class="ok">Working</td><td>Running tools or writing</td></tr>
+    <tr><td class="ok">Needs input</td><td>Waiting on your answer or a permission</td></tr>
+    <tr><td class="ok">Idle</td><td>Ready for your next prompt</td></tr>
+    <tr><td class="ok">Completed · Failed · Stopped</td><td>Done, broke, or you stopped it</td></tr>
+   </table>
+  </div>
+  <div class="foot">Leaving a background session never stops it. Each one spends your quota on its own. Agent view is a research preview.</div>
+ </div>`,
+ notes:"Demo: start two background sessions from the shell, open claude agents, attach to one with Enter, leave with the left arrow. The point to feel: you step in only when a row turns yellow.\n\nWorth saying: this is the setup most people mean when they say 'I run four agents'. It is sessions you steer, not a system that steers itself.\n\nSource: code.claude.com/docs/en/agent-view."
+},
+{
+ act:"Act 6 · Parallel work", n:"19", title:"What breaks first", time:"7:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Keep the laptop alive</div>
+ <div class="body">
+  <h2 style="flex:none">Two worktrees of the wall.<br>Four things they fight over.</h2>
+  <div class="cols c2" style="flex:none;gap:16px">
+   <div class="card"><span class="k">Ports</span><span class="v">The second <code>docker compose up</code> fails: 8010 is already taken.</span><span class="xs" style="margin-top:2px">Also: the dev servers on 8080 and 4200, the proxy aimed at the first API, the test port 8081, the debugger on 5005.</span></div>
+   <div class="card"><span class="k">Servers you reuse</span><span class="v">The second e2e run finds a server on 4200, tests the other worktree's app, and passes.</span><span class="xs" style="margin-top:2px">Also: the wall's <code>/cleanup-worktree</code> kills whatever is on 8080 and 4200, master's servers included.</span></div>
+   <div class="card"><span class="k">Disk</span><span class="v">Five worktrees hold about 1.5 GB of <code>node_modules</code> before anyone builds.</span><span class="xs" style="margin-top:2px">Also: build output in every folder, Docker volumes, worktrees nobody removed.</span></div>
+   <div class="card"><span class="k">CPU and memory</span><span class="v">Five Quarkus dev servers and five Angular builds at once, plus a workflow's agents.</span><span class="xs" style="margin-top:2px">Also: containers with no limits, two Maven builds writing to one <code>~/.m2</code>.</span></div>
+  </div>
+  <div class="foot">The worst one passes: green tests, run against someone else's branch.</div>
+ </div>`,
+ notes:"One real case per kind, from the wall's own repo, checked on 25 September. Open the files live if there is time: docker-compose.yml, proxy.conf.json, playwright.config.ts.\n\nSpend the time on the servers card. reuseExistingServer is a sensible default for one checkout. With two, the second run finds a server on 4200, reuses it, and tests code from the other branch. Nothing fails, which is why nobody notices.\n\nThe details behind the 'also' lines: Quarkus runs @QuarkusTest on 8081 by default, and quarkus.http.test-port=0 gives each run a free port. Quarkus dev mode listens for a debugger on 5005; -Ddebug=<port> moves it and -Ddebug=false turns it off. The wall's /cleanup-worktree was written when there was one worktree at a time: a harness file that was right for one agent and wrong for five. Maven's docs warn about two builds writing to one local repository.\n\nThe next two slides are the fixes: ports first, then disk and CPU."
+},
+{
+ act:"Act 6 · Parallel work", n:"20", title:"One block of ports per worktree", time:"7:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Ports</div>
+ <div class="body">
+  <h2 style="flex:none">One block of ports per worktree.</h2>
+  <div class="cols c2n" style="flex:none">
+   <div class="stack" style="gap:10px">
+    <table style="font-size:15px">
+     <tr><th>Slot</th><th>API</th><th>Web</th></tr>
+     <tr><td class="ok">master</td><td class="mono">8080</td><td class="mono">4200</td></tr>
+     <tr><td class="ok">1</td><td class="mono">8090</td><td class="mono">4210</td></tr>
+     <tr><td class="ok">2</td><td class="mono">8100</td><td class="mono">4220</td></tr>
+     <tr><td class="ok">3</td><td class="mono">8110</td><td class="mono">4230</td></tr>
+    </table>
+    <p class="xs">Plus 10 per slot. Tests use a random free port.</p>
+   </div>
+   <div class="card">
+    <span class="k">Four changes to the wall</span>
+    <ol class="steps" style="gap:8px;margin-top:6px">
+     <li style="font-size:15px"><code>docker-compose.yml</code>: <code>"\${API_PORT:-8010}:8080"</code>, and the same for web</li>
+     <li style="font-size:15px">Quarkus reads <code>QUARKUS_HTTP_PORT</code>; tests set <code>quarkus.http.test-port=0</code>; dev mode gets its own <code>-Ddebug</code> port</li>
+     <li style="font-size:15px"><code>proxy.conf.json</code> becomes <code>proxy.conf.js</code> and reads the API port from the environment; <code>ng serve --port</code></li>
+     <li style="font-size:15px">Playwright takes its ports from the environment, with <code>reuseExistingServer</code> off</li>
+    </ol>
+   </div>
+  </div>
+  <div class="foot">Compose keeps each worktree's containers apart by project name: <code>-p</code> or <code>COMPOSE_PROJECT_NAME</code>. Guide 4 has two short scripts that set a worktree's ports and tear it down.</div>
+ </div>`,
+ notes:"The rule is boring on purpose: a fixed slot per worktree, plus ten. Random ports are fine for tests and bad for humans who need to open the app.\n\nTools that do this for you, if someone asks: Conductor gives each workspace a range of 10 ports; worktrunk derives a stable port from the branch name; Vercel's portless serves branch.app.localhost. The built-ins plus these four changes are enough for the wall.\n\nDocker's docs: Compose isolates environments by project name, and name each project for its branch."
+},
+{
+ act:"Act 6 · Parallel work", n:"21", title:"Disk and CPU", time:"6:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Disk and CPU</div>
+ <div class="body">
+  <div class="cols c2" style="flex:none">
+   <div class="card"><span class="k">Disk</span>
+    <ul class="clean" style="gap:7px;margin-top:4px">
+     <li style="font-size:15px">Each worktree is a full checkout plus its own <code>node_modules</code></li>
+     <li style="font-size:15px">pnpm hard-links packages from one store per disk; npm keeps one shared cache that only grows</li>
+     <li style="font-size:15px">Maven's <code>~/.m2</code> is shared by every worktree; two builds writing to it at once is the case Maven's docs warn about</li>
+     <li style="font-size:15px">Clean up with <code>git worktree list</code>, <code>remove</code> and <code>prune</code>. Claude clears its own old worktrees after <code>cleanupPeriodDays</code></li>
+    </ul>
+   </div>
+   <div class="card"><span class="k">CPU and memory</span>
+    <ul class="clean" style="gap:7px;margin-top:4px">
+     <li style="font-size:15px">Containers have no limits unless you set them: <code>--cpus</code>, <code>-m</code>, Compose <code>deploy.resources.limits</code>, the Docker Desktop cap</li>
+     <li style="font-size:15px">Workflows run up to 16 agents at once, fewer on fewer CPUs; <code>CLAUDE_CODE_WORKFLOW_MAX_CONCURRENT_AGENTS</code> changes it</li>
+     <li style="font-size:15px">Start with 3 to 5 agents. Coinbase runs three or four per engineer</li>
+    </ul>
+   </div>
+  </div>
+  <div class="card darkc" style="flex:none"><span class="k">The wall's own repo, right now</span><span class="v"><code>git worktree list</code> shows <code>carrot-wall-slice-08</code> as prunable: left over from recording Monday's video. The folder is gone and git still remembers it. <code>git worktree prune</code> fixes that.</span></div>
+ </div>`,
+ notes:"The dark card is true on the instructor machine as of 25 September. Run git worktree list live; if it is already pruned, say what it showed.\n\nNo primary source gives a number of agents per laptop. The docs' agent-teams advice (3 to 5) and Coinbase's report (three or four per engineer, self-reported) are the best guides.\n\nMaven's resolver documentation: shared access to a local repository needs coordination. Check the Maven version on their machines if parallel builds misbehave."
+},
+{
+ act:"Act 6 · Parallel work", n:"22", title:"Parallel starts in the plan", time:"5:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Why those slices could run together</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center">
+    <h2>Parallel starts<br>in the plan.</h2>
+    <p class="lead">The dependency column decides what can run at once.</p>
+    <ul class="clean">
+     <li>01 first: everything reads the wall</li>
+     <li>Then 02, 03, 06 and 08 together</li>
+     <li>04, 05 and 07 wait for 03, the admin gate</li>
+    </ul>
+    <p class="sm">A new worktree starts from master. A slice that needs another slice's work branches from it: <code>worktree.baseRef: "head"</code>, or <code>git worktree add</code> from that branch.</p>
+   </div>
+   <figure>
+    <img src="04b-intent-work-output.png" alt="Eight intents with a dependency table">
+    <figcaption>04b · eight intents and what each one depends on</figcaption>
+   </figure>
+  </div>
+  <div class="foot">A plan that never says what depends on what can't be split safely.</div>
+ </div>`,
+ notes:"Claude wrote this table when it split the wall's spec into intents. Point at the Depends on column. This is the whole trick: the spec was cut into slices on purpose so that some of them share nothing.\n\nNote from the screenshot itself: the admin gate got its own slice because three later slices need it. That decision is what made 04, 05 and 07 wait, and made everything else free to run in parallel.\n\nThis is also the answer to 'how do I parallelize my ticket': you don't, until the plan tells you which parts are independent."
+},
+{
+ act:"Act 6 · Parallel work", n:"23", title:"Sessions that message each other", time:"7:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Agents that talk to each other · 1</div>
+ <div class="body">
+  <div class="cols c2n">
+   <div class="stack" style="justify-content:center">
+    <h2>Your sessions can<br>message each other.</h2>
+    <p class="lead">When one worktree lands something another needs, Claude tells that session.</p>
+    <div class="card darkc" style="padding:14px 18px"><span class="v" style="font-family:var(--mono);font-size:14px;color:#fff">Let @change-b know change A is committed. Rebase on it before you ship.</span></div>
+    <ul class="clean">
+     <li><code>/list-agents</code> shows which sessions it can reach</li>
+     <li>"Tell me when the migration session is done" gets you one notice when it goes idle</li>
+    </ul>
+   </div>
+   <div class="stack" style="gap:12px">
+    <div class="card"><span class="k">What a message is</span><span class="v">Plain text Claude writes. Never the other session's history or files. On the same machine it travels over a local socket, not through Anthropic.</span></div>
+    <div class="card"><span class="k">What it can't do</span><span class="v">Approve a permission prompt, change settings or CLAUDE.md, or run a command. The receiving session's own rules still apply.</span></div>
+    <p class="xs">On by default from v2.1.224. <code>crossSessionInbound</code> sets accept, hold or refuse.</p>
+   </div>
+  </div>
+  <div class="foot">A session inside a container can't reach sessions on the host.</div>
+ </div>`,
+ notes:"This is the piece that makes parallel worktrees a team instead of two strangers. The docs list 'coordinate parallel worktrees' as a main use.\n\nDemo: two sessions, rename one with /rename change-b, then from the other type the prompt on the slide. It is exactly the moment from the first half of the challenge: one change lands and the other has to rebase on it. Inside a graph, the same move is the API slice telling the web slice the contract is live. Show the one-line preview arriving.\n\nThe safety card is worth a minute: a message is treated as coming from another session, not from you, so it can't approve anything. That is Day 3's permission lesson, applied between agents.\n\nSource: code.claude.com/docs/en/cross-session-messaging."
+},
+{
+ act:"Act 6 · Parallel work", n:"24", title:"Agent teams", time:"6:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Agents that talk to each other · 2</div>
+ <div class="body">
+  <h2 style="flex:none">A lead, teammates, one task list.</h2>
+  <div class="cols c2" style="flex:none">
+   <div class="card"><span class="k">How it works</span><span class="v">One session leads. Each teammate has its own context window, messages the others, and claims tasks from a shared list. A task waits until the tasks it depends on are done. Hooks like <code>TaskCompleted</code> can keep a teammate working until a check passes.</span></div>
+   <div class="card darkc"><span class="k">What to know first</span><span class="v">Experimental and off by default: <code>CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1</code>. Teammates share one checkout, so give each a different set of files or they overwrite each other. About 7 times the tokens when teammates plan. Start with 3 to 5.</span></div>
+  </div>
+  <div class="cols c2" style="flex:none">
+   <div class="card plain"><span class="k">Messaging</span><span class="v">For sessions you start and steer yourself.</span></div>
+   <div class="card plain"><span class="k">Teams</span><span class="v">For sessions Claude starts and steers for you.</span></div>
+  </div>
+  <div class="foot">Either way, git is the record of what happened.</div>
+ </div>`,
+ notes:"The docs' sizing advice: start with 3 to 5 teammates and 5 to 6 tasks each; three focused teammates often beat five scattered ones.\n\nThe file-sharing warning is the one that bites: teams do not get worktrees. Partition by folder or by layer.\n\nLimits to mention if asked: no /resume of in-process teammates, one team per session, no nested teams.\n\nSources: code.claude.com/docs/en/agent-teams and the costs page for the 7x figure. Verify the experimental flag the week of."
+},
+{
+ act:"Act 6 · Parallel work", n:"25", title:"What we have", time:"7:00",
+ html:`<div class="eyebrow"><span class="dot"></span>What we have, side by side</div>
+ <div class="body">
+  <h2 style="flex:none">Six ways to run more than one agent.</h2>
+  <table style="flex:none;font-size:13.5px">
+   <tr><th>Approach</th><th>What it is</th><th>Who steers</th><th>A common use</th></tr>
+   <tr><td class="mono" style="white-space:nowrap">Subagents</td><td>A helper inside your session, with its own context. It hands back a summary</td><td>Claude</td><td>"Find every Quarkus resource without validation", without the search filling your window</td></tr>
+   <tr><td class="mono" style="white-space:nowrap">claude --bg · agents</td><td>Full sessions you start, leave, and check on from one list</td><td>You</td><td>Two changes running in two worktrees while you review a pull request</td></tr>
+   <tr><td class="mono" style="white-space:nowrap">Messaging</td><td>Sessions that send each other short notes</td><td>You</td><td>"Change A is committed. Rebase before you ship."</td></tr>
+   <tr><td class="mono" style="white-space:nowrap">Agent teams</td><td>A lead session that splits the work and keeps teammates on one task list. Experimental</td><td>A lead agent</td><td>A feature where the workers must keep talking, split by folder</td></tr>
+   <tr><td class="mono" style="white-space:nowrap">Workflows</td><td>A script that runs many subagents through fixed steps and checks</td><td>The script</td><td>Build and review every slice of a change, or audit every endpoint</td></tr>
+   <tr><td class="mono" style="white-space:nowrap">/batch</td><td>One mechanical change, split into worktrees and pull requests</td><td>Claude</td><td>Rename a field in every module, one pull request each</td></tr>
+  </table>
+  <div class="foot">Worktrees sit underneath most of these: a checkout each, so nobody edits the same files. Pick with three questions: who steers, do they need to talk, do they touch the same files.</div>
+ </div>`,
+ notes:"This closes the parallel act: everything they have seen today on one table, each with a use they can picture on the wall. The first columns follow the docs' own comparison, code.claude.com/docs/en/agents.\n\nWalk the three questions with the challenge: two changes you steer yourself, they talk once when one lands, they mostly touch different files. Answer: two background or worktree sessions with messaging. Then the graph half: one change, sliced by a script. Answer: a workflow.\n\nStatus labels to verify the week of: agent view is a research preview, agent teams are experimental and off by default (CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1, about 7 times the tokens when teammates plan, teammates share one checkout).\n\n/batch: a bundled skill. Claude splits one mechanical change into 5 to 30 independent units, you approve the plan, and one background subagent per unit works in its own worktree, runs the tests and opens a pull request.\n\nLeft off the table on purpose: Projects, the cloud threads for work that runs for days, which the docs list as a public beta on Pro and Max."
+},
+/* ============ ACT 7 ============ */
+{
+ act:"Act 7 · The price of depth", n:"26", title:"How parallel work uses your plan", time:"7:00",
+ html:`<div class="eyebrow"><span class="dot"></span>Your plan, not a bill</div>
+ <div class="body">
+  <h2 style="flex:none">Parallel work uses up your plan faster.<br>Here is where it goes.</h2>
+  <div class="cols c3" style="flex:none">
+   <div class="card" style="padding:18px 22px"><span class="stat" style="font-size:46px">N×</span><span class="v">N sessions at once use about N times the plan. Each one spends on its own.</span></div>
+   <div class="card" style="padding:18px 22px"><span class="stat" style="font-size:46px">~7×</span><span class="v">An agent team whose teammates plan uses about 7 times the tokens of one session.</span></div>
+   <div class="card" style="padding:18px 22px"><span class="stat" style="font-size:46px">~15×</span><span class="v">A multi-agent research run used about 15 times the tokens of a chat.</span></div>
+  </div>
+  <div class="cols c3" style="flex:none">
+   <div class="card plain"><span class="k">What drains it fastest</span><span class="v">A long conversation, sent again every turn. A cache miss after more than an hour away. Anything that starts a turn while you are gone: messages from other sessions, goal check-ins, loops.</span></div>
+   <div class="card plain"><span class="k">Where to look</span><span class="v"><code>/usage</code>: your 5-hour and weekly bars, the share each skill, subagent, plugin and MCP server took, and any habit over 10%. <code>/workflows</code>: tokens per agent.</span></div>
+   <div class="card plain"><span class="k">How to slow it</span><span class="v"><code>/clear</code> between tasks. Sonnet on the workers. One slice before five. <code>crossSessionInbound: hold</code> while you are away.</span></div>
+  </div>
+  <div class="foot">The 5-hour and weekly windows are shared across models, and on a Team seat with Claude chat too. Switching models doesn't bring a limit back; the reset does.</div>
+ </div>`,
+ notes:"On a subscription the question is not dollars, it is how fast the bars in /usage move. Talk in multiples.\n\nThe three numbers: each parallel session spends on its own, so N sessions use about N times as much (agent view docs). Agent teams use about 7 times the tokens of a standard session when teammates run in plan mode (costs docs). Anthropic's multi-agent research system used about 15 times the tokens of a chat (their engineering post, June 2025).\n\nWhat drains it, from the costs docs' 'why usage climbs in a long session': the full conversation is sent with every request; the first message after a break longer than the cache lifetime reprocesses everything (an hour on a subscription, five minutes once you draw on usage credits); scheduled loops, messages from other sessions and goal check-ins all start turns while you are idle; every active teammate keeps spending until it exits; compaction is itself a big request, while /clear costs nothing.\n\nWorkflow agents cache for five minutes by default, even on a subscription; subagentPromptCacheTtl: 1h keeps it longer.\n\n/usage on Pro, Max, Team and Enterprise shows attribution by skill, subagent, plugin and MCP server as percentages, flags any behavior that accounts for 10% or more of recent usage, and lists the heaviest loops. Press d or w for the last 24 hours or 7 days. It counts this machine only.\n\nWhen a bar runs out, 'You've hit your session limit' covers every model. Claude Code can wait and continue after the reset, and usage credits exist if your admin turned them on."
+},
+{
+ act:"Act 7 · The price of depth", n:"27", title:"The security pass", time:"6:00",
+ html:`<div class="eyebrow"><span class="dot"></span>The security pass, as promised</div>
+ <div class="body">
+  <h2 style="flex:none">More agents, the same boundaries.</h2>
+  <div class="cols c3" style="flex:none">
+   <div class="card"><span class="k">Permission modes</span><span class="v">Manual, accept edits, plan, auto (a second model reviews each action), don't ask, bypass. Unattended work gets the narrowest mode that still works.</span></div>
+   <div class="card"><span class="k">The sandbox</span><span class="v"><code>/sandbox</code> limits which files and network domains shell commands can reach. The operating system enforces it.</span></div>
+   <div class="card"><span class="k">Managed settings</span><span class="v">Rules an admin sets above every other level. Nobody overrides them from a repo or the command line.</span></div>
+  </div>
+  <div class="cols c2" style="flex:none">
+   <div class="card plain"><span class="k">Between sessions</span><span class="v">A message from another session can't approve a prompt or change settings. <code>isolatePeerMachines</code> asks before anything leaves the machine.</span></div>
+   <div class="card plain"><span class="k">Unattended work</span><span class="v">Run it in a container or in the cloud, not on a laptop with production keys. Plugins still run with your privileges.</span></div>
+  </div>
+  <div class="foot">Day 3's no-merge hook still holds: agents open pull requests, people merge them.</div>
+ </div>`,
+ notes:"Day 3 promised the deeper security pass for today. Keep it to one slide: the controls exist, and scale is where you need them.\n\nThe sandbox uses Seatbelt on macOS and bubblewrap on Linux and WSL2; native Windows is not supported. Auto mode is the default on Pro, Max and Team plans.\n\nThe last line ties back: more agents means more pull requests, not more people allowed to merge."
+},
+/* ============ ACT 8 ============ */
+{
+ act:"Act 8 · Close", n:"28", title:"How far you take it", time:"6:00",
+ html:`<div class="eyebrow"><span class="dot"></span>The whole day, in one picture</div>
+ <div class="body">
+  <h2 style="flex:none">Every step up works better,<br>and costs more gates and more tokens.</h2>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;align-items:end;flex:none">
+   <div class="card plain" style="padding:18px 20px"><span class="k" style="font-size:15px">1 · One prompt, one repo, on auto</span><span class="v" style="font-size:14px">It sees a single repository and guesses the rest. Fast, and often wrong about what it can't see.</span></div>
+   <div class="card" style="padding:18px 20px;min-height:172px"><span class="k" style="font-size:15px">2 · The whole project, plan first</span><span class="v" style="font-size:14px">Started in the folder that holds every part it touches. Plan mode, refine the plan, then execute.</span></div>
+   <div class="card" style="padding:18px 20px;min-height:206px"><span class="k" style="font-size:15px">3 · Your loop, by hand</span><span class="v" style="font-size:14px">Your five commands, typed one by one. Tier 3 is already a small graph, and you drive it.</span></div>
+   <div class="card darkc" style="padding:18px 20px;min-height:240px"><span class="k" style="font-size:15px">4 · The graph drives</span><span class="v" style="font-size:14px">It picks the tier, splits the work into worktrees, reviews it, and stops only where you sign.</span></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;flex:none">
+   <p class="xs">The cheapest. Fine for a one-line change.</p>
+   <p class="xs">A big jump for almost no extra cost. Make it your default.</p>
+   <p class="xs">More tokens and gates, for work that checks itself.</p>
+   <p class="xs">The most tokens. Only for a process you already trust.</p>
+  </div>
+  <div class="card" style="flex:none;background:var(--primary);padding:18px 24px"><span class="v" style="color:#fff;font-family:var(--serif);font-size:23px;letter-spacing:-.3px;line-height:1.3">Use it responsibly: climb when you need more hands on the wheel, or more stops on the way to your destination. And only once you trust the rung below.</span></div>
+ </div>`,
+ notes:"This is where the day lands. Walk the rungs left to right.\n\n1: a prompt to Claude Code opened on a single, narrowly scoped repo, left to run on auto. It is fine for a one-line change. For anything bigger it guesses about the parts it can't see.\n\n2: the same tool, opened on the folder that holds the whole area the change touches (Day 1's start-here rule), starting in its own plan mode, refining the plan, then executing. In our experience this is a large jump in quality over rung 1, and it costs almost nothing extra. It should be everyone's default.\n\n3: their loop, driven by hand. Tier 3 is already a small graph; they are the ones moving it from step to step. 4: the same graph, driving itself, with them at the gates. Each is another jump in how far you can trust the result, and each adds gates to sign and tokens to pay.\n\nThe last sentence on the card is the day's rule: you climb to rung 4 only once rung 3 is boring. Automating a process you are still learning multiplies its mistakes.\n\nThe improvement at every step is real, and so is the price. So choose per piece of work: climb a rung when you can see you need more hands on the wheel, or more stops on the way to your destination.\n\nThere is no benchmark behind the size of these jumps. Say it as experience from eCrop's own work, not as a measured number."
+},
+{
+ act:"Act 8 · Close", n:"29", title:"Challenge 4 briefing", time:"5:00 → 2h block",
+ html:`<div class="eyebrow"><span class="dot"></span>Challenge 4 · Two loops at once, then a graph</div>
+ <div class="body">
+  <div class="cols c2">
+   <div class="stack" style="justify-content:center">
+    <ol class="steps" style="gap:10px">
+     <li style="font-size:15.5px">Make the wall safe for two worktrees: ports per worktree and two short scripts</li>
+     <li style="font-size:15.5px">Pick two changes that can run at the same time. Write down the files each one will touch</li>
+     <li style="font-size:15.5px">Run both loops at once, one per worktree. When one lands, it tells the other to rebase</li>
+     <li style="font-size:15.5px">Then the graph: one Tier-3 change as a workflow that slices itself and builds the slices in parallel, with reviewers</li>
+     <li style="font-size:15.5px">Keep a log: what overlapped, what collided, and <code>/usage</code> for every run</li>
+     <li style="font-size:15.5px">Fix one thing that fought you. Tear down and push the branch</li>
+    </ol>
+   </div>
+   <div class="stack" style="justify-content:center">
+    <div class="card"><span class="k">Goal</span><span class="v">Two changes delivered at the same time by hand, then one change that splits itself inside a graph. And an honest note on where parallel paid off.</span></div>
+    <div class="card darkc"><span class="k">Stretch</span><span class="v">A <code>/ticket</code> skill that picks the tier and drives, or the same change with an agent team. Both go in the log.</span></div>
+    <div class="card plain"><span class="k">Watch for</span><span class="v">A green e2e run in the second worktree. Check which app it hit.</span></div>
+   </div>
+  </div>
+  <div class="foot">Guide 4 has every step. Push the branch at the end: tomorrow opens with your logs.</div>
+ </div>`,
+ notes:"\"Two hours. The first half hour is making the repo safe for two worktrees; do not skip it, or the rest of the block debugs port clashes.\"\n\nThe order matters. First the easy kind of parallel: two separate changes, split by ticket, each through their own loop, overlapping in time. They see what overlap buys them and where two agents collide. Only then the graph: one change that the workflow splits into slices, where each slice runs in parallel inside it. That is parallel inside a change, and it only makes sense when the change splits.\n\nGood pairs for the first half: 12 (search box, web) with 20 (pin cap, API) barely overlap; 11 and 12 both change the wall view and teach collisions. For the graph half: 29, the upvote leaderboard, or 32, the presence counter, with the contract written first.\n\nThe point of the challenge is the log, not the features. Suggest this morning's small tools: Sonnet with /advisor opus in each session, a status line with the worktree, and /rename change-a and change-b so the message has an address.\n\nCirculate with three questions: which port is your second frontend proxying to, how far did /usage move, and what would you change before running five? Collect the logs; Day 5 opens with them."
+},
+{
+ act:"Act 8 · Close", n:"30", title:"Tomorrow", time:"3:00", dark:true,
+ html:`<div class="eyebrow"><span class="dot"></span>Tuesday 29 · the last day</div>
+ <div class="body mid">
+  <h1 style="font-size:52px">Tomorrow: knowledge,<br>and the factory.</h1>
+  <p class="lead" style="color:var(--on-dark-soft);margin-top:16px;font-size:21px;max-width:940px">A knowledge base you and Claude both read. A code graph for a product with many versions and layers. A knowledge graph over all of it. Then a factory that runs your graph while you're away, and stops at a person.</p>
+  <p class="sm" style="color:var(--amber);margin-top:18px">Today's graphs were flows of agents. Tomorrow's graphs are data those flows read. Same word, two things.</p>
+ </div>
+ <div class="foot">Minute cards on the wall, then push your branch.</div>`,
+ notes:"Name the naming collision out loud so tomorrow's 'code graph' does not get confused with today's 'graph'.\n\nMinute cards: one thing that worked, one thing that fought you."
+},
+];
+
+/* ---------- render ---------- */
+const stage=document.getElementById('stage');
+D.forEach((s,i)=>{
+  const el=document.createElement('section');
+  el.className='slide'+(s.dark?' dark':'')+(s.coral?' coral':'');
+  el.dataset.i=i;
+  el.innerHTML=s.html;
+  stage.appendChild(el);
+});
+const slides=[...document.querySelectorAll('.slide')];
+let cur=0;
+
+function fit(){
+  const w=window.innerWidth-(document.body.classList.contains('notes-on')?380:0);
+  const h=window.innerHeight;
+  const k=Math.min((w-48)/1280,(h-72)/720);
+  stage.style.transform='scale('+k+')';
+}
+function show(i){
+  cur=Math.max(0,Math.min(D.length-1,i));
+  slides.forEach((s,j)=>s.classList.toggle('active',j===cur));
+  slides.forEach((el,j)=>{if(j!==cur)el.querySelectorAll('video').forEach(v=>v.pause())});
+  const s=D[cur];
+  document.getElementById('count').textContent=s.n+'  ·  '+(cur+1)+'/'+D.length;
+  document.getElementById('actlbl').textContent=s.act.split(' · ')[0];
+  document.getElementById('bar').style.width=((cur+1)/D.length*100)+'%';
+  document.getElementById('n-title').textContent=s.n+' · '+s.title;
+  document.getElementById('n-time').textContent=s.act+'  ·  '+s.time;
+  document.getElementById('n-text').textContent=s.notes||'';
+  document.getElementById('n-assets').innerHTML=s.gap?'<b>Gap:</b> '+s.gap:'<b>Assets:</b> complete';
+  const nx=D[cur+1];
+  document.getElementById('n-next').innerHTML=nx?'Next<b>'+nx.n+' · '+nx.title+'</b>':'Next<b>end of deck</b>';
+  [...document.querySelectorAll('.ovcell')].forEach((c,j)=>c.classList.toggle('cur',j===cur));
+  location.hash=s.n;
+}
+/* overview */
+const og=document.getElementById('ovgrid');
+D.forEach((s,i)=>{
+  const c=document.createElement('div');
+  c.className='ovcell';
+  c.innerHTML='<span class="n">'+s.n+'</span><span class="t">'+s.title+'</span>'+
+    (s.gap?'<span class="flag">gap</span>':'')+'<span class="a">'+s.act.split(' · ')[0]+'</span>';
+  c.onclick=()=>{show(i);toggle('overview',false)};
+  og.appendChild(c);
+});
+function toggle(id,on){
+  const el=document.getElementById(id);
+  el.classList.toggle('on',on===undefined?!el.classList.contains('on'):on);
+}
+function notes(){document.body.classList.toggle('notes-on');fit()}
+
+document.addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  const k=e.key;
+  if(k==='Escape'){toggle('overview',false);toggle('help',false);return}
+  if(k==='ArrowRight'||k==='ArrowDown'||k===' '||k==='PageDown'){e.preventDefault();show(cur+1)}
+  else if(k==='ArrowLeft'||k==='ArrowUp'||k==='PageUp'){e.preventDefault();show(cur-1)}
+  else if(k==='Home'){show(0)} else if(k==='End'){show(D.length-1)}
+  else if(k==='n'||k==='N'){notes()}
+  else if(k==='o'||k==='O'){toggle('overview')}
+  else if(k==='?'){toggle('help')}
+  else if(k==='f'||k==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  else if(/^[1-9]$/.test(k)){
+    const t=D.findIndex(s=>s.act.startsWith('Act '+k));
+    if(t>=0)show(t);
+  }
+});
+document.querySelectorAll('#hud button').forEach(b=>{
+  b.onclick=()=>{const g=b.dataset.go;
+    if(g==='next')show(cur+1); else if(g==='prev')show(cur-1);
+    else if(g==='notes')notes(); else if(g==='overview')toggle('overview'); else toggle('help');
+  };
+});
+window.addEventListener('resize',fit);
+const start=D.findIndex(s=>s.n===location.hash.replace('#',''));
+fit();show(start>=0?start:0);
+</script>
+</body>
+</html>
