@@ -108,11 +108,13 @@ footer{border-top:1px solid var(--hairline);padding:28px 0 64px;font-size:14px;c
 <section id="before">
 <h2><span class="num">Start here</span>Before you start</h2>
 <p>You need three things installed. Check them in a terminal:</p>
-<div class="code"><pre><code>java -version     # 21 or newer
-node -v           # 20 or newer
+<div class="code"><pre><code>java -version     # 21 (not 17 — the API compiles for release 21)
+node -v           # 22.22.3 or newer
 claude --version  # any recent version; run `claude update` if in doubt</code></pre></div>
 <p>You also need the <strong>teaching harness</strong> from this morning — one worked example of each kind of thing on the tour. It sits in the repo you are about to clone, under <code>setup-docs/teaching-harness/</code>, so it arrives with Step 1.</p>
-<p>If Java or Node are missing, grab them now and wave me over if the install fights you. One more thing from this morning: make sure you are signed into the company workspace, not a personal account. Real code only travels on the right accounts.</p>
+<p>If Java or Node are missing, grab them now and wave me over if the install fights you.</p>
+<div class="note"><span class="t">Or let mise do it</span><p>Optional, and the easier route if you already juggle versions on this machine: the repo ships a <code>mise.toml</code> that pins both. Once you have cloned in Step 1, <a href="https://mise.jdx.dev/">mise</a> installs exactly the right ones — <code>mise install</code>, then <code>mise exec -- ./mvnw test</code> to run anything with those versions. If another version manager is already on your PATH (nvm, Volta, SDKMAN, asdf) it can win over mise for bare <code>java</code>, <code>node</code> or <code>ng</code> commands; when a version looks wrong, prefix with <code>mise exec --</code> and move on.</p></div>
+<p>One more thing from this morning: make sure you are signed into the company workspace, not a personal account. Real code only travels on the right accounts.</p>
 </section>
 
 <section id="clean">
@@ -147,7 +149,7 @@ cd carrot-wall</code></pre></div>
 <div class="code"><div class="label">terminal 2 · the web app</div><pre><code>cd apps/web
 npm install
 npm start</code></pre></div>
-<p>Open <code>http://localhost:4200</code>. You should see the wall with a few seeded posts. If you see it, you are done with setup. If you do not, the two usual suspects are a busy port and a Node version below 20. Fix or flag.</p>
+<p>Open <code>http://localhost:4200</code>. You should see the wall with a few seeded posts. If you see it, you are done with setup. If you do not, the two usual suspects are a busy port and a Node version below 22.22.3. Fix or flag.</p>
 <p>Now create a branch to work on. Everything you do this week goes here, on your own fork:</p>
 <div class="code"><pre><code>git checkout -b day1-setup
 git push -u origin day1-setup</code></pre></div>
@@ -438,7 +440,7 @@ mv CLAUDE.md.off CLAUDE.md</code></pre></div>
 
 <section id="stuck">
 <h2><span class="num">Help</span>If you get stuck</h2>
-<div class="note"><p>Post it on the wall at <a href="https://carrot.ecrop.dev">carrot.ecrop.dev</a>, or orange sticky and I will come around. The three most common snags today: a port already in use, Node below 20, and being signed into the wrong account. All three take a minute to fix.</p></div>
+<div class="note"><p>Post it on the wall at <a href="https://carrot.ecrop.dev">carrot.ecrop.dev</a>, or orange sticky and I will come around. The three most common snags today: a port already in use, a Node or Java version below the one the repo pins, and being signed into the wrong account. All three take a minute to fix.</p></div>
 </section>
 
 <section id="stretch">

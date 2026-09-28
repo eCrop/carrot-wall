@@ -13,12 +13,23 @@ Work at your own speed. If you finish early, there is a stretch section at the e
 You need three things installed. Check them in a terminal:
 
 ```
-java -version     # 21 or newer
-node -v           # 20 or newer
+java -version     # 21 (not 17 — the API compiles for release 21)
+node -v           # 22.22.3 or newer
 claude --version  # any recent version; run `claude update` if in doubt
 ```
 
-If Java or Node are missing, grab them now and wave me over if the install fights you. One more thing from this morning: make sure you are signed into the company workspace, not a personal account. Real code only travels on the right accounts.
+If Java or Node are missing, grab them now and wave me over if the install fights you.
+
+Optional, and the easier route if you already juggle versions on this machine: the repo ships a `mise.toml` that pins both. Once you have cloned in Step 1, [mise](https://mise.jdx.dev/) installs exactly the right ones:
+
+```
+mise install                 # installs the pinned Java and Node
+mise exec -- ./mvnw test     # runs anything with those versions
+```
+
+If another version manager is already on your PATH — nvm, Volta, SDKMAN, asdf — it can win over mise for bare `java`, `node` or `ng` commands. When a version looks wrong, prefix with `mise exec --` and move on.
+
+One more thing from this morning: make sure you are signed into the company workspace, not a personal account. Real code only travels on the right accounts.
 
 ## Step 1 · Fork it, clone it, run it
 
@@ -46,7 +57,7 @@ npm install
 npm start
 ```
 
-Open http://localhost:4200. You should see the wall with a few seeded posts. If you see it, you are done with setup. If you do not, the two usual suspects are a busy port and a Node version below 20. Fix or flag.
+Open http://localhost:4200. You should see the wall with a few seeded posts. If you see it, you are done with setup. If you do not, the two usual suspects are a busy port and a Node version below 22.22.3. Fix or flag.
 
 Now create a branch to work on. Everything you do this week goes here, on your own fork:
 
@@ -127,7 +138,7 @@ Then start a fresh Claude Code session and ask one of your Step 2 questions agai
 
 ## If you get stuck
 
-Post it on the wall, or orange sticky and I will come around. The three most common snags today: a port already in use, Node below 20, and being signed into the wrong account. All three take a minute to fix.
+Post it on the wall, or orange sticky and I will come around. The three most common snags today: a port already in use, a Node or Java version below the one the repo pins, and being signed into the wrong account. All three take a minute to fix.
 
 ## Take it home
 
