@@ -48,6 +48,16 @@ const MATERIALS: readonly MaterialLink[] = [
     subtitle: 'Guia de preparação',
     href: '/course/guide-4-parallel.html',
   },
+  {
+    title: 'Dia 5 · Conhecimento e a fábrica',
+    subtitle: 'Slides da sessão',
+    href: '/course/day5-deck.html',
+  },
+  {
+    title: 'Guia 5 · A semana, de ponta a ponta',
+    subtitle: 'Guia de preparação',
+    href: '/course/guide-5-week.html',
+  },
 ];
 
 /** Static list of course materials — plain files under public/course/, opened in a new tab. */

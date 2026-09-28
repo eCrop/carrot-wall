@@ -17,7 +17,7 @@ describe('MaterialsComponent', () => {
       '.list a',
     ) as NodeListOf<HTMLAnchorElement>;
 
-    expect(links.length).toBe(8);
+    expect(links.length).toBe(10);
     for (const link of Array.from(links)) {
       expect(link.getAttribute('href')).toMatch(/^\/course\//);
       expect(link.getAttribute('target')).toBe('_blank');
