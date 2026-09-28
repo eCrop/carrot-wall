@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guide 5 · The week, end to end</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#cc785c; --primary-active:#a9583e;
+  --ink:#141413; --body:#3d3d3a; --body-strong:#252523;
+  --muted:#6c6a64; --muted-soft:#8e8b82;
+  --hairline:#e6dfd8; --hairline-soft:#ebe6df;
+  --canvas:#faf9f5; --surface-soft:#f5f0e8; --surface-card:#efe9de;
+  --dark:#181715; --dark-soft:#1f1e1b; --on-dark:#faf9f5; --on-dark-soft:#a09d96;
+  --amber:#e8a55a; --warning:#d4a017;
+  --serif:"Cormorant Garamond","Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--canvas);color:var(--body);font-family:var(--sans);font-size:16.5px;line-height:1.62;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1140px;margin:0 auto;padding:0 32px;display:grid;grid-template-columns:1fr 216px;gap:56px;align-items:start}
+
+/* ---------- masthead ---------- */
+header{border-bottom:1px solid var(--hairline);margin-bottom:44px;padding:52px 0 30px}
+header .kicker{font-size:12px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:var(--primary);margin-bottom:16px;display:flex;gap:11px;align-items:center}
+header .kicker::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--primary)}
+header h1{font-family:var(--serif);font-weight:500;font-size:54px;line-height:1.05;letter-spacing:-1.4px;color:var(--ink)}
+header .sub{font-size:17px;color:var(--muted);margin-top:14px}
+header .intro{font-size:19px;line-height:1.55;color:var(--body-strong);margin-top:24px;max-width:66ch}
+
+/* ---------- flow ---------- */
+main{min-width:0;padding-bottom:96px}
+section{margin-bottom:52px;scroll-margin-top:24px}
+h2{font-family:var(--serif);font-weight:500;font-size:34px;line-height:1.15;letter-spacing:-.7px;color:var(--ink);margin:0 0 18px;display:flex;gap:16px;align-items:baseline}
+h2 .num{font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:1.4px;color:var(--primary);text-transform:uppercase;flex:none;padding-top:6px}
+h3{font-family:var(--serif);font-weight:500;font-size:24px;letter-spacing:-.4px;color:var(--ink);margin:30px 0 12px}
+p{margin:0 0 15px;max-width:72ch}
+strong{font-weight:600;color:var(--ink)}
+em{font-style:italic}
+a{color:var(--primary);text-decoration:none;border-bottom:1px solid rgba(204,120,92,.35)}
+ul,ol{margin:0 0 16px;padding-left:22px;max-width:72ch}
+li{margin-bottom:8px}
+ul{list-style:none;padding-left:20px}
+ul li{position:relative}
+ul li::before{content:"";position:absolute;left:-16px;top:11px;width:5px;height:5px;border-radius:50%;background:var(--primary)}
+ol li::marker{color:var(--primary);font-weight:600}
+code{font-family:var(--mono);font-size:.88em;background:var(--surface-card);padding:2px 6px;border-radius:5px;color:var(--ink)}
+
+/* ---------- code blocks ---------- */
+.code{position:relative;margin:0 0 20px;border-radius:12px;background:var(--dark);overflow:hidden}
+.code .label{font-size:11px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--on-dark-soft);padding:13px 20px 0}
+.code pre{margin:0;padding:18px 20px;overflow-x:auto;font-family:var(--mono);font-size:13.5px;line-height:1.72;color:var(--on-dark);white-space:pre}
+.code code{background:none;padding:0;color:inherit;font-size:inherit}
+.code button{
+  position:absolute;top:11px;right:11px;border:0;border-radius:7px;cursor:pointer;
+  background:#2b2823;color:var(--on-dark-soft);font-family:var(--sans);font-size:11.5px;font-weight:500;
+  padding:6px 11px;opacity:0;transition:opacity .12s;
+}
+.code:hover button,.code button:focus{opacity:1}
+.code button.done{color:var(--amber)}
+.code.prompt{background:var(--dark-soft);border-left:3px solid var(--primary)}
+
+/* ---------- callouts ---------- */
+.note{background:var(--surface-soft);border-radius:12px;padding:20px 24px;margin:0 0 20px}
+.note.warn{background:#faf1dd;border-left:3px solid var(--warning)}
+.note.goal{background:var(--primary);color:#fff}
+.note.goal strong,.note.goal .t{color:#fff}
+.note .t{display:block;font-size:12px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--primary);margin-bottom:8px}
+.note.warn .t{color:#8a6a0c}
+.note p:last-child,.note ul:last-child,.note ol:last-child{margin-bottom:0}
+.tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;background:var(--surface-card);color:var(--ink);border-radius:9999px;padding:4px 12px;margin-bottom:14px}
+
+/* ---------- sidebar ---------- */
+nav{position:sticky;top:32px;font-size:13.5px;padding-top:56px}
+nav .t{font-size:11px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted-soft);margin-bottom:14px}
+nav a{display:block;color:var(--muted);border:0;padding:5px 0 5px 12px;border-left:2px solid var(--hairline);line-height:1.4}
+nav a:hover{color:var(--ink)}
+nav a.on{color:var(--ink);border-left-color:var(--primary);font-weight:500}
+footer{border-top:1px solid var(--hairline);padding:28px 0 64px;font-size:14px;color:var(--muted-soft);max-width:72ch}
+
+@media (max-width:900px){
+  .wrap{grid-template-columns:1fr;gap:0;padding:0 22px}
+  nav{display:none}
+  header h1{font-size:38px}
+}
+@media print{
+  body{font-size:11pt}
+  nav,.code button{display:none}
+  .wrap{display:block;max-width:none;padding:0}
+  section{page-break-inside:avoid}
+  .code{background:#fff;border:1px solid #ccc}
+  .code pre{color:#000}
+  .code .label{color:#666}
+  .note.goal{background:#fff;border:2px solid var(--primary);color:var(--ink)}
+  .note.goal .t,.note.goal strong{color:var(--ink)}
+  a{color:var(--ink);border:0}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<main>
+<header><div class="kicker">Guide 5 · Day 5 · Tuesday 29 September</div><h1>The week, end to end</h1><div class="sub">The Carrot Wall project · a reference to keep, and three things to try</div><p class="intro">Five days, one pattern: find the bottleneck, move it into a file, then into a system. This guide keeps the week on one page. Then today's block: connect Claude Design to your code and redesign part of the wall while it changes in front of you, build a code graph and switch it on and off, and build a small knowledge graph and ask it questions. After that, the tools you already use, connected, the one lesson to keep, and where to go next.</p></header>
+<style>
+.tbl{overflow-x:auto;margin:0 0 20px}
+.tbl table{border-collapse:collapse;width:100%;font-size:14.5px;line-height:1.5}
+.tbl th{text-align:left;font-size:11px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted-soft);padding:0 14px 9px 0;border-bottom:1px solid var(--hairline)}
+.tbl td{padding:10px 14px 10px 0;border-bottom:1px solid var(--hairline-soft);vertical-align:top}
+.tbl td:first-child{color:var(--ink);font-weight:500;min-width:150px}
+</style>
+<section id="before">
+<h2><span class="num">Start here</span>Before you start</h2>
+<ul>
+<li>Your fork is pushed from yesterday. Start a branch for today from it: <code>git switch -c day5-design</code>.</li>
+<li>The wall runs locally: <code>./mvnw quarkus:dev</code> in <code>apps/api</code> and <code>npm start</code> in <code>apps/web</code>, then open <code>localhost:4200</code>.</li>
+<li>Claude Code is 2.1.265 or later (<code>claude --version</code>), signed in with your claude.ai account. You can open <code>claude.ai/design</code>: it is on by default on your Team plan, in beta, and uses the same usage limits as the rest of Claude.</li>
+<li>For Steps 4 and 5: <code>npm</code> (you have it) and <code>uv</code> or <code>pipx</code> to install Graphify.</li>
+</ul>
+<div class="note "><span class="t">What this guide is</span><p>Not homework. Part 1 is the week on one page, to keep. Part 2 is today's block: redesign part of the wall with Claude Design and watch the code change, then build a code graph and a small knowledge graph and see what they change. Part 3 connects the tools you already use. Part 4 is the one lesson to take with you, and Part 5 is where to go next.</p></div>
+</section>
+
+<section id="week">
+<h2><span class="num">Part 1</span>The week on one page</h2>
+<div class="tbl"><table><tr><th>Day</th><th>The bottleneck</th><th>What you moved it into</th><th>The rule that came with it</th></tr><tr><td>1 · The tool</td><td>Explaining the repository every session</td><td><code>CLAUDE.md</code>, settings and a first harness: an agent, a hook, a rule, a skill</td><td>Start in the folder that holds everything the task touches. Work on a commercial account.</td></tr><tr><td>2 · The loop</td><td>Retyping the same prompts</td><td>Five commands with contracts: <code>/intent</code> → <code>/spec</code> → <code>/plan</code> → <code>/execute</code> → <code>/ship</code>, sized to the task in three tiers</td><td>A person signs the plan. <code>/ship</code> waits for a human to type it.</td></tr><tr><td>3 · Superpowers</td><td>Copy and paste from other tools</td><td>A CLI, an MCP server or a plugin wired into one step of the loop, plus rules and hooks</td><td>Read what you run. Nothing writes to a board your colleagues watch without you.</td></tr><tr><td>4 · Scale it</td><td>You typing the next command, on one laptop</td><td>Worktrees with their own ports, two loops at once, a saved workflow that slices one change</td><td>Let a graph drive only once the steps are boring. Watch <code>/usage</code>.</td></tr><tr><td>5 · Knowledge and the factory</td><td>Context the agent has to find, and one person on one laptop</td><td>A code graph, a knowledge base in OKF, a knowledge graph when the questions need one, and a factory the company triggers</td><td>Measure it before you trust it. People decide at the gates.</td></tr></table></div>
+<h3>Where each piece lives in the wall</h3>
+<div class="code"><div class="label">your fork, after five days</div><pre><code>CLAUDE.md                      ← how to work here              (Day 1)
+.claude/settings.json          ← permissions and hooks         (Days 1, 3)
+.claude/skills/intent|spec|plan|execute|ship/SKILL.md
+                               ← the loop                      (Day 2)
+.claude/agents/                ← code-reviewer, test-runner    (Day 1)
+.claude/rules/                 ← path-scoped rules             (Day 3)
+.claude/workflows/             ← build-slices, saved           (Day 4)
+docs/intents/  docs/specs/     ← what the loop writes          (Day 2)
+docs/parallel-log.md           ← what parallel taught you      (Day 4)
+scripts/wt-up.sh wt-down.sh dev.sh
+                               ← ports per worktree            (Day 4)
+.codegraph/  graphify-out/     ← your graphs, not in git       (today)
+kb/                            ← the knowledge base            (optional)</code></pre></div>
+</section>
+
+<section id="live">
+<h2><span class="num">Part 2 · Step 1</span>Run the wall, and keep it in view</h2>
+<p>Today's block is about seeing things change. Keep the wall running in a browser next to Claude Code the whole time: Angular reloads the page every time a file changes, so each change Claude makes shows up in seconds.</p>
+<div class="code"><div class="label">two terminals, at the repo root</div><pre><code>cd apps/api &amp;&amp; ./mvnw quarkus:dev
+cd apps/web &amp;&amp; npm start</code></pre></div>
+<ul>
+<li>Open <code>localhost:4200</code> and put the browser beside your Claude Code window.</li>
+<li>Look at the top of the wall: the question of the day, <code>wall-prompt</code> in <code>apps/web/src/app/wall/wall.html</code>, and the posts under it. That is what you redesign next.</li>
+<li>Start Claude Code at the repo root on today's branch, signed in with your claude.ai account (<code>/login</code>).</li>
+</ul>
+</section>
+
+<section id="design">
+<h2><span class="num">Step 2</span>Connect Claude Design to your code, and redesign the question</h2>
+<p>Start from the code, not from a blank canvas. Two ways; try the first one.</p>
+<h3>A · From Claude Code, with <code>/design</code></h3>
+<div class="code prompt"><div class="label">in Claude Code, at the repo root</div><pre><code>/design three different versions of the question of the day at the top of
+the wall (wall-prompt in apps/web/src/app/wall/wall.html), using this
+repository's styles and DESIGN.md. Keep the posts below it as they are.</code></pre></div>
+<ol>
+<li>Claude drafts the versions as artboards on one canvas and opens it in your browser.</li>
+<li>Pick one. Click on it and change it directly: the text size, the spacing, a colour. Your edits save on their own.</li>
+<li>Back in Claude Code: <em>"Implement the artboard I picked, including my edits, in wall.html and wall.scss."</em></li>
+<li>Watch <code>localhost:4200</code> change as it writes the files.</li>
+</ol>
+<div class="note "><span class="t">What you need</span><p><code>/design</code> is a research preview. It needs Claude Code 2.1.265 or later (<code>claude --version</code>) and a session signed in with <code>/login</code>, because the canvas is published as a private artifact on claude.ai. On your Team plan, artifacts are on by default.</p></div>
+<h3>B · From claude.ai/design</h3>
+<ol>
+<li>Open <code>claude.ai/design</code> and create a design system with <strong>Import</strong>: connect GitHub and pick only <code>DESIGN.md</code>, <code>apps/web/src/styles.scss</code> and <code>apps/web/src/app/wall/</code>. Access goes through Anthropic's read-only <em>Claude Design Import</em> app.</li>
+<li>Add a screenshot of the running wall, and ask for the same redesign of the question.</li>
+<li>Export, then <strong>Send to local coding agent</strong>, and paste the prompt it gives you into Claude Code. If that prompt can't open the design, download the zip instead and point Claude at the README inside.</li>
+</ol>
+<div class="note "><span class="t">The Angular catch</span><p>Claude Design draws your look as HTML. It does not render real <code>mat-</code> components, and <code>/design-sync</code> only takes React design systems. So the last step always happens in Claude Code, which writes the Angular for you.</p></div>
+</section>
+
+<section id="fast">
+<h2><span class="num">Step 3</span>Change it three times, fast</h2>
+<p>The point is the speed of the loop: design, implement, look, again.</p>
+<div class="tbl"><table><tr><th>Round</th><th>Change</th><th>Then</th></tr><tr><td>1</td><td>Make the question bigger and calmer: more space, less text around it</td><td>Implement, look at <code>localhost:4200</code></td></tr><tr><td>2</td><td>Show who asked it and since when, under the question</td><td>Implement, look</td></tr><tr><td>3</td><td>Your own idea, or the post cards under it</td><td>Implement, look</td></tr></table></div>
+<p>After each round, run <code>npm test</code> in <code>apps/web</code>. When you like it, commit. If a round turns into a real feature, put it through your loop: save the design in <code>docs/design/</code> and let <code>/intent</code> link it, so the time spent designing feeds the spec instead of being redone.</p>
+</section>
+
+<section id="graph">
+<h2><span class="num">Step 4</span>Build your code graph, then switch it on and off</h2>
+<div class="code"><div class="label">in a terminal</div><pre><code>npm i -g @colbymchenry/codegraph
+codegraph telemetry off
+codegraph install
+cd carrot-wall
+codegraph init
+codegraph status</code></pre></div>
+<p><code>install</code> adds codegraph to Claude Code; <code>init</code> builds the graph into <code>.codegraph/</code>, which stays out of git. Start a new Claude Code session and check <code>/mcp</code> shows codegraph as connected.</p>
+<h3>The comparison</h3>
+<ol>
+<li>With codegraph <strong>on</strong>, ask: <em>"How does a new post get from the form on the wall to the database, and what rate limits it?"</em> When it answers, run <code>/context</code> and note the tokens used and how many tools it called.</li>
+<li>Open <code>/mcp</code>, select codegraph and switch it <strong>off</strong>. Run <code>/clear</code>.</li>
+<li>Ask exactly the same question. Run <code>/context</code> again.</li>
+<li>Switch it back on in <code>/mcp</code> when you're done.</li>
+</ol>
+<div class="tbl"><table><tr><th></th><th>Graph on</th><th>Graph off</th></tr><tr><td>Tokens in context</td><td></td><td></td></tr><tr><td>Tool calls</td><td></td><td></td></tr><tr><td>Time to answer</td><td></td><td></td></tr><tr><td>Was the answer right?</td><td></td><td></td></tr></table></div>
+<div class="note "><span class="t">Don't expect a big gap here</span><p>The wall is small, so searching is cheap and the difference may be modest. On a codebase ten or a hundred times bigger it grows. What you are learning is how to measure it, so you can decide on your own repositories.</p></div>
+<p>To keep the graph fresh when you switch branch, add a git hook that runs <code>codegraph sync</code>:</p>
+<div class="code"><div class="label">.git/hooks/post-checkout, then chmod +x it</div><pre><code>#!/bin/sh
+# re-sync the code graph after every branch switch
+codegraph sync &gt;/dev/null 2&gt;&amp;1 &amp;</code></pre></div>
+</section>
+
+<section id="kg">
+<h2><span class="num">Step 5</span>Build a small knowledge graph of the wall</h2>
+<p>A code graph knows the code. A knowledge graph also takes in the documents: <code>DESIGN.md</code>, <code>spec.md</code>, <code>feature-ideas.md</code>, your intents and specs. Graphify builds one from a folder, and Claude Code can query it.</p>
+<div class="code"><div class="label">in a terminal</div><pre><code>uv tool install graphifyy
+graphify install</code></pre></div>
+<div class="code prompt"><div class="label">in Claude Code, at the repo root</div><pre><code>/graphify .</code></pre></div>
+<p>It writes three files to <code>graphify-out/</code>: <code>graph.html</code> to open in a browser and click around, <code>GRAPH_REPORT.md</code> with the main concepts and connections, and <code>graph.json</code>, which is what Claude queries. Add <code>graphify-out/</code> to <code>.gitignore</code> if it isn't there yet.</p>
+<h3>Ask it things</h3>
+<div class="code prompt"><div class="label">in Claude Code</div><pre><code>/graphify query "which features in feature-ideas.md touch the rate limiter?"
+/graphify path "WallComponent" "PostsResource"
+/graphify explain "RateLimiter"</code></pre></div>
+<ul>
+<li>Compare an answer with what you get from a plain question, without the graph.</li>
+<li>Open <code>graph.html</code> and look for a connection you didn't expect. The tags <code>EXTRACTED</code>, <code>INFERRED</code> and <code>AMBIGUOUS</code> tell you how sure it is about each link.</li>
+<li>Ask yourself: would this be worth keeping up to date on your real product? That is the question from this morning.</li>
+</ul>
+<div class="note "><span class="t">Where your tokens go</span><p>Code is parsed on your machine with no model calls. The documents are read by the model, so building the graph uses part of your plan's usage. On the wall that is small.</p></div>
+</section>
+
+<section id="extras">
+<h2><span class="num">Part 2 · Extras</span>If you finish early</h2>
+<h3>A first knowledge base, kept alive</h3>
+<ol>
+<li>Create <code>kb/index.md</code> with a header holding only <code>okf_version: "0.2"</code>, and an empty <code>kb/log.md</code>.</li>
+<li>Ask Claude to draft three concepts from what you know about the wall, for example why posts are rate limited. Each gets <code>type</code>, <code>title</code>, <code>description</code>, <code>sources</code>, <code>generated</code>, <code>status: draft</code> and a <code>stale_after</code> as a full date and time.</li>
+<li>Read them, fix them, add yourself to <code>verified</code> as <code>human:&lt;your-name&gt;</code>, and set <code>status: stable</code>.</li>
+<li>Add the workflow below, so every merged pull request proposes an update for you to review.</li>
+</ol>
+<div class="code"><div class="label">.github/workflows/kb-update.yml</div><pre><code>name: KB update on merge
+on:
+  pull_request:
+    types:
+      - closed
+jobs:
+  if_merged:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ github.token }}
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            PR ${{ github.event.pull_request.number }} was merged.
+            Read its diff. If it changes something kb/ describes, update those
+            concepts, cite the PR in sources, set status: draft on anything new,
+            add a line to kb/log.md, and open a pull request. If nothing in kb/
+            is affected, do nothing.
+          claude_args: |
+            --allowedTools "Read,Write,Edit,Bash(git:*),Bash(gh:*)"</code></pre></div>
+<div class="note "><span class="t">Three things to know</span><p>Test it on your fork first: on a fork, turn Actions on in the Actions tab. The workflow needs an API key in the repository's secrets; on a shared repository use an organisation key, not a personal login. And a merged pull request is untrusted input like any other: the prompt only lets it touch <code>kb/</code> through a pull request you review.</p></div>
+<h3>A reuse step in your plan</h3>
+<p>You raised it this week: the agent writes code again that already exists. Add this section to your <code>/plan</code> skill, so the check happens before any code is written and you see it at the gate.</p>
+<div class="code"><div class="label">.claude/skills/plan/SKILL.md · add before the steps</div><pre><code>## Existing code considered
+Before proposing new code, search for code that already solves part of this:
+the shared Angular components and services, the common Java module, the
+FastAPI utilities. Use the code graph (codegraph), not only grep.
+List what you found, one line each, and say for each: reuse it, extend it,
+or why not. Only propose a new shared abstraction when the same logic exists
+in three places or more. Otherwise keep it local.</code></pre></div>
+<p>After the change, <code>/code-review</code> reports reuse and simplification findings on your diff, and <code>/simplify</code> applies cleanups. In CI, SonarQube's quality gate already has a condition on duplicated lines in new code.</p>
+</section>
+
+<section id="connect">
+<h2><span class="num">Part 3</span>Connect the tools you already use</h2>
+<p>These help your own day, inside and outside Claude Code. On your Team plan, connectors in claude.ai are added by an admin; anyone can add a local server to Claude Code with <code>claude mcp add</code>. Start every one read-only.</p>
+<div class="tbl"><table><tr><th>You use</th><th>Connect it</th><th>Worth knowing</th></tr><tr><td>Outlook, Teams, SharePoint</td><td>The Microsoft 365 connector</td><td>A Team owner enables it and a Microsoft admin approves it for the tenant. Sending is controlled by the admin</td></tr><tr><td>Jira</td><td>Cloud: the Atlassian connector. Data Center: <code>acli</code> or the community <code>mcp-atlassian</code> server</td><td>The Atlassian connector is Jira Cloud only, and some of its tools spend Rovo credits</td></tr><tr><td>Meetings</td><td>Granola</td><td>No bot joins. Works with Teams calls and in person. Its connector is read-only</td></tr><tr><td>Your browser</td><td>Claude in Chrome, <code>claude --chrome</code></td><td>Test <code>localhost</code>, read the console, take screenshots</td></tr><tr><td>GitHub</td><td>The GitHub connector, or <code>gh</code></td><td>A read-only mode is available</td></tr><tr><td>SonarQube</td><td>SonarSource's official MCP server</td><td>Needs a user token. <code>SONARQUBE_READ_ONLY=true</code> blocks writes</td></tr><tr><td>Grafana and Prometheus</td><td><code>grafana/mcp-grafana</code></td><td>Use a service-account token and <code>--disable-write</code></td></tr><tr><td>Kubernetes</td><td><code>claude mcp add kubernetes -- npx -y kubernetes-mcp-server@latest</code></td><td>Add <code>--read-only</code>. It uses your current kubeconfig context: check it isn't production</td></tr><tr><td>PostgreSQL</td><td>Google's MCP Toolbox for Databases</td><td>Dev databases and read-only roles only</td></tr><tr><td>Angular</td><td><code>npx @angular/cli mcp</code></td><td>Best practices, docs search, build and test targets</td></tr><tr><td>Quarkus</td><td><code>claude mcp add -s user quarkus-agent -- jbang quarkus-agent-mcp@quarkusio</code></td><td>Dev mode, tests, docs, and a running app's Dev MCP</td></tr></table></div>
+<div class="note "><span class="t">One rule</span><p>Connectors that send, like Outlook and Teams, ask before each action by default. Keep it that way. An email, a ticket or a comment can carry instructions meant for the agent.</p></div>
+</section>
+
+<section id="lesson">
+<h2><span class="num">Part 4</span>The one lesson</h2>
+<p>If you keep one thing from the five days, keep this loop. Run it on your own work, not on the tool.</p>
+<ol>
+<li><strong>Look at what you do.</strong> Where could this be faster if AI did it? The repetitive part, the part that doesn't need you.</li>
+<li><strong>If it is faster, check the quality.</strong> How do you know the result is still right? A test, a review, a gate, a person.</li>
+<li><strong>Then look again.</strong> Next week, next project, next tool. The answer changes, so the question never ends.</li>
+</ol>
+<div class="note "><span class="t">Why it matters</span><p>We are all in our own loop of getting better. The day we stop looking, we stop growing. The AI can do more and more of the work. What stays ours is the thinking: noticing the problem, fixing it, making things better. That is the part worth protecting.</p></div>
+<p>Before you leave, write three lines at the bottom of your log, just for you: one thing you would hand to AI next week, how you would check it, and when you will look again.</p>
+</section>
+
+<section id="next">
+<h2><span class="num">Part 5</span>Continue from here</h2>
+<p>No homework, just doors. Everything below was checked on 28 September 2026.</p>
+<div class="tbl"><table><tr><th>Topic</th><th>Where</th></tr><tr><td>codegraph</td><td><a href="https://github.com/colbymchenry/codegraph">github.com/colbymchenry/codegraph</a></td></tr><tr><td>How Claude Code works in large codebases</td><td><a href="https://claude.com/blog/how-claude-code-works-in-large-codebases-best-practices-and-where-to-start">claude.com/blog · large codebases</a></td></tr><tr><td>OKF, the spec</td><td><a href="https://github.com/GoogleCloudPlatform/open-knowledge-format">github.com/GoogleCloudPlatform/open-knowledge-format</a></td></tr><tr><td>Karpathy's LLM wiki</td><td><a href="https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f">gist.github.com/karpathy · LLM wiki</a></td></tr><tr><td>Context engineering for agents</td><td><a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">anthropic.com/engineering · context engineering</a></td></tr><tr><td>Memory and CLAUDE.md</td><td><a href="https://code.claude.com/docs/en/memory">code.claude.com/docs/en/memory</a></td></tr><tr><td>Hooks</td><td><a href="https://code.claude.com/docs/en/hooks-guide">code.claude.com/docs/en/hooks-guide</a></td></tr><tr><td>MCP in Claude Code</td><td><a href="https://code.claude.com/docs/en/mcp">code.claude.com/docs/en/mcp</a></td></tr><tr><td>Measuring a plugin: <code>claude plugin eval</code></td><td><a href="https://code.claude.com/docs/en/plugin-evals">code.claude.com/docs/en/plugin-evals</a></td></tr><tr><td>Routines</td><td><a href="https://code.claude.com/docs/en/routines">code.claude.com/docs/en/routines</a></td></tr><tr><td>The GitHub Action</td><td><a href="https://code.claude.com/docs/en/github-actions">code.claude.com/docs/en/github-actions</a></td></tr><tr><td>Running Claude Code in scripts</td><td><a href="https://code.claude.com/docs/en/headless">code.claude.com/docs/en/headless</a></td></tr><tr><td>Claude in Chrome</td><td><a href="https://code.claude.com/docs/en/chrome">code.claude.com/docs/en/chrome</a></td></tr><tr><td>Claude Design, getting started</td><td><a href="https://support.claude.com/en/articles/14604416">support.claude.com · Claude Design</a></td></tr><tr><td>Vercel's software factory</td><td><a href="https://vercel.com/blog/building-a-software-factory-for-ai-sdk">vercel.com/blog · software factory</a></td></tr><tr><td>Uber's software factory</td><td><a href="https://www.uber.com/us/en/blog/efficient-software-factory/">uber.com/blog · efficient software factory</a></td></tr><tr><td>Do context files help? (ETH Zurich)</td><td><a href="https://arxiv.org/abs/2602.11988">arxiv.org/abs/2602.11988</a></td></tr></table></div>
+</section>
+
+<section id="push">
+<h2><span class="num">Before you leave</span>Push the branch</h2>
+<div class="code"><div class="label">at the repo root</div><pre><code>git add -A
+git commit -m "Day 5: design into the loop"
+git push -u origin day5-design</code></pre></div>
+<p>That is the only hand-off, as every day. Whatever state it is in.</p>
+</section>
+
+<section id="stuck">
+<h2><span class="num">Help</span>If you get stuck</h2>
+<div class="tbl"><table><tr><th>What happened</th><th>Try this</th></tr><tr><td><code>/design</code> says it can't publish</td><td>Run <code>/login</code> with your claude.ai account, and check <code>claude --version</code> is 2.1.265 or later</td></tr><tr><td>The import wants the whole repository</td><td>Link only <code>DESIGN.md</code>, <code>styles.scss</code> and one component folder</td></tr><tr><td><code>graphify</code> isn't found</td><td>The package has two y's: <code>uv tool install graphifyy</code>. Then open a new terminal</td></tr><tr><td>I can't find the switch for codegraph</td><td>Type <code>/mcp</code>, pick codegraph, and choose to disable it; it stays listed as disabled</td></tr><tr><td>The pasted handoff prompt can't open the design</td><td>Download the zip and unzip it into <code>docs/design/&lt;name&gt;/</code> (Step 4)</td></tr><tr><td>The plan pastes the prototype's HTML</td><td>Say: map each element to a Material component and a theme token instead</td></tr><tr><td>Claude in Chrome isn't connected</td><td>Start Claude Code with <code>claude --chrome</code>, or run <code>/chrome</code>, and check the extension is on</td></tr><tr><td>Claude ignores the code graph</td><td>Check <code>/mcp</code> shows it, then say in the prompt: use codegraph for who-calls questions</td></tr><tr><td>The workflow didn't run</td><td>On a fork, turn Actions on first. Then check the API key secret, and that the pull request was merged, not just closed</td></tr></table></div>
+</section>
+
+<footer>Part 1 is to keep. Part 2 is today's block, at your own pace. Part 3 is for Monday. Part 4 is for every week after. Push the branch at the end, whatever state it is in.</footer>
+</main>
+<nav><div class="t">On this page</div><div id="toc"></div></nav>
+</div>
+<script>
+// copy buttons on every code block
+document.querySelectorAll('.code').forEach(function(box){
+  var pre = box.querySelector('pre');
+  var b = document.createElement('button');
+  b.textContent = 'Copy';
+  b.onclick = function(){
+    navigator.clipboard.writeText(pre.innerText).then(function(){
+      b.textContent = 'Copied'; b.classList.add('done');
+      setTimeout(function(){ b.textContent = 'Copy'; b.classList.remove('done'); }, 1400);
+    }).catch(function(){ b.textContent = 'Select it'; });
+  };
+  box.appendChild(b);
+});
+// table of contents
+var toc = document.getElementById('toc');
+var secs = [].slice.call(document.querySelectorAll('section[id]'));
+secs.forEach(function(s){
+  var h = s.querySelector('h2');
+  if (!h) return;
+  var c = h.cloneNode(true);
+  var num = c.querySelector('.num');
+  var label = num ? num.textContent.trim() : '';
+  if (num) num.remove();
+  var a = document.createElement('a');
+  a.href = '#' + s.id;
+  a.textContent = c.textContent.trim();
+  if (label) a.title = label;
+  toc.appendChild(a);
+});
+var links = [].slice.call(toc.querySelectorAll('a'));
+var io = new IntersectionObserver(function(es){
+  es.forEach(function(e){
+    if (!e.isIntersecting) return;
+    var i = secs.indexOf(e.target);
+    links.forEach(function(l,j){ l.classList.toggle('on', j === i); });
+  });
+}, { rootMargin: '-10% 0px -80% 0px' });
+secs.forEach(function(s){ io.observe(s); });
+</script>
+</body>
+</html>
